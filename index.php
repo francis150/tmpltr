@@ -9,5 +9,5 @@
  *
  *           » What's your name?! «
  *              » Tony! «
- *                 » Fuck You Tony! «
+ *                 » F*ck You Tony! «
  */

@@ -1,0 +1,10 @@
+.tmpltr-admin-page {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    background: #f0f0f1;
+    position: absolute;
+    top: 0;
+    z-index: 1000;
+}
