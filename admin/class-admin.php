@@ -10,6 +10,10 @@ class TmpltrAdmin {
             'css' => 'templates-page.css',
             'handle' => 'tmpltr-templates-page',
         ],
+        'tmpltr-template' => [
+            'css' => 'template-page.css',
+            'handle' => 'tmpltr-template-page',
+        ],
     ];
 
     public function __construct() {
@@ -30,10 +34,32 @@ class TmpltrAdmin {
             'dashicons-admin-page',
             20
         );
+
+        add_submenu_page(
+            'tmpltr',
+            'Templates',
+            'Templates',
+            'manage_options',
+            'tmpltr',
+            [$this, 'render_templates_page']
+        );
+
+        add_submenu_page(
+            'tmpltr',
+            'Template',
+            'Create Template',
+            'manage_options',
+            'tmpltr-template',
+            [$this, 'render_template_page']
+        );
     }
 
     public function render_templates_page() {
         require_once plugin_dir_path( __FILE__ ) . 'pages/templates.php';
+    }
+
+    public function render_template_page() {
+        require_once plugin_dir_path( __FILE__ ) . 'pages/template.php';
     }
 
     public function enqueue_admin_styles($hook) {
