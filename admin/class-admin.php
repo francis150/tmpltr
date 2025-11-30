@@ -8,10 +8,12 @@ class TmpltrAdmin {
     private $pages = [
         'tmpltr' => [
             'css' => 'templates-page.css',
+            'js' => 'templates-page.js',
             'handle' => 'tmpltr-templates-page',
         ],
         'tmpltr-template' => [
             'css' => 'template-page.css',
+            'js' => 'template-page.js',
             'handle' => 'tmpltr-template-page',
         ],
     ];
@@ -20,7 +22,7 @@ class TmpltrAdmin {
         $this->plugin_data = get_plugin_data( plugin_dir_path( __FILE__ ) . '../tmpltr.php' );
 
         add_action('admin_menu', [$this, 'add_admin_menu']);
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_styles']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
 
     }
 
@@ -62,7 +64,7 @@ class TmpltrAdmin {
         require_once plugin_dir_path( __FILE__ ) . 'pages/template.php';
     }
 
-    public function enqueue_admin_styles($hook) {
+    public function enqueue_admin_assets($hook) {
         $page_slug = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
 
         // Only load on Tmpltr pages
@@ -77,12 +79,38 @@ class TmpltrAdmin {
             $this->plugin_data['Version']
         );
 
-        // Page-specific CSS
+        wp_enqueue_script(
+            'tmpltr-admin-global',
+            plugin_dir_url( __FILE__ ) . 'js/admin-global.js',
+            [],
+            $this->plugin_data['Version'],
+            true
+        );
+
+        // PHP to JS data transfer
+        wp_localize_script(
+            'tmpltr-admin-global',
+            'tmpltrData',
+            [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('tmpltr_nonce'),
+                'pluginUrl' => plugin_dir_url(__FILE__) . '../'
+            ]
+        );
+
         wp_enqueue_style(
             $this->pages[$page_slug]['handle'],
             plugin_dir_url( __FILE__ ) . '../assets/admin/css/' . $this->pages[$page_slug]['css'],
             ['tmpltr-admin-global'],
             $this->plugin_data['Version']
+        );
+
+        wp_enqueue_script(
+            $this->pages[$page_slug]['handle'],
+            plugin_dir_url( __FILE__ ) . '../assets/admin/js/' . $this->pages[$page_slug]['js'],
+            ['tmpltr-admin-global'],
+            $this->plugin_data['Version'],
+            true
         );
     }
 }

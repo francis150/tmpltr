@@ -49,4 +49,27 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 <div class="tmpltr-admin-page">
     <h1>template.php</h1>
     <span>ID: <?php echo esc_html($template_id); ?></span>
+    <hr>
+
+    <form action="#" class="template-form">
+        <h2>Fields</h2>
+        <div class="field-rows">
+
+            <div class="field-row">
+                <label for="field-name-1">Field Name</label>
+                <input type="text" id="field-name-1" name="field_name-1">
+
+                <label for="field-identifier-1">Identifier</label>
+                <input type="text" id="field-identifier-1" name="field_identifier-1" readonly>
+            </div>
+
+        </div>
+        
+        <button type="button" class="button">Add Field</button>
+
+        <hr>
+        <h2>Prompts</h2>
+        <hr>
+        <h2>Template Page</h2>
+    </form>
 </div>
