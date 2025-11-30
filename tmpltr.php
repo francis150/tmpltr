@@ -33,4 +33,8 @@ new TmpltrCore();
 if ( is_admin() ) {
     require_once plugin_dir_path( __FILE__ ) . 'admin/class-admin.php';
     new TmpltrAdmin();
+
+    // Initialize AJAX handlers
+    require_once plugin_dir_path( __FILE__ ) . 'admin/class-ajax.php';
+    new TmpltrAjax();
 }
