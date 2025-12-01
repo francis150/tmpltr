@@ -32,6 +32,7 @@
 
         addFieldBtn.addEventListener('click', handleAddField);
         fieldRowsContainer.addEventListener('click', handleRemoveField);
+        document.addEventListener('keydown', handleKeyboardShortcuts);
 
         if (templateForm) {
             templateForm.addEventListener('submit', handleFormSubmit);
@@ -55,6 +56,11 @@
 
         setupFieldNameListener(fieldCounter);
         debugLog(`Field ${fieldCounter} added`);
+
+        const fieldNameInput = document.getElementById(`field-name-${fieldCounter}`);
+        if (fieldNameInput) {
+            fieldNameInput.focus();
+        }
     }
 
     /**
@@ -72,6 +78,41 @@
             const fieldNumber = fieldRow.dataset.fieldNumber;
             fieldRow.remove();
             debugLog(`Field ${fieldNumber} removed`);
+        }
+    }
+
+    function isInFieldsContext() {
+        const focusedElement = document.activeElement;
+        const fieldRowsContainer = document.querySelector(SELECTORS.FIELD_ROWS_CONTAINER);
+
+        if (!fieldRowsContainer) {
+            return false;
+        }
+
+        if (focusedElement.tagName === 'TEXTAREA') {
+            return false;
+        }
+
+        const isNoFocus = focusedElement === document.body;
+        const isFocusedInFieldsSection = fieldRowsContainer.contains(focusedElement);
+
+        return isNoFocus || isFocusedInFieldsSection;
+    }
+
+    function handleKeyboardShortcuts(e) {
+        const ctrl = e.ctrlKey || e.metaKey;
+
+        if (ctrl && e.key === 'Enter') {
+            if (!isInFieldsContext()) {
+                return;
+            }
+
+            e.preventDefault();
+            const addFieldBtn = document.querySelector(SELECTORS.ADD_FIELD_BTN);
+            if (addFieldBtn) {
+                addFieldBtn.click();
+            }
+            return;
         }
     }
 
