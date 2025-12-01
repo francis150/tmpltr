@@ -96,6 +96,25 @@
                     >
                 </div>
 
+                <div class="field-group">
+                    <label for="field-required-${fieldNumber}">Required</label>
+                    <input
+                        type="checkbox"
+                        id="field-required-${fieldNumber}"
+                        name="field_required-${fieldNumber}"
+                    >
+                </div>
+
+                <div class="field-group">
+                    <label for="field-default-value-${fieldNumber}">Default Value</label>
+                    <input
+                        type="text"
+                        id="field-default-value-${fieldNumber}"
+                        name="field_default_value-${fieldNumber}"
+                        class="regular-text"
+                    >
+                </div>
+
                 <button type="button" class="button button-link-delete remove-field-btn" aria-label="Remove field">
                     Remove
                 </button>
