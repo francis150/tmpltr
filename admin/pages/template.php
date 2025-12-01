@@ -53,19 +53,9 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
     <form action="#" class="template-form">
         <h2>Fields</h2>
-        <div class="field-rows">
+        <div class="field-rows"></div>
 
-            <div class="field-row">
-                <label for="field-name-1">Field Name</label>
-                <input type="text" id="field-name-1" name="field_name-1">
-
-                <label for="field-identifier-1">Identifier</label>
-                <input type="text" id="field-identifier-1" name="field_identifier-1" readonly>
-            </div>
-
-        </div>
-        
-        <button type="button" class="button">Add Field</button>
+        <button type="button" class="button add-field-btn">Add Field</button>
 
         <hr>
         <h2>Prompts</h2>
