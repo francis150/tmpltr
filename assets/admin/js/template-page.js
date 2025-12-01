@@ -225,10 +225,10 @@
     }
 
     /**
-     * Generates identifier from field name (e.g., "My Field" → "my_field")
+     * Generates identifier from field name (e.g., "My Field" → "@my_field")
      */
     function generateIdentifier(fieldName) {
-        return fieldName
+        return '@' + fieldName
             .toLowerCase()
             .replace(/\s+/g, '_')
             .replace(/[^a-z0-9_]/g, '');
