@@ -8,6 +8,7 @@
     'use strict';
 
     const SELECTORS = {
+        TEMPLATE_FORM: '.template-form',
         FIELD_ROWS_CONTAINER: '.field-rows',
         ADD_FIELD_BTN: '.add-field-btn',
         REMOVE_FIELD_BTN: '.remove-field-btn',
@@ -20,6 +21,7 @@
      * Initializes field management functionality
      */
     function initFieldManagement() {
+        const templateForm = document.querySelector(SELECTORS.TEMPLATE_FORM);
         const addFieldBtn = document.querySelector(SELECTORS.ADD_FIELD_BTN);
         const fieldRowsContainer = document.querySelector(SELECTORS.FIELD_ROWS_CONTAINER);
 
@@ -30,6 +32,10 @@
 
         addFieldBtn.addEventListener('click', handleAddField);
         fieldRowsContainer.addEventListener('click', handleRemoveField);
+
+        if (templateForm) {
+            templateForm.addEventListener('submit', handleFormSubmit);
+        }
     }
 
     /**
@@ -67,6 +73,86 @@
             fieldRow.remove();
             debugLog(`Field ${fieldNumber} removed`);
         }
+    }
+
+    /**
+     * Handles template form submission
+     * Collects all form data and logs to console
+     *
+     * @param {Event} e - Form submit event
+     */
+    function handleFormSubmit(e) {
+        e.preventDefault();
+
+        debugLog('Form submitted - collecting template data...');
+
+        // Collect all form data (works for fields, prompts, template page, etc.)
+        const formData = collectFormData();
+
+        // Display results in console
+        console.group('=== Template Form Data ===');
+        console.log('Form data collected:', formData);
+        console.groupEnd();
+    }
+
+    /**
+     * Collects all data from the template form
+     * Works for all form sections: fields, prompts, template page, etc.
+     *
+     * @returns {Object} Form data organized by section
+     */
+    function collectFormData() {
+        const form = document.querySelector(SELECTORS.TEMPLATE_FORM);
+
+        if (!form) {
+            debugLog('Warning: Template form not found');
+            return {};
+        }
+
+        // Use native FormData API to get all form inputs
+        const formData = new FormData(form);
+        const data = {
+            fields: [],
+            // Future sections will go here:
+            // prompts: [],
+            // templatePage: {}
+        };
+
+        // Group field inputs by field number
+        const fieldGroups = {};
+
+        for (const [name, value] of formData.entries()) {
+            // Parse field inputs (e.g., "field_name-1", "field_required-2")
+            if (name.startsWith('field_')) {
+                const match = name.match(/^field_(.+)-(\d+)$/);
+                if (match) {
+                    const [, fieldName, fieldNumber] = match;
+                    const num = parseInt(fieldNumber, 10);
+
+                    if (!fieldGroups[num]) {
+                        fieldGroups[num] = { fieldNumber: num };
+                    }
+
+                    // Handle checkbox values (convert to boolean)
+                    if (fieldName === 'required') {
+                        fieldGroups[num][fieldName] = value === 'on';
+                    } else {
+                        fieldGroups[num][fieldName] = value;
+                    }
+                }
+            }
+
+            // Future: Handle prompt inputs
+            // if (name.startsWith('prompt_')) { ... }
+
+            // Future: Handle template page inputs
+            // if (name.startsWith('template_')) { ... }
+        }
+
+        // Convert field groups object to array
+        data.fields = Object.values(fieldGroups);
+
+        return data;
     }
 
     /**
@@ -153,7 +239,7 @@
      */
     function debugLog(message) {
         if (typeof TMPLTR_DEBUG_MODE !== 'undefined' && TMPLTR_DEBUG_MODE) {
-            console.log('[Tmpltr Fields]', message);
+            console.log('[Tmpltr Template]', message);
         }
     }
 

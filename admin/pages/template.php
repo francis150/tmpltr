@@ -61,5 +61,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         <h2>Prompts</h2>
         <hr>
         <h2>Template Page</h2>
+
+        <button type="submit" class="button button-primary">Save Fields</button>
     </form>
 </div>
