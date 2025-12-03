@@ -52,6 +52,7 @@
 
         addPromptBtn.addEventListener('click', handleAddPrompt);
         promptRowsContainer.addEventListener('click', handleRemovePrompt);
+        promptRowsContainer.addEventListener('click', handleCopyPlaceholder);
     }
 
     /**
@@ -129,6 +130,62 @@
             promptRow.remove();
             debugLog(`Prompt ${promptNumber} removed`);
         }
+    }
+
+    function handleCopyPlaceholder(e) {
+        const copyBtn = e.target.closest('.copy-btn');
+        if (!copyBtn) {
+            return;
+        }
+
+        e.preventDefault();
+        const targetId = copyBtn.dataset.copyTarget;
+        const targetInput = document.getElementById(targetId);
+
+        if (!targetInput) {
+            return;
+        }
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(targetInput.value).then(() => {
+                showCopyFeedback(copyBtn, targetInput.value);
+            }).catch(err => {
+                debugLog('Clipboard API failed: ' + err);
+                fallbackCopy(targetInput, copyBtn);
+            });
+        } else {
+            fallbackCopy(targetInput, copyBtn);
+        }
+    }
+
+    function fallbackCopy(inputElement, copyBtn) {
+        try {
+            inputElement.select();
+            inputElement.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            showCopyFeedback(copyBtn, inputElement.value);
+        } catch (err) {
+            debugLog('Failed to copy: ' + err);
+        }
+    }
+
+    function showCopyFeedback(copyBtn, copiedValue) {
+        const icon = copyBtn.querySelector('.dashicons');
+        if (icon) {
+            icon.classList.remove('dashicons-admin-page');
+            icon.classList.add('dashicons-yes');
+        }
+        copyBtn.classList.add('copied');
+
+        setTimeout(() => {
+            if (icon) {
+                icon.classList.remove('dashicons-yes');
+                icon.classList.add('dashicons-admin-page');
+            }
+            copyBtn.classList.remove('copied');
+        }, 2000);
+
+        debugLog(`Copied: ${copiedValue}`);
     }
 
     function isInFieldsContext() {
@@ -336,16 +393,21 @@
                     ></textarea>
                 </div>
 
-                <div class="prompt-group">
+                <div class="prompt-group prompt-group-with-copy">
                     <label for="prompt-placeholder-${promptNumber}">Placeholder</label>
-                    <input
-                        type="text"
-                        id="prompt-placeholder-${promptNumber}"
-                        name="prompt_placeholder-${promptNumber}"
-                        value="{prompt_${promptNumber}}"
-                        class="regular-text"
-                        readonly
-                    >
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input
+                            type="text"
+                            id="prompt-placeholder-${promptNumber}"
+                            name="prompt_placeholder-${promptNumber}"
+                            value="{prompt_${promptNumber}}"
+                            class="regular-text"
+                            readonly
+                        >
+                        <button type="button" class="button button-small copy-btn" data-copy-target="prompt-placeholder-${promptNumber}" aria-label="Copy placeholder">
+                            <span class="dashicons dashicons-admin-page"></span>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="button" class="button button-link-delete remove-prompt-btn" aria-label="Remove prompt">
