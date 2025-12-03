@@ -1,11 +1,17 @@
 /* Template page specific styles */
 
+.template-form {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
 .field-rows {
     margin-bottom: 15px;
 }
 
 .field-row {
     display: flex;
+    flex-wrap: wrap;
     gap: 15px;
     align-items: flex-end;
     margin-bottom: 10px;
@@ -15,14 +21,95 @@
 }
 
 .field-group {
-    flex: 1;
+    flex: 1 1 200px;
+    min-width: 150px;
+}
+
+.field-group input[type="text"],
+.field-group input.regular-text {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.field-group input[type="checkbox"] {
+    margin-top: 5px;
 }
 
 .field-group label {
     display: block;
     margin-bottom: 5px;
+    font-weight: 500;
 }
 
 .remove-field-btn {
     flex-shrink: 0;
+}
+
+/* Responsive Design */
+
+/* Tablet breakpoint (max-width: 768px) */
+@media screen and (max-width: 768px) {
+    .field-row {
+        gap: 10px;
+        padding: 15px 10px;
+    }
+
+    .field-group {
+        flex: 1 1 calc(50% - 10px);
+        min-width: 140px;
+    }
+
+    .remove-field-btn {
+        flex: 0 0 100%;
+        margin-top: 10px;
+    }
+}
+
+/* Mobile breakpoint (max-width: 600px) */
+@media screen and (max-width: 600px) {
+    .tmpltr-admin-page {
+        padding: 15px;
+    }
+
+    .tmpltr-admin-page h1 {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .tmpltr-admin-page h2 {
+        font-size: 1.3em;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .field-row {
+        gap: 8px;
+        padding: 12px 8px;
+    }
+
+    .field-group {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+
+    .field-group input[type="text"],
+    .field-group input.regular-text {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .remove-field-btn {
+        flex: 0 0 100%;
+        margin-top: 10px;
+        padding: 10px 15px;
+        min-height: 44px; /* Touch-friendly size */
+    }
+
+    .add-field-btn,
+    .button-primary {
+        width: 100%;
+        padding: 10px 15px;
+        min-height: 44px; /* Touch-friendly size */
+        text-align: center;
+    }
 }
