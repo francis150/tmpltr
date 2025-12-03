@@ -59,6 +59,10 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
         <hr>
         <h2>Prompts</h2>
+        <div class="prompt-rows"></div>
+
+        <button type="button" class="button add-prompt-btn">Add Prompt</button>
+
         <hr>
         <h2>Template Page</h2>
 

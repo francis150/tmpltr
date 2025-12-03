@@ -12,14 +12,16 @@
         FIELD_ROWS_CONTAINER: '.field-rows',
         ADD_FIELD_BTN: '.add-field-btn',
         REMOVE_FIELD_BTN: '.remove-field-btn',
-        FIELD_ROW: '.field-row'
+        FIELD_ROW: '.field-row',
+        PROMPT_ROWS_CONTAINER: '.prompt-rows',
+        ADD_PROMPT_BTN: '.add-prompt-btn',
+        REMOVE_PROMPT_BTN: '.remove-prompt-btn',
+        PROMPT_ROW: '.prompt-row'
     };
 
     let fieldCounter = 0;
+    let promptCounter = 0;
 
-    /**
-     * Initializes field management functionality
-     */
     function initFieldManagement() {
         const templateForm = document.querySelector(SELECTORS.TEMPLATE_FORM);
         const addFieldBtn = document.querySelector(SELECTORS.ADD_FIELD_BTN);
@@ -37,6 +39,19 @@
         if (templateForm) {
             templateForm.addEventListener('submit', handleFormSubmit);
         }
+    }
+
+    function initPromptManagement() {
+        const addPromptBtn = document.querySelector(SELECTORS.ADD_PROMPT_BTN);
+        const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
+
+        if (!addPromptBtn || !promptRowsContainer) {
+            debugLog('Required elements not found. Prompt management not initialized.');
+            return;
+        }
+
+        addPromptBtn.addEventListener('click', handleAddPrompt);
+        promptRowsContainer.addEventListener('click', handleRemovePrompt);
     }
 
     /**
@@ -81,6 +96,41 @@
         }
     }
 
+    function handleAddPrompt(e) {
+        e.preventDefault();
+
+        const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
+        if (!promptRowsContainer) {
+            return;
+        }
+
+        promptCounter++;
+        const newPromptRow = createPromptRow(promptCounter);
+        promptRowsContainer.insertAdjacentHTML('beforeend', newPromptRow);
+
+        debugLog(`Prompt ${promptCounter} added`);
+
+        const promptTextarea = document.getElementById(`prompt-text-${promptCounter}`);
+        if (promptTextarea) {
+            promptTextarea.focus();
+        }
+    }
+
+    function handleRemovePrompt(e) {
+        if (!e.target.classList.contains('remove-prompt-btn')) {
+            return;
+        }
+
+        e.preventDefault();
+        const promptRow = e.target.closest(SELECTORS.PROMPT_ROW);
+
+        if (promptRow) {
+            const promptNumber = promptRow.dataset.promptNumber;
+            promptRow.remove();
+            debugLog(`Prompt ${promptNumber} removed`);
+        }
+    }
+
     function isInFieldsContext() {
         const focusedElement = document.activeElement;
         const fieldRowsContainer = document.querySelector(SELECTORS.FIELD_ROWS_CONTAINER);
@@ -99,20 +149,40 @@
         return isNoFocus || isFocusedInFieldsSection;
     }
 
+    function isInPromptsContext() {
+        const focusedElement = document.activeElement;
+        const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
+
+        if (!promptRowsContainer) {
+            return false;
+        }
+
+        const isFocusedInPromptsSection = promptRowsContainer.contains(focusedElement);
+
+        return isFocusedInPromptsSection;
+    }
+
     function handleKeyboardShortcuts(e) {
         const ctrl = e.ctrlKey || e.metaKey;
 
         if (ctrl && e.key === 'Enter') {
-            if (!isInFieldsContext()) {
+            if (isInFieldsContext()) {
+                e.preventDefault();
+                const addFieldBtn = document.querySelector(SELECTORS.ADD_FIELD_BTN);
+                if (addFieldBtn) {
+                    addFieldBtn.click();
+                }
                 return;
             }
 
-            e.preventDefault();
-            const addFieldBtn = document.querySelector(SELECTORS.ADD_FIELD_BTN);
-            if (addFieldBtn) {
-                addFieldBtn.click();
+            if (isInPromptsContext()) {
+                e.preventDefault();
+                const addPromptBtn = document.querySelector(SELECTORS.ADD_PROMPT_BTN);
+                if (addPromptBtn) {
+                    addPromptBtn.click();
+                }
+                return;
             }
-            return;
         }
     }
 
@@ -154,16 +224,13 @@
         const formData = new FormData(form);
         const data = {
             fields: [],
-            // Future sections will go here:
-            // prompts: [],
-            // templatePage: {}
+            prompts: []
         };
 
-        // Group field inputs by field number
         const fieldGroups = {};
+        const promptGroups = {};
 
         for (const [name, value] of formData.entries()) {
-            // Parse field inputs (e.g., "field_name-1", "field_required-2")
             if (name.startsWith('field_')) {
                 const match = name.match(/^field_(.+)-(\d+)$/);
                 if (match) {
@@ -174,7 +241,6 @@
                         fieldGroups[num] = { fieldNumber: num };
                     }
 
-                    // Handle checkbox values (convert to boolean)
                     if (fieldName === 'required') {
                         fieldGroups[num][fieldName] = value === 'on';
                     } else {
@@ -183,15 +249,23 @@
                 }
             }
 
-            // Future: Handle prompt inputs
-            // if (name.startsWith('prompt_')) { ... }
+            if (name.startsWith('prompt_')) {
+                const match = name.match(/^prompt_(.+)-(\d+)$/);
+                if (match) {
+                    const [, promptField, promptNumber] = match;
+                    const num = parseInt(promptNumber, 10);
 
-            // Future: Handle template page inputs
-            // if (name.startsWith('template_')) { ... }
+                    if (!promptGroups[num]) {
+                        promptGroups[num] = { promptNumber: num };
+                    }
+
+                    promptGroups[num][promptField] = value;
+                }
+            }
         }
 
-        // Convert field groups object to array
         data.fields = Object.values(fieldGroups);
+        data.prompts = Object.values(promptGroups);
 
         return data;
     }
@@ -249,9 +323,38 @@
         `;
     }
 
-    /**
-     * Sets up real-time identifier generation for a field
-     */
+    function createPromptRow(promptNumber) {
+        return `
+            <div class="prompt-row" data-prompt-number="${promptNumber}">
+                <div class="prompt-group">
+                    <label for="prompt-text-${promptNumber}">Prompt</label>
+                    <textarea
+                        id="prompt-text-${promptNumber}"
+                        name="prompt_text-${promptNumber}"
+                        rows="4"
+                        class="large-text"
+                    ></textarea>
+                </div>
+
+                <div class="prompt-group">
+                    <label for="prompt-placeholder-${promptNumber}">Placeholder</label>
+                    <input
+                        type="text"
+                        id="prompt-placeholder-${promptNumber}"
+                        name="prompt_placeholder-${promptNumber}"
+                        value="{prompt_${promptNumber}}"
+                        class="regular-text"
+                        readonly
+                    >
+                </div>
+
+                <button type="button" class="button button-link-delete remove-prompt-btn" aria-label="Remove prompt">
+                    Remove
+                </button>
+            </div>
+        `;
+    }
+
     function setupFieldNameListener(fieldNumber) {
         const fieldNameInput = document.getElementById(`field-name-${fieldNumber}`);
         const fieldIdentifierInput = document.getElementById(`field-identifier-${fieldNumber}`);
@@ -284,9 +387,14 @@
         }
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initFieldManagement);
-    } else {
+    function init() {
         initFieldManagement();
+        initPromptManagement();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
     }
 })();

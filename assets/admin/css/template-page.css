@@ -46,6 +46,52 @@
     flex-shrink: 0;
 }
 
+.prompt-rows {
+    margin-bottom: 15px;
+}
+
+.prompt-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+}
+
+.prompt-group {
+    flex: 1 1 300px;
+    min-width: 200px;
+}
+
+.prompt-group textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.prompt-group input[type="text"],
+.prompt-group input.regular-text {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.prompt-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.remove-prompt-btn {
+    flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 28px;
+}
+
 /* Responsive Design */
 
 /* Tablet breakpoint (max-width: 768px) */
@@ -61,6 +107,20 @@
     }
 
     .remove-field-btn {
+        flex: 0 0 100%;
+        margin-top: 10px;
+    }
+
+    .prompt-row {
+        gap: 10px;
+        padding: 15px 10px;
+    }
+
+    .prompt-group {
+        flex: 1 1 100%;
+    }
+
+    .remove-prompt-btn {
         flex: 0 0 100%;
         margin-top: 10px;
     }
@@ -110,6 +170,34 @@
         width: 100%;
         padding: 10px 15px;
         min-height: 44px; /* Touch-friendly size */
+        text-align: center;
+    }
+
+    .prompt-row {
+        gap: 8px;
+        padding: 12px 8px;
+    }
+
+    .prompt-group {
+        flex: 1 1 100%;
+        min-width: 100%;
+    }
+
+    .prompt-group textarea {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+
+    .remove-prompt-btn {
+        flex: 0 0 100%;
+        margin-top: 10px;
+        padding: 10px 15px;
+        min-height: 44px;
+    }
+
+    .add-prompt-btn {
+        width: 100%;
+        padding: 10px 15px;
+        min-height: 44px;
         text-align: center;
     }
 }
