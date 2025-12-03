@@ -54,7 +54,7 @@ class TmpltrDatabase {
         $sql_prompts = "CREATE TABLE {$wpdb->prefix}tmpltr_template_prompts (
           id bigint(20) NOT NULL AUTO_INCREMENT,
           template_id bigint(20) NOT NULL,
-          shortcode varchar(100) NOT NULL,
+          placeholder varchar(100) NOT NULL,
           prompt_text longtext NOT NULL,
           prompt_order int(11) DEFAULT 0,
           max_tokens int(11) DEFAULT 1000,
@@ -63,7 +63,7 @@ class TmpltrDatabase {
           updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           PRIMARY KEY  (id),
           KEY template_id (template_id),
-          KEY shortcode (shortcode),
+          KEY placeholder (placeholder),
           KEY prompt_order (prompt_order)
         ) $charset_collate;";
 
