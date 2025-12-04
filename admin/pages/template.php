@@ -52,6 +52,33 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     <hr>
 
     <form action="#" class="template-form">
+        <h2>Template Information</h2>
+        <div class="template-metadata-row">
+            <div class="template-metadata-field">
+                <label for="template-name">Template Name:</label>
+                <input
+                    type="text"
+                    id="template-name"
+                    name="template_name"
+                    value="<?php echo esc_attr($template->get_name()); ?>"
+                    class="regular-text"
+                >
+            </div>
+
+            <div class="template-metadata-field">
+                <label for="template-status">Status:</label>
+                <select
+                    id="template-status"
+                    name="template_status"
+                    class="regular-text"
+                >
+                    <option value="draft" <?php selected($template->get_status(), 'draft'); ?>>Draft</option>
+                    <option value="published" <?php selected($template->get_status(), 'published'); ?>>Published</option>
+                </select>
+            </div>
+        </div>
+
+        <hr>
         <h2>Fields</h2>
         <div class="field-rows"></div>
 

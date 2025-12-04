@@ -427,6 +427,8 @@
         // Use native FormData API to get all form inputs
         const formData = new FormData(form);
         const data = {
+            template_name: '',
+            template_status: 'draft',
             fields: [],
             prompts: [],
             template_page_id: 0
@@ -436,6 +438,14 @@
         const promptGroups = {};
 
         for (const [name, value] of formData.entries()) {
+            if (name === 'template_name') {
+                data.template_name = value;
+            }
+
+            if (name === 'template_status') {
+                data.template_status = value;
+            }
+
             if (name.startsWith('field_')) {
                 const match = name.match(/^field_(.+)-(\d+)$/);
                 if (match) {
