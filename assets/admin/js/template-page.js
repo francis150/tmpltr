@@ -410,6 +410,10 @@
 
         debugLog('Form submitted - collecting template data...');
 
+        if (!validateFormBeforeSubmit()) {
+            return;
+        }
+
         const formData = collectFormData();
         const templateId = getTemplateId();
 
@@ -770,6 +774,45 @@
                 ignoreEmpty: true
             }
         );
+    }
+
+    function validateFormBeforeSubmit() {
+        clearValidationErrors();
+
+        let hasErrors = false;
+        const fieldNameInputs = document.querySelectorAll('[id^="field-name-"]');
+        const promptTextareas = document.querySelectorAll('[id^="prompt-text-"]');
+
+        validateFieldNames();
+
+        fieldNameInputs.forEach(input => {
+            if (!input.value.trim()) {
+                showValidationError(input, 'Field name is required');
+                hasErrors = true;
+            }
+        });
+
+        promptTextareas.forEach(textarea => {
+            if (!textarea.value.trim()) {
+                showValidationError(textarea, 'Prompt text is required');
+                hasErrors = true;
+            }
+        });
+
+        const duplicateErrors = document.querySelectorAll('.validation-error');
+        if (duplicateErrors.length > 0) {
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            const firstError = document.querySelector('.validation-error');
+            if (firstError) {
+                firstError.focus();
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        return !hasErrors;
     }
 
     /**
