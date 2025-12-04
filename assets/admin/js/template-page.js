@@ -73,6 +73,7 @@
 
         // Load pages when user focuses on the dropdown
         pageSelect.addEventListener('focus', handlePageSelectorFocus);
+        loadPageOptions();
         debugLog('Page selector initialized');
     }
 
@@ -102,6 +103,10 @@
         if (!select) return;
 
         const currentValue = select.value;
+        const savedPageId = select.dataset.selectedPage;
+        const valueToSelect = (currentValue && currentValue !== '0') ? currentValue : (savedPageId && savedPageId !== '0' ? savedPageId : currentValue);
+
+        debugLog('Page loading - currentValue: ' + currentValue + ', savedPageId: ' + savedPageId + ', valueToSelect: ' + valueToSelect);
 
         // Show loading indicator on first load
         if (!pageSelectorLoaded) {
@@ -126,7 +131,7 @@
                 return;
             }
 
-            populatePageOptions(data.data.pages, currentValue);
+            populatePageOptions(data.data.pages, valueToSelect);
             pageSelectorLoaded = true;
             debugLog(`Loaded ${data.data.pages.length} pages`);
         })
