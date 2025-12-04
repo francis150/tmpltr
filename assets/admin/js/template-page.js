@@ -392,22 +392,69 @@
 
     /**
      * Handles template form submission
-     * Collects all form data and logs to console
+     * Collects all form data and sends via AJAX
      *
      * @param {Event} e - Form submit event
      */
     function handleFormSubmit(e) {
         e.preventDefault();
 
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn ? submitBtn.textContent : '';
+
         debugLog('Form submitted - collecting template data...');
 
-        // Collect all form data (works for fields, prompts, template page, etc.)
         const formData = collectFormData();
+        const templateId = getTemplateId();
 
-        // Display results in console
-        console.group('=== Template Form Data ===');
-        console.log('Form data collected:', formData);
-        console.groupEnd();
+        if (!templateId) {
+            showAdminNotice('Template ID is missing', 'error');
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+        }
+
+        const requestBody = new URLSearchParams({
+            action: 'tmpltr_save_template',
+            nonce: tmpltrData.nonce,
+            template_id: templateId,
+            template_name: formData.template_name,
+            template_status: formData.template_status,
+            template_page_id: formData.template_page_id,
+            fields: JSON.stringify(formData.fields),
+            prompts: JSON.stringify(formData.prompts)
+        });
+
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: requestBody
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAdminNotice(data.data.message || 'Template saved successfully', 'success');
+                debugLog('Template saved successfully');
+            } else {
+                showAdminNotice(data.data?.message || 'Failed to save template', 'error');
+                debugLog('Save failed: ' + (data.data?.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            showAdminNotice('Network error: Failed to save template', 'error');
+            debugLog('Network error: ' + error.message);
+        })
+        .finally(() => {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+            }
+        });
     }
 
     /**
@@ -453,11 +500,13 @@
                     const num = parseInt(fieldNumber, 10);
 
                     if (!fieldGroups[num]) {
-                        fieldGroups[num] = { fieldNumber: num };
+                        fieldGroups[num] = {};
                     }
 
-                    if (fieldName === 'required') {
-                        fieldGroups[num][fieldName] = value === 'on';
+                    if (fieldName === 'id') {
+                        fieldGroups[num].id = value ? parseInt(value, 10) : null;
+                    } else if (fieldName === 'required') {
+                        fieldGroups[num].required = value === 'on';
                     } else {
                         fieldGroups[num][fieldName] = value;
                     }
@@ -471,10 +520,14 @@
                     const num = parseInt(promptNumber, 10);
 
                     if (!promptGroups[num]) {
-                        promptGroups[num] = { promptNumber: num };
+                        promptGroups[num] = {};
                     }
 
-                    promptGroups[num][promptField] = value;
+                    if (promptField === 'id') {
+                        promptGroups[num].id = value ? parseInt(value, 10) : null;
+                    } else {
+                        promptGroups[num][promptField] = value;
+                    }
                 }
             }
         }
@@ -494,9 +547,17 @@
     /**
      * Creates HTML for a new field row
      */
-    function createFieldRow(fieldNumber) {
+    function createFieldRow(fieldNumber, fieldData = null) {
+        const fieldId = fieldData?.id || '';
+        const fieldName = fieldData?.label || '';
+        const fieldIdentifier = fieldData?.unique_identifier || '';
+        const fieldRequired = fieldData?.is_required == 1;
+        const fieldDefaultValue = fieldData?.default_value || '';
+
         return `
             <div class="field-row" data-field-number="${fieldNumber}">
+                <input type="hidden" name="field_id-${fieldNumber}" value="${fieldId}">
+
                 <div class="field-group">
                     <label for="field-name-${fieldNumber}">Field Name</label>
                     <input
@@ -504,6 +565,7 @@
                         id="field-name-${fieldNumber}"
                         name="field_name-${fieldNumber}"
                         class="regular-text"
+                        value="${fieldName}"
                     >
                 </div>
 
@@ -514,6 +576,7 @@
                         id="field-identifier-${fieldNumber}"
                         name="field_identifier-${fieldNumber}"
                         class="regular-text"
+                        value="${fieldIdentifier}"
                         readonly
                     >
                 </div>
@@ -524,6 +587,7 @@
                         type="checkbox"
                         id="field-required-${fieldNumber}"
                         name="field_required-${fieldNumber}"
+                        ${fieldRequired ? 'checked' : ''}
                     >
                 </div>
 
@@ -534,6 +598,7 @@
                         id="field-default-value-${fieldNumber}"
                         name="field_default_value-${fieldNumber}"
                         class="regular-text"
+                        value="${fieldDefaultValue}"
                     >
                 </div>
 
@@ -544,9 +609,15 @@
         `;
     }
 
-    function createPromptRow(promptNumber) {
+    function createPromptRow(promptNumber, promptData = null) {
+        const promptId = promptData?.id || '';
+        const promptText = promptData?.prompt_text || '';
+        const promptPlaceholder = promptData?.placeholder || `{prompt_${promptNumber}}`;
+
         return `
             <div class="prompt-row" data-prompt-number="${promptNumber}">
+                <input type="hidden" name="prompt_id-${promptNumber}" value="${promptId}">
+
                 <div class="prompt-group">
                     <label for="prompt-text-${promptNumber}">Prompt</label>
                     <textarea
@@ -554,7 +625,7 @@
                         name="prompt_text-${promptNumber}"
                         rows="4"
                         class="large-text"
-                    ></textarea>
+                    >${promptText}</textarea>
                 </div>
 
                 <div class="prompt-group prompt-group-with-copy">
@@ -564,7 +635,7 @@
                             type="text"
                             id="prompt-placeholder-${promptNumber}"
                             name="prompt_placeholder-${promptNumber}"
-                            value="{prompt_${promptNumber}}"
+                            value="${promptPlaceholder}"
                             class="regular-text"
                             readonly
                         >
@@ -617,6 +688,99 @@
         initFieldManagement();
         initPromptManagement();
         initPageSelector();
+        loadExistingData();
+    }
+
+    function getTemplateId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return parseInt(urlParams.get('id'), 10) || 0;
+    }
+
+    function loadExistingData() {
+        const templateId = getTemplateId();
+
+        if (!templateId) {
+            debugLog('No template ID found, skipping data load');
+            return;
+        }
+
+        debugLog('Loading existing template data for ID: ' + templateId);
+
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_get_template_data',
+                nonce: tmpltrData.nonce,
+                template_id: templateId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                debugLog('Failed to load template data: ' + (data.data?.message || 'Unknown error'));
+                return;
+            }
+
+            populateExistingFields(data.data.fields || []);
+            populateExistingPrompts(data.data.prompts || []);
+            debugLog(`Loaded ${data.data.fields.length} fields and ${data.data.prompts.length} prompts`);
+        })
+        .catch(error => {
+            debugLog('Network error loading template data: ' + error.message);
+        });
+    }
+
+    function populateExistingFields(fields) {
+        const fieldRowsContainer = document.querySelector(SELECTORS.FIELD_ROWS_CONTAINER);
+        if (!fieldRowsContainer || fields.length === 0) {
+            return;
+        }
+
+        fields.forEach((field) => {
+            fieldCounter++;
+            const fieldRow = createFieldRow(fieldCounter, field);
+            fieldRowsContainer.insertAdjacentHTML('beforeend', fieldRow);
+            setupFieldNameListener(fieldCounter);
+        });
+    }
+
+    function populateExistingPrompts(prompts) {
+        const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
+        if (!promptRowsContainer || prompts.length === 0) {
+            return;
+        }
+
+        prompts.forEach((prompt) => {
+            promptCounter++;
+            const promptRow = createPromptRow(promptCounter, prompt);
+            promptRowsContainer.insertAdjacentHTML('beforeend', promptRow);
+        });
+    }
+
+    function showAdminNotice(message, type = 'success') {
+        const existingNotice = document.querySelector('.tmpltr-ajax-notice');
+        if (existingNotice) {
+            existingNotice.remove();
+        }
+
+        const noticeClass = type === 'success' ? 'notice-success' : 'notice-error';
+        const notice = document.createElement('div');
+        notice.className = `notice ${noticeClass} is-dismissible tmpltr-ajax-notice`;
+        notice.innerHTML = `<p>${message}</p>`;
+
+        const adminPage = document.querySelector('.tmpltr-admin-page');
+        if (adminPage) {
+            adminPage.insertAdjacentElement('afterbegin', notice);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const dismissBtn = notice.querySelector('.notice-dismiss');
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => notice.remove());
+            }
+        }
     }
 
     if (document.readyState === 'loading') {

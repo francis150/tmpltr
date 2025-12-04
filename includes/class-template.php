@@ -252,6 +252,233 @@ class TmpltrTemplate {
     }
 
     /**
+     * Get all fields for this template
+     *
+     * @return array
+     */
+    public function get_fields() {
+        global $wpdb;
+
+        if (!$this->id) {
+            return [];
+        }
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}tmpltr_template_fields WHERE template_id = %d ORDER BY field_order ASC",
+                $this->id
+            ),
+            ARRAY_A
+        );
+
+        return $results ? $results : [];
+    }
+
+    /**
+     * Get all prompts for this template
+     *
+     * @return array
+     */
+    public function get_prompts() {
+        global $wpdb;
+
+        if (!$this->id) {
+            return [];
+        }
+
+        $results = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}tmpltr_template_prompts WHERE template_id = %d ORDER BY prompt_order ASC",
+                $this->id
+            ),
+            ARRAY_A
+        );
+
+        return $results ? $results : [];
+    }
+
+    /**
+     * Save fields for this template (smart upsert)
+     *
+     * @param array $fields_array Array of field data
+     * @return bool True on success, false on failure
+     */
+    public function save_fields($fields_array) {
+        global $wpdb;
+
+        if (!$this->id) {
+            return false;
+        }
+
+        $submitted_ids = [];
+
+        foreach ($fields_array as $index => $field) {
+            $field_data = [
+                'template_id' => $this->id,
+                'unique_identifier' => sanitize_text_field($field['identifier'] ?? ''),
+                'label' => sanitize_text_field($field['name'] ?? ''),
+                'default_value' => sanitize_text_field($field['default_value'] ?? ''),
+                'is_required' => isset($field['required']) && $field['required'] ? 1 : 0,
+                'field_order' => $index
+            ];
+
+            $field_id = isset($field['id']) ? absint($field['id']) : 0;
+
+            if ($field_id > 0) {
+                $result = $wpdb->update(
+                    $wpdb->prefix . 'tmpltr_template_fields',
+                    $field_data,
+                    ['id' => $field_id],
+                    ['%d', '%s', '%s', '%s', '%d', '%d'],
+                    ['%d']
+                );
+
+                if ($result === false) {
+                    if (TMPLTR_DEBUG_MODE) {
+                        error_log('Tmpltr: Failed to update field ' . $field_id . ' - ' . $wpdb->last_error);
+                    }
+                    return false;
+                }
+
+                $submitted_ids[] = $field_id;
+            } else {
+                $result = $wpdb->insert(
+                    $wpdb->prefix . 'tmpltr_template_fields',
+                    $field_data,
+                    ['%d', '%s', '%s', '%s', '%d', '%d']
+                );
+
+                if ($result === false) {
+                    if (TMPLTR_DEBUG_MODE) {
+                        error_log('Tmpltr: Failed to insert field - ' . $wpdb->last_error);
+                    }
+                    return false;
+                }
+
+                $submitted_ids[] = $wpdb->insert_id;
+            }
+        }
+
+        if (!empty($submitted_ids)) {
+            $ids_placeholder = implode(',', array_fill(0, count($submitted_ids), '%d'));
+            $query = $wpdb->prepare(
+                "DELETE FROM {$wpdb->prefix}tmpltr_template_fields WHERE template_id = %d AND id NOT IN ($ids_placeholder)",
+                array_merge([$this->id], $submitted_ids)
+            );
+            $wpdb->query($query);
+        } else {
+            $wpdb->delete(
+                $wpdb->prefix . 'tmpltr_template_fields',
+                ['template_id' => $this->id],
+                ['%d']
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Save prompts for this template (smart upsert)
+     *
+     * @param array $prompts_array Array of prompt data
+     * @return bool True on success, false on failure
+     */
+    public function save_prompts($prompts_array) {
+        global $wpdb;
+
+        if (!$this->id) {
+            return false;
+        }
+
+        $submitted_ids = [];
+
+        foreach ($prompts_array as $index => $prompt) {
+            $prompt_data = [
+                'template_id' => $this->id,
+                'placeholder' => sanitize_text_field($prompt['placeholder'] ?? ''),
+                'prompt_text' => wp_kses_post($prompt['text'] ?? ''),
+                'prompt_order' => $index
+            ];
+
+            $prompt_id = isset($prompt['id']) ? absint($prompt['id']) : 0;
+
+            if ($prompt_id > 0) {
+                $result = $wpdb->update(
+                    $wpdb->prefix . 'tmpltr_template_prompts',
+                    $prompt_data,
+                    ['id' => $prompt_id],
+                    ['%d', '%s', '%s', '%d'],
+                    ['%d']
+                );
+
+                if ($result === false) {
+                    if (TMPLTR_DEBUG_MODE) {
+                        error_log('Tmpltr: Failed to update prompt ' . $prompt_id . ' - ' . $wpdb->last_error);
+                    }
+                    return false;
+                }
+
+                $submitted_ids[] = $prompt_id;
+            } else {
+                $result = $wpdb->insert(
+                    $wpdb->prefix . 'tmpltr_template_prompts',
+                    $prompt_data,
+                    ['%d', '%s', '%s', '%d']
+                );
+
+                if ($result === false) {
+                    if (TMPLTR_DEBUG_MODE) {
+                        error_log('Tmpltr: Failed to insert prompt - ' . $wpdb->last_error);
+                    }
+                    return false;
+                }
+
+                $submitted_ids[] = $wpdb->insert_id;
+            }
+        }
+
+        if (!empty($submitted_ids)) {
+            $ids_placeholder = implode(',', array_fill(0, count($submitted_ids), '%d'));
+            $query = $wpdb->prepare(
+                "DELETE FROM {$wpdb->prefix}tmpltr_template_prompts WHERE template_id = %d AND id NOT IN ($ids_placeholder)",
+                array_merge([$this->id], $submitted_ids)
+            );
+            $wpdb->query($query);
+        } else {
+            $wpdb->delete(
+                $wpdb->prefix . 'tmpltr_template_prompts',
+                ['template_id' => $this->id],
+                ['%d']
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Validate that a page ID exists in WordPress
+     *
+     * @param int $page_id Page ID to validate
+     * @return bool True if page exists, false otherwise
+     */
+    public static function validate_template_page_id($page_id) {
+        global $wpdb;
+
+        if (empty($page_id) || $page_id <= 0) {
+            return false;
+        }
+
+        $exists = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE ID = %d AND post_type = 'page' AND post_status != 'trash'",
+                $page_id
+            )
+        );
+
+        return !empty($exists);
+    }
+
+    /**
      * Get all templates
      *
      * @return array

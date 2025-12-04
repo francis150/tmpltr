@@ -99,6 +99,6 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
             </select>
         </p>
 
-        <button type="submit" class="button button-primary">Save Fields</button>
+        <button type="submit" class="button button-primary">Save Template</button>
     </form>
 </div>
