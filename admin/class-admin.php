@@ -98,6 +98,22 @@ class TmpltrAdmin {
             ]
         );
 
+        // Toast system (global utility)
+        wp_enqueue_style(
+            'tmpltr-toast',
+            plugin_dir_url( __FILE__ ) . 'css/toast.css',
+            [],
+            $this->plugin_data['Version']
+        );
+
+        wp_enqueue_script(
+            'tmpltr-toast',
+            plugin_dir_url( __FILE__ ) . 'js/toast.js',
+            ['tmpltr-admin-global'],
+            $this->plugin_data['Version'],
+            true
+        );
+
         wp_enqueue_style(
             $this->pages[$page_slug]['handle'],
             plugin_dir_url( __FILE__ ) . '../assets/admin/css/' . $this->pages[$page_slug]['css'],
@@ -108,7 +124,7 @@ class TmpltrAdmin {
         wp_enqueue_script(
             $this->pages[$page_slug]['handle'],
             plugin_dir_url( __FILE__ ) . '../assets/admin/js/' . $this->pages[$page_slug]['js'],
-            ['tmpltr-admin-global'],
+            ['tmpltr-admin-global', 'tmpltr-toast'],
             $this->plugin_data['Version'],
             true
         );

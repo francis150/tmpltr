@@ -418,7 +418,10 @@
         const templateId = getTemplateId();
 
         if (!templateId) {
-            showAdminNotice('Template ID is missing', 'error');
+            TmpltrToast.error({
+                title: 'Template ID is missing',
+                subtext: 'Cannot load template data'
+            });
             return;
         }
 
@@ -448,15 +451,26 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showAdminNotice(data.data.message || 'Template saved successfully', 'success');
+                TmpltrToast.success({
+                    title: 'Template saved successfully',
+                    subtext: data.data.message || ''
+                });
                 debugLog('Template saved successfully');
             } else {
-                showAdminNotice(data.data?.message || 'Failed to save template', 'error');
+                TmpltrToast.error({
+                    title: 'Failed to save template',
+                    subtext: data.data?.message || 'Unknown error',
+                    seconds: 7
+                });
                 debugLog('Save failed: ' + (data.data?.message || 'Unknown error'));
             }
         })
         .catch(error => {
-            showAdminNotice('Network error: Failed to save template', 'error');
+            TmpltrToast.error({
+                title: 'Network error',
+                subtext: 'Failed to save template. Please check your connection.',
+                seconds: 8
+            });
             debugLog('Network error: ' + error.message);
         })
         .finally(() => {
@@ -902,28 +916,6 @@
         });
     }
 
-    function showAdminNotice(message, type = 'success') {
-        const existingNotice = document.querySelector('.tmpltr-ajax-notice');
-        if (existingNotice) {
-            existingNotice.remove();
-        }
-
-        const noticeClass = type === 'success' ? 'notice-success' : 'notice-error';
-        const notice = document.createElement('div');
-        notice.className = `notice ${noticeClass} is-dismissible tmpltr-ajax-notice`;
-        notice.innerHTML = `<p>${message}</p>`;
-
-        const adminPage = document.querySelector('.tmpltr-admin-page');
-        if (adminPage) {
-            adminPage.insertAdjacentElement('afterbegin', notice);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            const dismissBtn = notice.querySelector('.notice-dismiss');
-            if (dismissBtn) {
-                dismissBtn.addEventListener('click', () => notice.remove());
-            }
-        }
-    }
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
