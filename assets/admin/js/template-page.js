@@ -246,6 +246,7 @@
             const fieldNumber = fieldRow.dataset.fieldNumber;
             fieldRow.remove();
             debugLog(`Field ${fieldNumber} removed`);
+            validateFieldNames();
         }
     }
 
@@ -667,6 +668,7 @@
 
         fieldNameInput.addEventListener('input', function() {
             fieldIdentifierInput.value = generateIdentifier(this.value);
+            validateFieldNames();
         });
     }
 
@@ -678,6 +680,96 @@
             .toLowerCase()
             .replace(/\s+/g, '_')
             .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function validateDuplicates(selector, errorMessage, options = {}) {
+        const {
+            caseSensitive = false,
+            trimWhitespace = true,
+            ignoreEmpty = true
+        } = options;
+
+        const inputs = document.querySelectorAll(selector);
+        const valueMap = new Map();
+
+        clearValidationErrors(selector);
+
+        inputs.forEach(input => {
+            let value = input.value;
+
+            if (trimWhitespace) {
+                value = value.trim();
+            }
+
+            if (ignoreEmpty && !value) {
+                return;
+            }
+
+            const normalizedValue = caseSensitive ? value : value.toLowerCase();
+
+            if (!valueMap.has(normalizedValue)) {
+                valueMap.set(normalizedValue, []);
+            }
+
+            valueMap.get(normalizedValue).push(input);
+        });
+
+        valueMap.forEach((inputElements) => {
+            if (inputElements.length > 1) {
+                inputElements.forEach(input => showValidationError(input, errorMessage));
+            }
+        });
+    }
+
+    function showValidationError(input, message) {
+        input.classList.add('validation-error');
+
+        const existingError = input.parentElement.querySelector('.validation-error-message');
+        if (existingError) {
+            return;
+        }
+
+        const errorElement = document.createElement('span');
+        errorElement.className = 'validation-error-message';
+        errorElement.textContent = message;
+
+        input.insertAdjacentElement('afterend', errorElement);
+    }
+
+    function clearValidationErrors(selector) {
+        const scopedInputs = selector ? document.querySelectorAll(selector) : null;
+
+        if (scopedInputs) {
+            scopedInputs.forEach(input => {
+                input.classList.remove('validation-error');
+                const errorMsg = input.parentElement.querySelector('.validation-error-message');
+                if (errorMsg) {
+                    errorMsg.remove();
+                }
+            });
+        } else {
+            const allErrors = document.querySelectorAll('.validation-error');
+            allErrors.forEach(input => {
+                input.classList.remove('validation-error');
+            });
+
+            const allMessages = document.querySelectorAll('.validation-error-message');
+            allMessages.forEach(message => {
+                message.remove();
+            });
+        }
+    }
+
+    function validateFieldNames() {
+        validateDuplicates(
+            '[id^="field-name-"]',
+            'This field name is already in use',
+            {
+                caseSensitive: false,
+                trimWhitespace: true,
+                ignoreEmpty: true
+            }
+        );
     }
 
     /**
@@ -750,6 +842,8 @@
             fieldRowsContainer.insertAdjacentHTML('beforeend', fieldRow);
             setupFieldNameListener(fieldCounter);
         });
+
+        validateFieldNames();
     }
 
     function populateExistingPrompts(prompts) {

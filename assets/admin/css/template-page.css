@@ -70,6 +70,32 @@
     flex-shrink: 0;
 }
 
+/* Generic validation error styles - reusable across all form inputs */
+input.validation-error,
+textarea.validation-error,
+select.validation-error {
+    border-color: #d63638;
+    box-shadow: 0 0 0 1px #d63638;
+}
+
+input.validation-error:focus,
+textarea.validation-error:focus,
+select.validation-error:focus {
+    border-color: #d63638;
+    box-shadow: 0 0 0 1px #d63638;
+    outline: 2px solid transparent;
+    outline-offset: 0;
+}
+
+.validation-error-message {
+    display: block;
+    margin-top: 5px;
+    color: #d63638;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
 .prompt-rows {
     margin-bottom: 15px;
 }
