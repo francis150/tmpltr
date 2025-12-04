@@ -65,6 +65,12 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
         <hr>
         <h2>Template Page</h2>
+        <p>
+            <label for="template-page-select">Select Page:</label><br>
+            <select name="template_page_id" id="template-page-select" class="regular-text">
+                <option value="0">Select a page...</option>
+            </select>
+        </p>
 
         <button type="submit" class="button button-primary">Save Fields</button>
     </form>

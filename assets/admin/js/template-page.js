@@ -16,11 +16,15 @@
         PROMPT_ROWS_CONTAINER: '.prompt-rows',
         ADD_PROMPT_BTN: '.add-prompt-btn',
         REMOVE_PROMPT_BTN: '.remove-prompt-btn',
-        PROMPT_ROW: '.prompt-row'
+        PROMPT_ROW: '.prompt-row',
+        TEMPLATE_PAGE_SELECT: '#template-page-select'
     };
 
     let fieldCounter = 0;
     let promptCounter = 0;
+    let lastPageLoadTime = 0;
+    let pageSelectorLoaded = false;
+    const PAGE_LOAD_DEBOUNCE = 1000; // 1 second
 
     function initFieldManagement() {
         const templateForm = document.querySelector(SELECTORS.TEMPLATE_FORM);
@@ -53,6 +57,149 @@
         addPromptBtn.addEventListener('click', handleAddPrompt);
         promptRowsContainer.addEventListener('click', handleRemovePrompt);
         promptRowsContainer.addEventListener('click', handleCopyPlaceholder);
+    }
+
+    /**
+     * Initializes the page selector functionality
+     * Adds focus event listener to load fresh page list when dropdown opens
+     */
+    function initPageSelector() {
+        const pageSelect = document.querySelector(SELECTORS.TEMPLATE_PAGE_SELECT);
+
+        if (!pageSelect) {
+            debugLog('Page selector not found. Page selector not initialized.');
+            return;
+        }
+
+        // Load pages when user focuses on the dropdown
+        pageSelect.addEventListener('focus', handlePageSelectorFocus);
+        debugLog('Page selector initialized');
+    }
+
+    /**
+     * Handles focus event on page selector
+     * Implements debouncing to prevent rapid duplicate AJAX calls
+     */
+    function handlePageSelectorFocus(e) {
+        const now = Date.now();
+
+        // Debounce: skip if loaded within last second
+        if (now - lastPageLoadTime < PAGE_LOAD_DEBOUNCE) {
+            debugLog('Page selector focus - skipping (debounced)');
+            return;
+        }
+
+        loadPageOptions();
+        lastPageLoadTime = now;
+    }
+
+    /**
+     * Loads WordPress pages via AJAX
+     * Shows loading indicator and populates dropdown with fresh page list
+     */
+    function loadPageOptions() {
+        const select = document.querySelector(SELECTORS.TEMPLATE_PAGE_SELECT);
+        if (!select) return;
+
+        const currentValue = select.value;
+
+        // Show loading indicator on first load
+        if (!pageSelectorLoaded) {
+            select.innerHTML = '<option value="0">Loading pages...</option>';
+        }
+
+        // Fetch pages from server
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_get_pages',
+                nonce: tmpltrData.nonce
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                handlePageLoadError(data.data?.message || 'Unknown error');
+                return;
+            }
+
+            populatePageOptions(data.data.pages, currentValue);
+            pageSelectorLoaded = true;
+            debugLog(`Loaded ${data.data.pages.length} pages`);
+        })
+        .catch(error => {
+            handlePageLoadError('Network error: ' + error.message);
+        });
+    }
+
+    /**
+     * Populates the page selector dropdown with page options
+     * Preserves current selection if it still exists in the new list
+     *
+     * @param {Array} pages - Array of page objects with id, title, and status
+     * @param {string} currentValue - Currently selected page ID to preserve
+     */
+    function populatePageOptions(pages, currentValue) {
+        const select = document.querySelector(SELECTORS.TEMPLATE_PAGE_SELECT);
+        if (!select) return;
+
+        // Clear existing options and add default
+        select.innerHTML = '<option value="0">Select a page...</option>';
+
+        // Handle empty state
+        if (!pages || pages.length === 0) {
+            select.innerHTML = '<option value="0">No pages found - create one first</option>';
+            debugLog('No pages available');
+            return;
+        }
+
+        // Add each page as an option
+        pages.forEach(page => {
+            const option = document.createElement('option');
+            option.value = page.id;
+            // Show status for draft/private pages
+            option.textContent = page.title + (page.status !== 'publish' ? ` (${page.status})` : '');
+
+            // Preserve current selection
+            if (page.id == currentValue) {
+                option.selected = true;
+            }
+
+            select.appendChild(option);
+        });
+
+        debugLog(`Populated ${pages.length} page options`);
+    }
+
+    /**
+     * Handles errors when loading pages
+     * Preserves current selection and shows error message
+     *
+     * @param {string} errorMsg - Error message to log
+     */
+    function handlePageLoadError(errorMsg) {
+        debugLog('Page loading failed: ' + errorMsg);
+
+        const select = document.querySelector(SELECTORS.TEMPLATE_PAGE_SELECT);
+        if (!select) return;
+
+        const currentValue = select.value;
+        const currentText = select.options[select.selectedIndex]?.text || '';
+
+        // Show error message
+        select.innerHTML = '<option value="0">Failed to load - try again</option>';
+
+        // Preserve currently selected page if it exists
+        if (currentValue && currentValue !== '0' && currentText) {
+            const preservedOption = document.createElement('option');
+            preservedOption.value = currentValue;
+            preservedOption.textContent = currentText;
+            preservedOption.selected = true;
+            select.appendChild(preservedOption);
+        }
     }
 
     /**
@@ -281,7 +428,8 @@
         const formData = new FormData(form);
         const data = {
             fields: [],
-            prompts: []
+            prompts: [],
+            template_page_id: 0
         };
 
         const fieldGroups = {};
@@ -323,6 +471,12 @@
 
         data.fields = Object.values(fieldGroups);
         data.prompts = Object.values(promptGroups);
+
+        // Extract template page ID from page selector
+        const pageSelector = document.querySelector(SELECTORS.TEMPLATE_PAGE_SELECT);
+        if (pageSelector) {
+            data.template_page_id = parseInt(pageSelector.value, 10) || 0;
+        }
 
         return data;
     }
@@ -452,6 +606,7 @@
     function init() {
         initFieldManagement();
         initPromptManagement();
+        initPageSelector();
     }
 
     if (document.readyState === 'loading') {
