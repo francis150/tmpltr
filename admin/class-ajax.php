@@ -12,6 +12,7 @@ class TmpltrAjax {
 		// Template handlers
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
 		add_action('wp_ajax_tmpltr_save_template', [$this, 'save_template']);
+		add_action('wp_ajax_tmpltr_delete_template', [$this, 'delete_template']);
 	}
 
 	// ===== PAGE HANDLERS =====
@@ -230,5 +231,61 @@ class TmpltrAjax {
 				'message' => 'Failed to save template. Please try again.'
 			]);
 		}
+	}
+
+	/**
+	 * AJAX handler: Delete template
+	 * Soft deletes a template by setting deleted_at timestamp
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function delete_template() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error([
+				'message' => 'Security check failed'
+			]);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error([
+				'message' => 'Insufficient permissions'
+			]);
+			return;
+		}
+
+		$template_id = isset($_POST['template_id']) ? absint($_POST['template_id']) : 0;
+
+		if (empty($template_id)) {
+			wp_send_json_error([
+				'message' => 'Template ID is required'
+			]);
+			return;
+		}
+
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+		$template = new TmpltrTemplate($template_id);
+
+		if (!$template->exists()) {
+			wp_send_json_error([
+				'message' => 'Template not found'
+			]);
+			return;
+		}
+
+		if (!$template->delete()) {
+			if (TMPLTR_DEBUG_MODE) {
+				error_log('Tmpltr: Failed to delete template ' . $template_id);
+			}
+
+			wp_send_json_error([
+				'message' => 'Failed to delete template'
+			]);
+			return;
+		}
+
+		wp_send_json_success([
+			'message' => 'Template deleted successfully'
+		]);
 	}
 }
