@@ -202,7 +202,6 @@ select.validation-error:focus {
     background-color: rgba(0, 115, 170, 0.15);
     color: transparent;
     border-radius: 3px;
-    padding: 2px 4px;
     font-weight: 500;
 }
 
