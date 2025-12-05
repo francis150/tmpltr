@@ -168,6 +168,97 @@ select.validation-error:focus {
     flex: 1;
 }
 
+.highlight-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.highlight-wrapper .backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: hidden;
+    color: transparent;
+    pointer-events: none;
+    box-sizing: border-box;
+}
+
+.highlight-wrapper textarea {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    color: #1d2327;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+.identifier-highlight {
+    background-color: rgba(0, 115, 170, 0.15);
+    color: transparent;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-weight: 500;
+}
+
+.prompt-autocomplete {
+    position: absolute;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid #8c8f94;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+    max-width: 350px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+.prompt-autocomplete__item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #1d2327;
+    border-bottom: 1px solid #f0f0f1;
+    transition: background-color 0.1s ease;
+}
+
+.prompt-autocomplete__item:last-child {
+    border-bottom: none;
+}
+
+.prompt-autocomplete__item:hover {
+    background-color: #f0f0f1;
+}
+
+.prompt-autocomplete__item--selected {
+    background-color: #e5f5fa;
+    color: #0073aa;
+}
+
+.prompt-autocomplete__item code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 12px;
+    color: #0073aa;
+    background-color: rgba(0, 115, 170, 0.1);
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.prompt-autocomplete__empty {
+    padding: 12px;
+    text-align: center;
+    color: #646970;
+    font-size: 13px;
+    font-style: italic;
+}
+
 /* Responsive Design */
 
 /* Tablet breakpoint (max-width: 768px) */
@@ -285,5 +376,19 @@ select.validation-error:focus {
     .copy-btn {
         min-width: 44px;
         min-height: 44px;
+    }
+
+    .prompt-autocomplete {
+        min-width: 200px;
+        max-width: 90vw;
+        max-height: 150px;
+        font-size: 14px;
+    }
+
+    .prompt-autocomplete__item {
+        padding: 10px 14px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
     }
 }

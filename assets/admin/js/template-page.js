@@ -17,7 +17,12 @@
         ADD_PROMPT_BTN: '.add-prompt-btn',
         REMOVE_PROMPT_BTN: '.remove-prompt-btn',
         PROMPT_ROW: '.prompt-row',
-        TEMPLATE_PAGE_SELECT: '#template-page-select'
+        TEMPLATE_PAGE_SELECT: '#template-page-select',
+        PROMPT_TEXTAREA: '[id^="prompt-text-"]',
+        FIELD_IDENTIFIER: '[id^="field-identifier-"]',
+        AUTOCOMPLETE_DROPDOWN: '.prompt-autocomplete',
+        HIGHLIGHT_WRAPPER: '.highlight-wrapper',
+        BACKDROP: '.backdrop'
     };
 
     let fieldCounter = 0;
@@ -57,6 +62,9 @@
         addPromptBtn.addEventListener('click', handleAddPrompt);
         promptRowsContainer.addEventListener('click', handleRemovePrompt);
         promptRowsContainer.addEventListener('click', handleCopyPlaceholder);
+
+        initAutocomplete();
+        initTextareaHighlighting();
     }
 
     /**
@@ -262,6 +270,8 @@
         const newPromptRow = createPromptRow(promptCounter);
         promptRowsContainer.insertAdjacentHTML('beforeend', newPromptRow);
 
+        setupTextareaHighlighting(promptCounter);
+
         debugLog(`Prompt ${promptCounter} added`);
 
         const promptTextarea = document.getElementById(`prompt-text-${promptCounter}`);
@@ -339,6 +349,353 @@
         }, 2000);
 
         debugLog(`Copied: ${copiedValue}`);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function buildIdentifierRegex(identifiers) {
+        if (identifiers.length === 0) return null;
+        const escapedIdentifiers = identifiers.map(id => escapeRegex(id));
+        const pattern = escapedIdentifiers.join('|');
+        return new RegExp(pattern, 'g');
+    }
+
+    function getCurrentFieldIdentifiers() {
+        const identifierInputs = document.querySelectorAll(SELECTORS.FIELD_IDENTIFIER);
+        const identifiers = Array.from(identifierInputs)
+            .map(input => input.value.trim())
+            .filter(value => value.startsWith('@') && value.length > 1);
+        return identifiers;
+    }
+
+    function syncScroll(textarea, backdrop) {
+        backdrop.scrollTop = textarea.scrollTop;
+        backdrop.scrollLeft = textarea.scrollLeft;
+    }
+
+    function updateBackdrop(textarea) {
+        const wrapper = textarea.closest(SELECTORS.HIGHLIGHT_WRAPPER);
+        if (!wrapper) return;
+
+        const backdrop = wrapper.querySelector(SELECTORS.BACKDROP);
+        if (!backdrop) return;
+
+        const computed = getComputedStyle(textarea);
+        backdrop.style.font = computed.font;
+        backdrop.style.fontSize = computed.fontSize;
+        backdrop.style.fontFamily = computed.fontFamily;
+        backdrop.style.lineHeight = computed.lineHeight;
+        backdrop.style.padding = computed.padding;
+        backdrop.style.border = '1px solid transparent';
+        backdrop.style.letterSpacing = computed.letterSpacing;
+        backdrop.style.wordSpacing = computed.wordSpacing;
+
+        const text = textarea.value;
+        const identifiers = getCurrentFieldIdentifiers();
+
+        if (identifiers.length === 0) {
+            backdrop.innerHTML = escapeHtml(text);
+            syncScroll(textarea, backdrop);
+            return;
+        }
+
+        const regex = buildIdentifierRegex(identifiers);
+        const highlightedHtml = escapeHtml(text).replace(regex, (match) => {
+            return `<mark class="identifier-highlight">${match}</mark>`;
+        });
+
+        backdrop.innerHTML = highlightedHtml;
+        syncScroll(textarea, backdrop);
+    }
+
+    function setupTextareaHighlighting(promptNumber) {
+        const textarea = document.getElementById(`prompt-text-${promptNumber}`);
+        if (!textarea) return;
+
+        updateBackdrop(textarea);
+
+        textarea.addEventListener('scroll', function() {
+            const wrapper = this.closest(SELECTORS.HIGHLIGHT_WRAPPER);
+            if (!wrapper) return;
+            const backdrop = wrapper.querySelector(SELECTORS.BACKDROP);
+            if (backdrop) {
+                syncScroll(this, backdrop);
+            }
+        });
+    }
+
+    function initTextareaHighlighting() {
+        const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
+        if (!promptRowsContainer) return;
+
+        promptRowsContainer.addEventListener('input', function(e) {
+            if (e.target.matches(SELECTORS.PROMPT_TEXTAREA)) {
+                updateBackdrop(e.target);
+            }
+        });
+    }
+
+    function getCaretCoordinates(textarea, position) {
+        const mirror = document.createElement('div');
+        const computed = getComputedStyle(textarea);
+
+        mirror.style.cssText = `
+            position: absolute;
+            visibility: hidden;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font: ${computed.font};
+            padding: ${computed.padding};
+            border: ${computed.border};
+            box-sizing: ${computed.boxSizing};
+            width: ${textarea.clientWidth}px;
+        `;
+
+        const textBeforeCaret = textarea.value.substring(0, position);
+        mirror.textContent = textBeforeCaret;
+
+        const marker = document.createElement('span');
+        marker.textContent = '|';
+        mirror.appendChild(marker);
+
+        document.body.appendChild(mirror);
+
+        const coords = {
+            top: marker.offsetTop,
+            left: marker.offsetLeft,
+            height: marker.offsetHeight
+        };
+
+        document.body.removeChild(mirror);
+        return coords;
+    }
+
+    let currentAutocomplete = null;
+    let currentSelectedIndex = -1;
+
+    function hideAutocomplete() {
+        if (currentAutocomplete) {
+            const textarea = currentAutocomplete.textarea;
+            if (textarea) {
+                textarea.removeAttribute('aria-controls');
+                textarea.removeAttribute('aria-activedescendant');
+                textarea.setAttribute('aria-expanded', 'false');
+            }
+
+            if (currentAutocomplete.dropdown && currentAutocomplete.dropdown.parentNode) {
+                currentAutocomplete.dropdown.remove();
+            }
+
+            currentAutocomplete = null;
+            currentSelectedIndex = -1;
+        }
+    }
+
+    function updateAriaAttributes(textarea, dropdown, selectedIndex) {
+        if (selectedIndex >= 0) {
+            const selectedItem = dropdown.querySelector(`[data-index="${selectedIndex}"]`);
+            if (selectedItem) {
+                textarea.setAttribute('aria-activedescendant', selectedItem.id);
+            }
+        } else {
+            textarea.removeAttribute('aria-activedescendant');
+        }
+    }
+
+    function navigateSuggestions(direction) {
+        if (!currentAutocomplete || !currentAutocomplete.dropdown) return;
+
+        const dropdown = currentAutocomplete.dropdown;
+        const items = dropdown.querySelectorAll('.prompt-autocomplete__item');
+
+        if (items.length === 0) return;
+
+        items.forEach(item => item.classList.remove('prompt-autocomplete__item--selected'));
+
+        if (direction === 'down') {
+            currentSelectedIndex = (currentSelectedIndex + 1) % items.length;
+        } else if (direction === 'up') {
+            currentSelectedIndex = currentSelectedIndex <= 0 ? items.length - 1 : currentSelectedIndex - 1;
+        }
+
+        items[currentSelectedIndex].classList.add('prompt-autocomplete__item--selected');
+        items[currentSelectedIndex].scrollIntoView({ block: 'nearest' });
+
+        updateAriaAttributes(currentAutocomplete.textarea, dropdown, currentSelectedIndex);
+    }
+
+    function insertIdentifier(textarea, identifier) {
+        const cursorPos = textarea.selectionStart;
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const textAfter = textarea.value.substring(cursorPos);
+
+        const atIndex = textBefore.lastIndexOf('@');
+        if (atIndex === -1) return;
+
+        const beforeAt = textBefore.substring(0, atIndex);
+        const newValue = beforeAt + identifier + ' ' + textAfter;
+
+        textarea.value = newValue;
+
+        const newCursorPos = beforeAt.length + identifier.length + 1;
+        textarea.setSelectionRange(newCursorPos, newCursorPos);
+
+        textarea.focus();
+
+        updateBackdrop(textarea);
+
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function showAutocomplete(textarea, searchTerm) {
+        const identifiers = getCurrentFieldIdentifiers();
+
+        let filtered = identifiers;
+        if (searchTerm) {
+            const search = searchTerm.toLowerCase();
+            filtered = identifiers.filter(id => id.toLowerCase().includes(search));
+        }
+
+        hideAutocomplete();
+
+        if (filtered.length === 0) {
+            return;
+        }
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'prompt-autocomplete';
+        dropdown.setAttribute('role', 'listbox');
+        dropdown.id = `autocomplete-${Date.now()}`;
+
+        filtered.forEach((identifier, index) => {
+            const item = document.createElement('div');
+            item.className = 'prompt-autocomplete__item';
+            if (index === 0) {
+                item.classList.add('prompt-autocomplete__item--selected');
+                currentSelectedIndex = 0;
+            }
+            item.setAttribute('role', 'option');
+            item.id = `suggestion-${Date.now()}-${index}`;
+            item.dataset.index = index;
+            item.dataset.identifier = identifier;
+
+            const code = document.createElement('code');
+            code.textContent = identifier;
+            item.appendChild(code);
+
+            item.addEventListener('click', function() {
+                insertIdentifier(textarea, this.dataset.identifier);
+                hideAutocomplete();
+            });
+
+            dropdown.appendChild(item);
+        });
+
+        const promptGroup = textarea.closest('.prompt-group');
+        promptGroup.style.position = 'relative';
+        promptGroup.appendChild(dropdown);
+
+        const cursorPos = textarea.selectionStart;
+        const textBefore = textarea.value.substring(0, cursorPos);
+        const atIndex = textBefore.lastIndexOf('@');
+
+        const coords = getCaretCoordinates(textarea, atIndex);
+        const textareaRect = textarea.getBoundingClientRect();
+        const promptGroupRect = promptGroup.getBoundingClientRect();
+
+        const topPosition = (textareaRect.top - promptGroupRect.top) + coords.top + coords.height + 2;
+        const leftPosition = (textareaRect.left - promptGroupRect.left) + coords.left;
+
+        dropdown.style.top = topPosition + 'px';
+        dropdown.style.left = leftPosition + 'px';
+
+        textarea.setAttribute('aria-expanded', 'true');
+        textarea.setAttribute('aria-controls', dropdown.id);
+
+        if (currentSelectedIndex >= 0) {
+            updateAriaAttributes(textarea, dropdown, currentSelectedIndex);
+        }
+
+        currentAutocomplete = { textarea, dropdown };
+    }
+
+    function handleAutocompleteInput(e) {
+        const textarea = e.target;
+        const cursorPos = textarea.selectionStart;
+        const textBefore = textarea.value.substring(0, cursorPos);
+
+        const atIndex = textBefore.lastIndexOf('@');
+
+        if (atIndex === -1) {
+            hideAutocomplete();
+            return;
+        }
+
+        const textAfterAt = textBefore.substring(atIndex + 1);
+
+        if (/\s/.test(textAfterAt) && textAfterAt.length > 0) {
+            const words = textAfterAt.split(/\s/);
+            if (words.length > 1) {
+                hideAutocomplete();
+                return;
+            }
+        }
+
+        const searchTerm = '@' + textAfterAt;
+        showAutocomplete(textarea, searchTerm);
+    }
+
+    function handleAutocompleteKeydown(e) {
+        if (!currentAutocomplete) return;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            navigateSuggestions('down');
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            navigateSuggestions('up');
+        } else if (e.key === 'Enter' && currentAutocomplete) {
+            e.preventDefault();
+            const selectedItem = currentAutocomplete.dropdown.querySelector('.prompt-autocomplete__item--selected');
+            if (selectedItem) {
+                insertIdentifier(currentAutocomplete.textarea, selectedItem.dataset.identifier);
+                hideAutocomplete();
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            hideAutocomplete();
+        }
+    }
+
+    function initAutocomplete() {
+        const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
+        if (!promptRowsContainer) return;
+
+        promptRowsContainer.addEventListener('input', function(e) {
+            if (e.target.matches(SELECTORS.PROMPT_TEXTAREA)) {
+                handleAutocompleteInput(e);
+            }
+        });
+
+        promptRowsContainer.addEventListener('keydown', function(e) {
+            if (e.target.matches(SELECTORS.PROMPT_TEXTAREA)) {
+                handleAutocompleteKeydown(e);
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (currentAutocomplete && !e.target.closest(SELECTORS.AUTOCOMPLETE_DROPDOWN) && !e.target.matches(SELECTORS.PROMPT_TEXTAREA)) {
+                hideAutocomplete();
+            }
+        });
     }
 
     function isInFieldsContext() {
@@ -644,12 +1001,18 @@
 
                 <div class="prompt-group">
                     <label for="prompt-text-${promptNumber}">Prompt</label>
-                    <textarea
-                        id="prompt-text-${promptNumber}"
-                        name="prompt_text-${promptNumber}"
-                        rows="4"
-                        class="large-text"
-                    >${promptText}</textarea>
+                    <div class="highlight-wrapper">
+                        <div class="backdrop" id="prompt-backdrop-${promptNumber}"></div>
+                        <textarea
+                            id="prompt-text-${promptNumber}"
+                            name="prompt_text-${promptNumber}"
+                            rows="4"
+                            class="large-text"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                        >${promptText}</textarea>
+                    </div>
                 </div>
 
                 <div class="prompt-group prompt-group-with-copy">
@@ -913,6 +1276,7 @@
             promptCounter++;
             const promptRow = createPromptRow(promptCounter, prompt);
             promptRowsContainer.insertAdjacentHTML('beforeend', promptRow);
+            setupTextareaHighlighting(promptCounter);
         });
     }
 
