@@ -18,6 +18,7 @@
         REMOVE_PROMPT_BTN: '.remove-prompt-btn',
         PROMPT_ROW: '.prompt-row',
         TEMPLATE_PAGE_SELECT: '#template-page-select',
+        TEMPLATE_STATUS_SELECT: '#template-status',
         PROMPT_TEXTAREA: '[id^="prompt-text-"]',
         FIELD_IDENTIFIER: '[id^="field-identifier-"]',
         AUTOCOMPLETE_DROPDOWN: '.prompt-autocomplete',
@@ -1175,6 +1176,16 @@
                 hasErrors = true;
             }
         });
+
+        const templateStatus = document.querySelector(SELECTORS.TEMPLATE_STATUS_SELECT);
+        const templatePage = document.querySelector(SELECTORS.TEMPLATE_PAGE_SELECT);
+
+        if (templateStatus && templatePage) {
+            if (templateStatus.value === 'published' && templatePage.value === '0') {
+                showValidationError(templatePage, 'Template Page is required when status is Published');
+                hasErrors = true;
+            }
+        }
 
         const duplicateErrors = document.querySelectorAll('.validation-error');
         if (duplicateErrors.length > 0) {
