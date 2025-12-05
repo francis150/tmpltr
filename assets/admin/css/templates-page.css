@@ -4,6 +4,65 @@
  * @package Tmpltr
  */
 
-/* Add your templates page specific styles here */
+.wp-list-table tbody tr {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.wp-list-table tbody tr:hover {
+    background-color: #f6f7f7;
+}
+
+.template-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.template-status-badge.status-draft {
+    background-color: #dcdcdc;
+    color: #50575e;
+}
+
+.template-status-badge.status-published {
+    background-color: #00a32a;
+    color: #ffffff;
+}
+
+.template-empty-state {
+    margin-top: 30px;
+    padding: 40px 20px;
+    text-align: center;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.template-empty-state p {
+    margin: 0;
+    font-size: 14px;
+    color: #646970;
+}
+
+.wp-list-table td {
+    vertical-align: middle;
+}
+
+.delete-template-btn {
+    cursor: pointer;
+}
+
+@media screen and (max-width: 782px) {
+    .wp-list-table td {
+        padding: 10px;
+    }
+
+    .template-empty-state {
+        padding: 30px 15px;
+    }
+}
 
 
