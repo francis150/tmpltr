@@ -114,6 +114,22 @@ class TmpltrAdmin {
             true
         );
 
+        // Popup system (global utility)
+        wp_enqueue_style(
+            'tmpltr-popup',
+            plugin_dir_url( __FILE__ ) . 'css/popup.css',
+            [],
+            $this->plugin_data['Version']
+        );
+
+        wp_enqueue_script(
+            'tmpltr-popup',
+            plugin_dir_url( __FILE__ ) . 'js/popup.js',
+            ['tmpltr-admin-global', 'tmpltr-toast'],
+            $this->plugin_data['Version'],
+            true
+        );
+
         wp_enqueue_style(
             $this->pages[$page_slug]['handle'],
             plugin_dir_url( __FILE__ ) . '../assets/admin/css/' . $this->pages[$page_slug]['css'],
@@ -124,7 +140,7 @@ class TmpltrAdmin {
         wp_enqueue_script(
             $this->pages[$page_slug]['handle'],
             plugin_dir_url( __FILE__ ) . '../assets/admin/js/' . $this->pages[$page_slug]['js'],
-            ['tmpltr-admin-global', 'tmpltr-toast'],
+            ['tmpltr-admin-global', 'tmpltr-toast', 'tmpltr-popup'],
             $this->plugin_data['Version'],
             true
         );
