@@ -11,7 +11,13 @@ $templates = TmpltrTemplate::get_all();
 ?>
 
 <div class="tmpltr-admin-page">
-    <h1>Tmpltr</h1>
+    <div class="tmpltr-auth-loading">Verifying authentication...</div>
+
+    <div class="tmpltr-protected-content">
+    <div class="tmpltr-page-header">
+        <h1>Tmpltr</h1>
+        <button class="button tmpltr-logout-btn">Logout</button>
+    </div>
     <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
 
     <?php if (empty($templates)) : ?>
@@ -47,4 +53,5 @@ $templates = TmpltrTemplate::get_all();
             </tbody>
         </table>
     <?php endif; ?>
+    </div>
 </div>

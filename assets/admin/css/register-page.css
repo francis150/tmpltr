@@ -1,0 +1,9 @@
+.tmpltr-auth-form-wrapper {
+    max-width: 500px;
+    margin-top: 20px;
+}
+
+.tmpltr-auth-error p,
+.tmpltr-auth-success p {
+    margin: 0.5em 0;
+}

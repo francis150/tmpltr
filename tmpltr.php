@@ -37,4 +37,8 @@ if ( is_admin() ) {
     // Initialize AJAX handlers
     require_once plugin_dir_path( __FILE__ ) . 'admin/class-ajax.php';
     new TmpltrAjax();
+
+    // Initialize authentication
+    require_once plugin_dir_path( __FILE__ ) . 'admin/class-auth.php';
+    new TmpltrAuth();
 }
