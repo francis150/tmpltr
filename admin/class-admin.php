@@ -140,7 +140,7 @@ class TmpltrAdmin {
         wp_enqueue_script(
             $this->pages[$page_slug]['handle'],
             plugin_dir_url( __FILE__ ) . '../assets/admin/js/' . $this->pages[$page_slug]['js'],
-            ['tmpltr-admin-global', 'tmpltr-toast', 'tmpltr-popup'],
+            ['tmpltr-admin-global', 'tmpltr-toast', 'tmpltr-popup', 'tmpltr-auth'],
             $this->plugin_data['Version'],
             true
         );

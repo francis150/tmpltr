@@ -1,0 +1,37 @@
+.tmpltr-auth-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: #646970;
+}
+
+.tmpltr-auth-loading::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    border: 2px solid #c3c4c7;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: tmpltr-spin 0.6s linear infinite;
+    margin-right: 10px;
+}
+
+@keyframes tmpltr-spin {
+    to { transform: rotate(360deg); }
+}
+
+.tmpltr-protected-content {
+    display: none;
+}
+
+.tmpltr-page-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.tmpltr-page-header h1 {
+    margin: 0;
+}

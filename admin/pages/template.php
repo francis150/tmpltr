@@ -47,7 +47,13 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 ?>
 
 <div class="tmpltr-admin-page">
-    <h1>template.php</h1>
+    <div class="tmpltr-auth-loading">Verifying authentication...</div>
+
+    <div class="tmpltr-protected-content">
+        <div class="tmpltr-page-header">
+        <h1>template.php</h1>
+        <button class="button tmpltr-logout-btn">Logout</button>
+    </div>
     <span>ID: <?php echo esc_html($template_id); ?></span>
     <hr>
 
@@ -101,4 +107,5 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
         <button type="submit" class="button button-primary">Save Template</button>
     </form>
+    </div>
 </div>
