@@ -15,6 +15,10 @@ defined('ABSPATH') or die();
         <form id="tmpltr-register-form" class="tmpltr-auth-form">
             <table class="form-table">
                 <tr>
+                    <th scope="row"><label for="auth-name">Name</label></th>
+                    <td><input type="text" id="auth-name" name="name" class="regular-text" required></td>
+                </tr>
+                <tr>
                     <th scope="row"><label for="auth-email">Email</label></th>
                     <td><input type="email" id="auth-email" name="email" class="regular-text" required></td>
                 </tr>
