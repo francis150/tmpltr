@@ -11,7 +11,8 @@
         tableBody: '.wp-list-table tbody',
         templateRow: 'tr[data-template-id]',
         deleteBtn: '.delete-template-btn',
-        generateBtn: '.generate-template-btn'
+        generateBtn: '.generate-template-btn',
+        statusBadge: '.template-status-badge'
     };
 
     function initTemplateList() {
@@ -69,6 +70,15 @@
     function handleGenerateClick(e) {
         const row = e.target.closest(SELECTORS.templateRow);
         if (!row) return;
+
+        const statusBadge = row.querySelector(SELECTORS.statusBadge);
+        if (statusBadge && statusBadge.classList.contains('status-draft')) {
+            TmpltrToast.error({
+                title: 'Cannot generate from draft',
+                subtext: 'Please publish this template before generating pages'
+            });
+            return;
+        }
 
         const templateId = row.dataset.templateId;
         const templateName = row.querySelector('td:first-child').textContent;

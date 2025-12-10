@@ -45,7 +45,7 @@ $templates = TmpltrTemplate::get_all();
                         </td>
                         <td><?php echo esc_html(wp_date('M j, Y g:i A', strtotime($template['created_at']))); ?></td>
                         <td>
-                            <button class="button button-primary generate-template-btn">Generate</button>
+                            <button class="button button-primary generate-template-btn"<?php echo $template['status'] === 'draft' ? ' disabled' : ''; ?>>Generate</button>
                             <button class="button delete-template-btn">Delete</button>
                         </td>
                     </tr>
