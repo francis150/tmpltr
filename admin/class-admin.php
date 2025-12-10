@@ -33,7 +33,7 @@ class TmpltrAdmin {
             'manage_options',
             'tmpltr',
             [$this, 'render_templates_page'],
-            'dashicons-admin-page',
+            plugin_dir_url(__FILE__) . '../assets/admin/images/admin_menu_icon.svg',
             20
         );
 
