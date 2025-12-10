@@ -42,12 +42,18 @@
         return await supabaseClient.auth.signInWithPassword({ email, password });
     }
 
-    async function signUp(email, password) {
+    async function signUp(email, password, name) {
         if (!supabaseClient) {
             return { error: { message: 'Auth not initialized' } };
         }
 
-        return await supabaseClient.auth.signUp({ email, password });
+        return await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+                data: { display_name: name }
+            }
+        });
     }
 
     async function signOut() {

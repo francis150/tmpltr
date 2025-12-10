@@ -3,6 +3,7 @@
 
     const SELECTORS = {
         FORM: '#tmpltr-register-form',
+        NAME: '#auth-name',
         EMAIL: '#auth-email',
         PASSWORD: '#auth-password',
         PASSWORD_CONFIRM: '#auth-password-confirm',
@@ -22,11 +23,12 @@
     async function handleSubmit(e) {
         e.preventDefault();
 
+        const name = document.querySelector(SELECTORS.NAME).value.trim();
         const email = document.querySelector(SELECTORS.EMAIL).value.trim();
         const password = document.querySelector(SELECTORS.PASSWORD).value;
         const passwordConfirm = document.querySelector(SELECTORS.PASSWORD_CONFIRM).value;
 
-        if (!email || !password || !passwordConfirm) {
+        if (!name || !email || !password || !passwordConfirm) {
             TmpltrToast.error({ title: 'Validation Error', subtext: 'Please fill in all fields.' });
             return;
         }
@@ -43,7 +45,7 @@
 
         setLoading(true);
 
-        const { data, error } = await TmpltrAuth.signUp(email, password);
+        const { data, error } = await TmpltrAuth.signUp(email, password, name);
 
         if (error) {
             TmpltrToast.error({ title: 'Registration Failed', subtext: error.message });

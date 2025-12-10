@@ -11,7 +11,8 @@
         tableBody: '.wp-list-table tbody',
         templateRow: 'tr[data-template-id]',
         deleteBtn: '.delete-template-btn',
-        generateBtn: '.generate-template-btn'
+        generateBtn: '.generate-template-btn',
+        statusBadge: '.template-status-badge'
     };
 
     function initTemplateList() {
@@ -70,6 +71,15 @@
         const row = e.target.closest(SELECTORS.templateRow);
         if (!row) return;
 
+        const statusBadge = row.querySelector(SELECTORS.statusBadge);
+        if (statusBadge && statusBadge.classList.contains('status-draft')) {
+            TmpltrToast.error({
+                title: 'Cannot generate from draft',
+                subtext: 'Please publish this template before generating pages'
+            });
+            return;
+        }
+
         const templateId = row.dataset.templateId;
         const templateName = row.querySelector('td:first-child').textContent;
         const generateBtn = e.target.closest(SELECTORS.generateBtn);
@@ -97,7 +107,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                showGeneratePopup(templateName, data.data.fields || []);
+                showGeneratePopup(templateId, templateName, data.data.fields || [], data.data.prompts || []);
             } else {
                 TmpltrToast.error({
                     title: 'Failed to load template',
@@ -125,11 +135,11 @@
         });
     }
 
-    function showGeneratePopup(templateName, fields) {
-        if (!fields || fields.length === 0) {
+    function showGeneratePopup(templateId, templateName, fields, prompts) {
+        if (!prompts || prompts.length === 0) {
             TmpltrToast.warning({
-                title: 'No fields available',
-                subtext: 'This template has no fields to generate content from'
+                title: 'No prompts configured',
+                subtext: 'This template has no prompts to generate content from'
             });
             return;
         }
@@ -159,13 +169,18 @@
             level: 'low',
             inputs: inputs,
             submitText: 'Generate Page',
-            onSubmit: (formData) => {
-                console.log('Generate form submitted:', formData);
-
-                TmpltrToast.success({
-                    title: 'Form data logged',
-                    subtext: 'Check the browser console to see the submitted data'
-                });
+            onSubmit: async (formData) => {
+                try {
+                    await TmpltrGenerator.generate({
+                        templateId,
+                        templateName,
+                        prompts,
+                        fields,
+                        formData
+                    });
+                } catch (error) {
+                    // Error already shown by generator via toast
+                }
             },
             cancelText: 'Cancel'
         });
