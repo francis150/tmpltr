@@ -31,21 +31,3 @@ register_deactivation_hook(__FILE__, ['TmpltrActivator', 'deactivate']);
 // Initialize the plugin
 require_once TMPLTR_PLUGIN_DIR . 'includes/class-core.php';
 new TmpltrCore();
-
-// Initialize shortcodes
-require_once TMPLTR_PLUGIN_DIR . 'includes/class-shortcode.php';
-new TmpltrShortcode();
-
-// Initialize admin functionality
-if ( is_admin() ) {
-    require_once plugin_dir_path( __FILE__ ) . 'admin/class-admin.php';
-    new TmpltrAdmin();
-
-    // Initialize AJAX handlers
-    require_once plugin_dir_path( __FILE__ ) . 'admin/class-ajax.php';
-    new TmpltrAjax();
-
-    // Initialize authentication
-    require_once plugin_dir_path( __FILE__ ) . 'admin/class-auth.php';
-    new TmpltrAuth();
-}
