@@ -94,7 +94,11 @@ class TmpltrAdmin {
             [
                 'ajaxUrl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('tmpltr_nonce'),
-                'pluginUrl' => plugin_dir_url(__FILE__) . '../'
+                'pluginUrl' => plugin_dir_url(__FILE__) . '../',
+                'siteUrl' => home_url('/'),
+                'pluginVersion' => $this->plugin_data['Version'],
+                'userId' => get_current_user_id(),
+                'generatorServerUrl' => TmpltrConstants::GENERATOR_SERVER_URL
             ]
         );
 
@@ -126,6 +130,24 @@ class TmpltrAdmin {
             'tmpltr-popup',
             plugin_dir_url( __FILE__ ) . 'js/popup.js',
             ['tmpltr-admin-global', 'tmpltr-toast'],
+            $this->plugin_data['Version'],
+            true
+        );
+
+        // Socket.IO client library
+        wp_enqueue_script(
+            'socket-io',
+            'https://cdn.socket.io/4.7.2/socket.io.min.js',
+            [],
+            '4.7.2',
+            true
+        );
+
+        // Page Generator module (global utility)
+        wp_enqueue_script(
+            'tmpltr-page-generator',
+            plugin_dir_url( __FILE__ ) . 'js/page-generator.js',
+            ['tmpltr-admin-global', 'tmpltr-toast', 'tmpltr-auth', 'socket-io'],
             $this->plugin_data['Version'],
             true
         );

@@ -20,6 +20,9 @@ defined( 'ABSPATH' ) or die( 'Why are you geh?' );
 define('TMPLTR_PLUGIN_DIR', plugin_dir_path( __FILE__ ));
 define('TMPLTR_DEBUG_MODE', true);
 
+// Load constants
+require_once TMPLTR_PLUGIN_DIR . 'includes/class-constants.php';
+
 // Load activator
 require_once TMPLTR_PLUGIN_DIR . 'includes/class-activator.php';
 register_activation_hook(__FILE__, ['TmpltrActivator', 'activate']);

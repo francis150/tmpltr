@@ -13,6 +13,9 @@ class TmpltrAjax {
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
 		add_action('wp_ajax_tmpltr_save_template', [$this, 'save_template']);
 		add_action('wp_ajax_tmpltr_delete_template', [$this, 'delete_template']);
+
+		// Generation handlers
+		add_action('wp_ajax_tmpltr_save_generation', [$this, 'save_generation']);
 	}
 
 	// ===== PAGE HANDLERS =====
@@ -287,5 +290,116 @@ class TmpltrAjax {
 		wp_send_json_success([
 			'message' => 'Template deleted successfully'
 		]);
+	}
+
+	// ===== GENERATION HANDLERS =====
+
+	/**
+	 * AJAX handler: Save generation results
+	 * Stores generated page data and prompt results
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function save_generation() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error([
+				'message' => 'Security check failed'
+			]);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error([
+				'message' => 'Insufficient permissions'
+			]);
+			return;
+		}
+
+		$template_id = isset($_POST['template_id']) ? absint($_POST['template_id']) : 0;
+		$page_title = isset($_POST['page_title']) ? sanitize_text_field($_POST['page_title']) : '';
+		$field_values = isset($_POST['field_values']) ? json_decode(stripslashes($_POST['field_values']), true) : [];
+		$results = isset($_POST['results']) ? json_decode(stripslashes($_POST['results']), true) : [];
+		$summary = isset($_POST['summary']) ? json_decode(stripslashes($_POST['summary']), true) : [];
+
+		if (empty($template_id)) {
+			wp_send_json_error([
+				'message' => 'Template ID is required'
+			]);
+			return;
+		}
+
+		if (empty($results) || !is_array($results)) {
+			wp_send_json_error([
+				'message' => 'Generation results are required'
+			]);
+			return;
+		}
+
+		global $wpdb;
+		$wpdb->query('START TRANSACTION');
+
+		try {
+			$insert_result = $wpdb->insert(
+				$wpdb->prefix . 'tmpltr_generated_pages',
+				[
+					'template_id' => $template_id,
+					'page_id' => 0,
+					'field_values' => wp_json_encode($field_values),
+					'generated_by' => get_current_user_id(),
+					'generation_status' => 'completed'
+				],
+				['%d', '%d', '%s', '%d', '%s']
+			);
+
+			if ($insert_result === false) {
+				throw new Exception('Failed to save generated page record');
+			}
+
+			$generated_page_id = $wpdb->insert_id;
+
+			foreach ($results as $result) {
+				$prompt_id = isset($result['prompt_id']) ? absint($result['prompt_id']) : 0;
+				$prompt_text_used = isset($result['prompt_text_used']) ? wp_kses_post($result['prompt_text_used']) : '';
+				$ai_response = isset($result['content']) ? wp_kses_post($result['content']) : '';
+				$tokens_used = isset($result['tokens_used']) ? absint($result['tokens_used']) : 0;
+				$processing_time = isset($result['processing_time_ms']) ? absint($result['processing_time_ms']) : 0;
+
+				$result_insert = $wpdb->insert(
+					$wpdb->prefix . 'tmpltr_prompt_results',
+					[
+						'generated_page_id' => $generated_page_id,
+						'prompt_id' => $prompt_id,
+						'prompt_text_used' => $prompt_text_used,
+						'ai_response' => $ai_response,
+						'tokens_used' => $tokens_used,
+						'processing_time' => $processing_time
+					],
+					['%d', '%d', '%s', '%s', '%d', '%d']
+				);
+
+				if ($result_insert === false) {
+					throw new Exception('Failed to save prompt result');
+				}
+			}
+
+			$wpdb->query('COMMIT');
+
+			wp_send_json_success([
+				'message' => 'Generation saved successfully',
+				'generated_page_id' => $generated_page_id,
+				'results_count' => count($results)
+			]);
+
+		} catch (Exception $e) {
+			$wpdb->query('ROLLBACK');
+
+			if (TMPLTR_DEBUG_MODE) {
+				error_log('Tmpltr: Failed to save generation - ' . $e->getMessage());
+			}
+
+			wp_send_json_error([
+				'message' => 'Failed to save generation results. Please try again.'
+			]);
+		}
 	}
 }
