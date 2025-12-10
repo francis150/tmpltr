@@ -335,6 +335,24 @@ class TmpltrAjax {
 			return;
 		}
 
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+		$template = new TmpltrTemplate($template_id);
+
+		if (!$template->exists()) {
+			wp_send_json_error([
+				'message' => 'Template not found'
+			]);
+			return;
+		}
+
+		$template_page_id = $template->get_template_page_id();
+		if (!$template_page_id) {
+			wp_send_json_error([
+				'message' => 'No template page configured for this template'
+			]);
+			return;
+		}
+
 		global $wpdb;
 		$wpdb->query('START TRANSACTION');
 
@@ -382,11 +400,28 @@ class TmpltrAjax {
 				}
 			}
 
+			require_once TMPLTR_PLUGIN_DIR . 'includes/class-page-duplicator.php';
+			$new_page_id = TmpltrPageDuplicator::duplicate($template_page_id, $page_title);
+
+			if (is_wp_error($new_page_id)) {
+				throw new Exception($new_page_id->get_error_message());
+			}
+
+			$wpdb->update(
+				$wpdb->prefix . 'tmpltr_generated_pages',
+				['page_id' => $new_page_id],
+				['id' => $generated_page_id],
+				['%d'],
+				['%d']
+			);
+
 			$wpdb->query('COMMIT');
 
 			wp_send_json_success([
-				'message' => 'Generation saved successfully',
+				'message' => 'Page created successfully',
 				'generated_page_id' => $generated_page_id,
+				'page_id' => $new_page_id,
+				'edit_url' => get_edit_post_link($new_page_id, 'raw'),
 				'results_count' => count($results)
 			]);
 

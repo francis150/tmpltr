@@ -265,7 +265,11 @@
                             content.appendChild(subtextEl);
                         }
                         if (subtextEl) {
-                            subtextEl.textContent = newSubtext;
+                            if (newSubtext && newSubtext.includes('<a ')) {
+                                subtextEl.innerHTML = newSubtext;
+                            } else {
+                                subtextEl.textContent = newSubtext;
+                            }
                             subtextEl.style.display = newSubtext ? 'block' : 'none';
                         }
                     }

@@ -136,14 +136,19 @@
             if (!activeJob || data.job_id !== activeJob.id) return;
 
             if (progressToast) {
-                progressToast.update(0.95, 'Generating Page', 'Saving results...');
+                progressToast.update(0.95, 'Generating Page', 'Creating page...');
             }
 
             try {
-                await this.saveResults(data);
+                const saveResponse = await this.saveResults(data);
 
                 if (progressToast) {
-                    progressToast.complete('success', 'Generation Complete', 'Page content generated successfully');
+                    const editUrl = saveResponse.edit_url;
+                    const subtext = editUrl
+                        ? `<a href="${editUrl}" target="_blank">Edit page</a>`
+                        : 'Page created successfully';
+
+                    progressToast.complete('success', 'Page Created', subtext);
                 }
 
                 if (activeJob.resolve) {
