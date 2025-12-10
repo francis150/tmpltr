@@ -375,6 +375,8 @@ class TmpltrAjax {
 
 			$generated_page_id = $wpdb->insert_id;
 
+			$prompt_result_ids = [];
+
 			foreach ($results as $result) {
 				$prompt_id = isset($result['prompt_id']) ? absint($result['prompt_id']) : 0;
 				$prompt_text_used = isset($result['prompt_text_used']) ? wp_kses_post($result['prompt_text_used']) : '';
@@ -398,10 +400,12 @@ class TmpltrAjax {
 				if ($result_insert === false) {
 					throw new Exception('Failed to save prompt result');
 				}
+
+				$prompt_result_ids[$prompt_id] = $wpdb->insert_id;
 			}
 
 			require_once TMPLTR_PLUGIN_DIR . 'includes/class-page-duplicator.php';
-			$new_page_id = TmpltrPageDuplicator::duplicate($template_page_id, $page_title);
+			$new_page_id = TmpltrPageDuplicator::duplicate($template_page_id, $page_title, $template_id, $prompt_result_ids);
 
 			if (is_wp_error($new_page_id)) {
 				throw new Exception($new_page_id->get_error_message());

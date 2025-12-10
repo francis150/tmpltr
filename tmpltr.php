@@ -32,6 +32,10 @@ register_deactivation_hook(__FILE__, ['TmpltrActivator', 'deactivate']);
 require_once TMPLTR_PLUGIN_DIR . 'includes/class-core.php';
 new TmpltrCore();
 
+// Initialize shortcodes
+require_once TMPLTR_PLUGIN_DIR . 'includes/class-shortcode.php';
+new TmpltrShortcode();
+
 // Initialize admin functionality
 if ( is_admin() ) {
     require_once plugin_dir_path( __FILE__ ) . 'admin/class-admin.php';

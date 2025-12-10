@@ -61,7 +61,7 @@ class TmpltrPageDuplicator {
 		'page_options',
 	];
 
-	public static function duplicate($source_page_id, $new_title) {
+	public static function duplicate($source_page_id, $new_title, $template_id = 0, $prompt_result_ids = []) {
 		$source_page_id = absint($source_page_id);
 		if (!$source_page_id) {
 			return new WP_Error('invalid_source', 'Invalid source page ID');
@@ -72,22 +72,80 @@ class TmpltrPageDuplicator {
 			return new WP_Error('page_not_found', 'Source page not found');
 		}
 
-		$new_page_id = self::create_page($source_page, $new_title);
+		$replacements = self::build_replacement_map($template_id, $prompt_result_ids);
+
+		$new_page_id = self::create_page($source_page, $new_title, $replacements);
 		if (is_wp_error($new_page_id)) {
 			return $new_page_id;
 		}
 
-		self::copy_meta($source_page_id, $new_page_id);
+		self::copy_meta($source_page_id, $new_page_id, $replacements);
 		self::copy_taxonomies($source_page_id, $new_page_id);
 		self::clear_builder_caches($new_page_id);
 
 		return $new_page_id;
 	}
 
-	private static function create_page($source_page, $new_title) {
+	private static function build_replacement_map($template_id, $prompt_result_ids) {
+		if (empty($template_id) || empty($prompt_result_ids)) {
+			return [];
+		}
+
+		global $wpdb;
+		$replacements = [];
+
+		$prompts = $wpdb->get_results($wpdb->prepare(
+			"SELECT id, placeholder FROM {$wpdb->prefix}tmpltr_template_prompts WHERE template_id = %d",
+			$template_id
+		), ARRAY_A);
+
+		foreach ($prompts as $prompt) {
+			$prompt_id = absint($prompt['id']);
+			if (isset($prompt_result_ids[$prompt_id])) {
+				$replacements[$prompt['placeholder']] = '[tmpltr id="' . $prompt_result_ids[$prompt_id] . '"]';
+			}
+		}
+
+		return $replacements;
+	}
+
+	private static function apply_replacements($content, $replacements) {
+		if (empty($content) || empty($replacements)) {
+			return $content;
+		}
+
+		foreach ($replacements as $placeholder => $shortcode) {
+			$content = str_replace($placeholder, $shortcode, $content);
+		}
+
+		return $content;
+	}
+
+	private static function apply_replacements_recursive($data, $replacements) {
+		if (empty($replacements)) {
+			return $data;
+		}
+
+		if (is_string($data)) {
+			return self::apply_replacements($data, $replacements);
+		}
+
+		if (is_array($data)) {
+			foreach ($data as $key => $value) {
+				$data[$key] = self::apply_replacements_recursive($value, $replacements);
+			}
+		}
+
+		return $data;
+	}
+
+	private static function create_page($source_page, $new_title, $replacements = []) {
+		$post_content = $source_page->post_content;
+		$post_content = self::apply_replacements($post_content, $replacements);
+
 		$new_page_data = [
 			'post_title'     => sanitize_text_field($new_title),
-			'post_content'   => $source_page->post_content,
+			'post_content'   => $post_content,
 			'post_excerpt'   => $source_page->post_excerpt,
 			'post_status'    => 'publish',
 			'post_type'      => 'page',
@@ -101,7 +159,7 @@ class TmpltrPageDuplicator {
 		return wp_insert_post($new_page_data, true);
 	}
 
-	private static function copy_meta($source_page_id, $new_page_id) {
+	private static function copy_meta($source_page_id, $new_page_id, $replacements = []) {
 		$all_meta = get_post_meta($source_page_id);
 
 		if (!$all_meta || !is_array($all_meta)) {
@@ -118,15 +176,31 @@ class TmpltrPageDuplicator {
 
 				if (in_array($meta_key, self::$builder_meta_keys, true)) {
 					if (is_array($value) || is_object($value)) {
+						$value = self::apply_replacements_recursive($value, $replacements);
 						add_post_meta($new_page_id, $meta_key, wp_slash($value));
 					} else {
-						add_post_meta($new_page_id, $meta_key, wp_slash($meta_value));
+						$processed_value = self::process_builder_string_meta($meta_value, $replacements);
+						add_post_meta($new_page_id, $meta_key, wp_slash($processed_value));
 					}
 				} else {
 					add_post_meta($new_page_id, $meta_key, $value);
 				}
 			}
 		}
+	}
+
+	private static function process_builder_string_meta($meta_value, $replacements) {
+		if (empty($replacements)) {
+			return $meta_value;
+		}
+
+		$decoded = json_decode($meta_value, true);
+		if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+			$decoded = self::apply_replacements_recursive($decoded, $replacements);
+			return wp_json_encode($decoded);
+		}
+
+		return self::apply_replacements($meta_value, $replacements);
 	}
 
 	private static function copy_taxonomies($source_page_id, $new_page_id) {
