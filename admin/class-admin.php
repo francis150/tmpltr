@@ -79,6 +79,13 @@ class TmpltrAdmin {
             $this->plugin_data['Version']
         );
 
+        wp_enqueue_style(
+            'tmpltr-header',
+            plugin_dir_url( __FILE__ ) . 'css/header.css',
+            ['tmpltr-admin-global'],
+            $this->plugin_data['Version']
+        );
+
         wp_enqueue_script(
             'tmpltr-admin-global',
             plugin_dir_url( __FILE__ ) . 'js/admin-global.js',

@@ -50,10 +50,12 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     <div class="tmpltr-auth-loading">Verifying authentication...</div>
 
     <div class="tmpltr-protected-content">
+        <?php require_once TMPLTR_PLUGIN_DIR . 'admin/partials/header.php'; ?>
+
         <div class="tmpltr-page-header">
-        <h1>template.php</h1>
-        <button class="button tmpltr-logout-btn">Logout</button>
-    </div>
+            <h1>Template</h1>
+            <button class="button tmpltr-logout-btn">Logout</button>
+        </div>
     <span>ID: <?php echo esc_html($template_id); ?></span>
     <hr>
 

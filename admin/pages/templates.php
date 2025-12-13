@@ -14,10 +14,12 @@ $templates = TmpltrTemplate::get_all();
     <div class="tmpltr-auth-loading">Verifying authentication...</div>
 
     <div class="tmpltr-protected-content">
-    <div class="tmpltr-page-header">
-        <h1>Tmpltr</h1>
-        <button class="button tmpltr-logout-btn">Logout</button>
-    </div>
+        <?php require_once TMPLTR_PLUGIN_DIR . 'admin/partials/header.php'; ?>
+
+        <div class="tmpltr-page-header">
+            <h1>Templates</h1>
+            <button class="button tmpltr-logout-btn">Logout</button>
+        </div>
     <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
 
     <?php if (empty($templates)) : ?>
