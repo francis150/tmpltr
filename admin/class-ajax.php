@@ -13,6 +13,7 @@ class TmpltrAjax {
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
 		add_action('wp_ajax_tmpltr_save_template', [$this, 'save_template']);
 		add_action('wp_ajax_tmpltr_delete_template', [$this, 'delete_template']);
+		add_action('wp_ajax_tmpltr_duplicate_template', [$this, 'duplicate_template']);
 
 		// Generation handlers
 		add_action('wp_ajax_tmpltr_save_generation', [$this, 'save_generation']);
@@ -289,6 +290,68 @@ class TmpltrAjax {
 
 		wp_send_json_success([
 			'message' => 'Template deleted successfully'
+		]);
+	}
+
+	/**
+	 * AJAX handler: Duplicate template
+	 * Creates a copy of the template with all fields and prompts
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function duplicate_template() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error([
+				'message' => 'Security check failed'
+			]);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error([
+				'message' => 'Insufficient permissions'
+			]);
+			return;
+		}
+
+		$template_id = isset($_POST['template_id']) ? absint($_POST['template_id']) : 0;
+
+		if (empty($template_id)) {
+			wp_send_json_error([
+				'message' => 'Template ID is required'
+			]);
+			return;
+		}
+
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+		$template = new TmpltrTemplate($template_id);
+
+		if (!$template->exists()) {
+			wp_send_json_error([
+				'message' => 'Template not found'
+			]);
+			return;
+		}
+
+		$new_template_id = $template->duplicate();
+
+		if (!$new_template_id) {
+			wp_send_json_error([
+				'message' => 'Failed to duplicate template'
+			]);
+			return;
+		}
+
+		$new_template = new TmpltrTemplate($new_template_id);
+
+		wp_send_json_success([
+			'message' => 'Template duplicated successfully',
+			'template' => [
+				'id' => $new_template->get_id(),
+				'name' => $new_template->get_name(),
+				'status' => $new_template->get_status(),
+				'created_at' => wp_date('M j, Y g:i A')
+			]
 		]);
 	}
 

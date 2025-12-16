@@ -11,20 +11,32 @@
         tableBody: '.wp-list-table tbody',
         templateRow: 'tr[data-template-id]',
         deleteBtn: '.delete-template-btn',
+        duplicateBtn: '.template-options__item--duplicate',
         generateBtn: '.generate-template-btn',
-        statusBadge: '.template-status-badge'
+        statusBadge: '.template-status-badge',
+        optionsTrigger: '.template-options__trigger',
+        optionsDropdown: '.template-options__dropdown',
+        optionsContainer: '.template-options'
     };
+
+    const CLASSES = {
+        triggerOpen: 'template-options__trigger--open',
+        dropdownOpen: 'template-options__dropdown--open'
+    };
+
+    let activeDropdown = null;
 
     function initTemplateList() {
         const tableBody = document.querySelector(SELECTORS.tableBody);
         if (!tableBody) return;
 
-        tableBody.addEventListener('click', handleRowClick);
+        tableBody.addEventListener('click', handleTableClick);
+        document.addEventListener('click', handleDocumentClick);
+        document.addEventListener('keydown', handleKeydown);
     }
 
-    function handleRowClick(e) {
+    function handleTableClick(e) {
         const generateBtn = e.target.closest(SELECTORS.generateBtn);
-
         if (generateBtn) {
             e.preventDefault();
             e.stopPropagation();
@@ -32,22 +44,85 @@
             return;
         }
 
-        const deleteBtn = e.target.closest(SELECTORS.deleteBtn);
+        const optionsTrigger = e.target.closest(SELECTORS.optionsTrigger);
+        if (optionsTrigger) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleOptionsToggle(optionsTrigger);
+            return;
+        }
 
+        const deleteBtn = e.target.closest(SELECTORS.deleteBtn);
         if (deleteBtn) {
             e.preventDefault();
             e.stopPropagation();
+            closeActiveDropdown();
             handleDeleteClick(e);
             return;
         }
 
-        const row = e.target.closest(SELECTORS.templateRow);
-        if (!row) return;
+        const duplicateBtn = e.target.closest(SELECTORS.duplicateBtn);
+        if (duplicateBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeActiveDropdown();
+            handleDuplicateClick(e);
+            return;
+        }
+    }
 
-        const templateId = row.dataset.templateId;
-        if (!templateId) return;
+    function handleOptionsToggle(trigger) {
+        const container = trigger.closest(SELECTORS.optionsContainer);
+        const dropdown = container.querySelector(SELECTORS.optionsDropdown);
 
-        window.location.href = `admin.php?page=tmpltr-template&id=${templateId}`;
+        if (activeDropdown && activeDropdown !== dropdown) {
+            closeActiveDropdown();
+        }
+
+        const isOpen = dropdown.classList.contains(CLASSES.dropdownOpen);
+
+        if (isOpen) {
+            closeDropdown(trigger, dropdown);
+        } else {
+            openDropdown(trigger, dropdown);
+        }
+    }
+
+    function openDropdown(trigger, dropdown) {
+        trigger.classList.add(CLASSES.triggerOpen);
+        trigger.setAttribute('aria-expanded', 'true');
+        dropdown.classList.add(CLASSES.dropdownOpen);
+        activeDropdown = dropdown;
+    }
+
+    function closeDropdown(trigger, dropdown) {
+        trigger.classList.remove(CLASSES.triggerOpen);
+        trigger.setAttribute('aria-expanded', 'false');
+        dropdown.classList.remove(CLASSES.dropdownOpen);
+        activeDropdown = null;
+    }
+
+    function closeActiveDropdown() {
+        if (!activeDropdown) return;
+
+        const container = activeDropdown.closest(SELECTORS.optionsContainer);
+        const trigger = container.querySelector(SELECTORS.optionsTrigger);
+        closeDropdown(trigger, activeDropdown);
+    }
+
+    function handleDocumentClick(e) {
+        if (!activeDropdown) return;
+
+        const container = activeDropdown.closest(SELECTORS.optionsContainer);
+        if (!container.contains(e.target)) {
+            closeActiveDropdown();
+        }
+    }
+
+    function handleKeydown(e) {
+        if (e.key === 'Escape' && activeDropdown) {
+            closeActiveDropdown();
+        }
     }
 
     function handleDeleteClick(e) {
@@ -65,6 +140,14 @@
             onConfirm: () => deleteTemplate(templateId, row),
             cancelText: 'Cancel'
         });
+    }
+
+    function handleDuplicateClick(e) {
+        const row = e.target.closest(SELECTORS.templateRow);
+        if (!row) return;
+
+        const templateId = row.dataset.templateId;
+        duplicateTemplate(templateId);
     }
 
     function handleGenerateClick(e) {
@@ -187,13 +270,6 @@
     }
 
     function deleteTemplate(templateId, rowElement) {
-        const deleteBtn = rowElement.querySelector(SELECTORS.deleteBtn);
-
-        if (deleteBtn) {
-            deleteBtn.disabled = true;
-            deleteBtn.textContent = 'Deleting...';
-        }
-
         fetch(tmpltrData.ajaxUrl, {
             method: 'POST',
             headers: {
@@ -226,11 +302,6 @@
                     subtext: data.data?.message || 'Unknown error occurred',
                     seconds: 7
                 });
-
-                if (deleteBtn) {
-                    deleteBtn.disabled = false;
-                    deleteBtn.textContent = 'Delete';
-                }
             }
         })
         .catch(error => {
@@ -239,12 +310,112 @@
                 subtext: 'Failed to delete template. Please check your connection.',
                 seconds: 8
             });
-
-            if (deleteBtn) {
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = 'Delete';
-            }
         });
+    }
+
+    function duplicateTemplate(templateId) {
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_duplicate_template',
+                nonce: tmpltrData.nonce,
+                template_id: templateId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addTemplateRow(data.data.template);
+                TmpltrToast.success({
+                    title: 'Template duplicated',
+                    subtext: data.data.message
+                });
+            } else {
+                TmpltrToast.error({
+                    title: 'Failed to duplicate template',
+                    subtext: data.data?.message || 'Unknown error occurred',
+                    seconds: 7
+                });
+            }
+        })
+        .catch(error => {
+            TmpltrToast.error({
+                title: 'Network error',
+                subtext: 'Failed to duplicate template. Please check your connection.',
+                seconds: 8
+            });
+        });
+    }
+
+    function addTemplateRow(template) {
+        const tbody = document.querySelector(SELECTORS.tableBody);
+        if (!tbody) return;
+
+        const editUrl = tmpltrData.siteUrl + 'wp-admin/admin.php?page=tmpltr-template&id=' + template.id;
+
+        const newRow = document.createElement('tr');
+        newRow.dataset.templateId = template.id;
+        newRow.innerHTML = `
+            <td>${escapeHtml(template.name)}</td>
+            <td>
+                <span class="template-status-badge status-${template.status}">
+                    ${template.status.charAt(0).toUpperCase() + template.status.slice(1)}
+                </span>
+            </td>
+            <td>${template.created_at}</td>
+            <td class="template-actions">
+                <button class="button button-primary generate-template-btn" disabled>Generate</button>
+                <div class="template-options">
+                    <button type="button" class="template-options__trigger" aria-label="More options" aria-expanded="false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="1"></circle>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <circle cx="12" cy="19" r="1"></circle>
+                        </svg>
+                    </button>
+                    <div class="template-options__dropdown">
+                        <a href="${editUrl}" class="template-options__item">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Edit
+                        </a>
+                        <button type="button" class="template-options__item template-options__item--delete delete-template-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                            Delete
+                        </button>
+                        <button type="button" class="template-options__item template-options__item--duplicate">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Duplicate
+                        </button>
+                    </div>
+                </div>
+            </td>
+        `;
+
+        newRow.style.opacity = '0';
+        tbody.insertBefore(newRow, tbody.firstChild);
+
+        requestAnimationFrame(() => {
+            newRow.style.transition = 'opacity 0.3s';
+            newRow.style.opacity = '1';
+        });
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function checkEmptyState() {

@@ -4,15 +4,6 @@
  * @package Tmpltr
  */
 
-.wp-list-table tbody tr {
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.wp-list-table tbody tr:hover {
-    background-color: #f6f7f7;
-}
-
 .template-status-badge {
     display: inline-block;
     padding: 3px 8px;
@@ -51,12 +42,102 @@
     vertical-align: middle;
 }
 
-.generate-template-btn {
-    margin-right: 8px;
+.template-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.delete-template-btn {
+.template-options {
+    position: relative;
+}
+
+.template-options__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: #646970;
     cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.template-options__trigger:hover {
+    background-color: #f0f0f1;
+    border-color: #c3c4c7;
+    color: #1e1e1e;
+}
+
+.template-options__trigger--open {
+    background-color: #f0f0f1;
+    border-color: #c3c4c7;
+    color: #1e1e1e;
+}
+
+.template-options__dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 160px;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 100;
+    overflow: hidden;
+}
+
+.template-options__dropdown--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.template-options__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e1e1e;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-align: left;
+}
+
+.template-options__item:hover {
+    background-color: #f6f7f7;
+}
+
+.template-options__item svg {
+    flex-shrink: 0;
+    color: #646970;
+}
+
+.template-options__item:hover svg {
+    color: #1e1e1e;
+}
+
+.template-options__item--delete:hover {
+    background-color: #fcf0f1;
+    color: #d63638;
+}
+
+.template-options__item--delete:hover svg {
+    color: #d63638;
 }
 
 @media screen and (max-width: 782px) {
@@ -67,6 +148,8 @@
     .template-empty-state {
         padding: 30px 15px;
     }
+
+    .template-actions {
+        flex-wrap: wrap;
+    }
 }
-
-

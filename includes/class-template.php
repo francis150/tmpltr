@@ -170,6 +170,73 @@ class TmpltrTemplate {
     }
 
     /**
+     * Duplicate template with all fields and prompts
+     *
+     * @return int|false New template ID on success, false on failure
+     */
+    public function duplicate() {
+        if (!$this->exists()) {
+            return false;
+        }
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+
+        try {
+            $new_template = new TmpltrTemplate();
+            $new_template->set_name($this->get_name() . ' (Copy)');
+            $new_template->set_description($this->get_description());
+            $new_template->set_status('draft');
+
+            if (!$new_template->save()) {
+                throw new Exception('Failed to create duplicate template');
+            }
+
+            $new_id = $new_template->get_id();
+
+            $fields = $this->get_fields();
+            if (!empty($fields)) {
+                $fields_to_save = array_map(function($field) {
+                    return [
+                        'identifier' => $field['unique_identifier'],
+                        'name' => $field['label'],
+                        'default_value' => $field['default_value'],
+                        'required' => $field['is_required']
+                    ];
+                }, $fields);
+
+                if (!$new_template->save_fields($fields_to_save)) {
+                    throw new Exception('Failed to copy template fields');
+                }
+            }
+
+            $prompts = $this->get_prompts();
+            if (!empty($prompts)) {
+                $prompts_to_save = array_map(function($prompt) {
+                    return [
+                        'placeholder' => $prompt['placeholder'],
+                        'text' => $prompt['prompt_text']
+                    ];
+                }, $prompts);
+
+                if (!$new_template->save_prompts($prompts_to_save)) {
+                    throw new Exception('Failed to copy template prompts');
+                }
+            }
+
+            $wpdb->query('COMMIT');
+            return $new_id;
+
+        } catch (Exception $e) {
+            $wpdb->query('ROLLBACK');
+            if (TMPLTR_DEBUG_MODE) {
+                error_log('Tmpltr: Failed to duplicate template - ' . $e->getMessage());
+            }
+            return false;
+        }
+    }
+
+    /**
      * Get template ID
      *
      * @return int
