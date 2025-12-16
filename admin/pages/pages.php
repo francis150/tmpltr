@@ -51,7 +51,10 @@ $total_pages = count($generated_pages);
                 </a>
                 <h1><?php echo esc_html($template->get_name()); ?></h1>
             </div>
-            <div class="tmpltr-page-header__right"></div>
+            <div class="tmpltr-page-header__right">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template&id=' . $template_id)); ?>" class="button button-secondary button-hero">Edit Template</a>
+                <button type="button" class="button button-primary button-hero generate-template-btn" data-template-id="<?php echo esc_attr($template_id); ?>" data-template-name="<?php echo esc_attr($template->get_name()); ?>"<?php echo $template->get_status() === 'draft' ? ' disabled' : ''; ?>>Generate</button>
+            </div>
         </div>
 
         <div class="pages-stats">

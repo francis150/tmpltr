@@ -11,14 +11,20 @@
         tableBody: '.wp-list-table tbody',
         pageRow: 'tr[data-generated-page-id]',
         deleteBtn: '.pages-delete-btn',
-        statsNumber: '.pages-stats__number'
+        statsNumber: '.pages-stats__number',
+        generateBtn: '.generate-template-btn'
     };
 
     function init() {
         const tableBody = document.querySelector(SELECTORS.tableBody);
-        if (!tableBody) return;
+        if (tableBody) {
+            tableBody.addEventListener('click', handleTableClick);
+        }
 
-        tableBody.addEventListener('click', handleTableClick);
+        const generateBtn = document.querySelector(SELECTORS.generateBtn);
+        if (generateBtn) {
+            generateBtn.addEventListener('click', handleGenerateClick);
+        }
     }
 
     function handleTableClick(e) {
@@ -98,6 +104,103 @@
 
         const remainingRows = document.querySelectorAll(SELECTORS.pageRow);
         statsNumber.textContent = remainingRows.length;
+    }
+
+    function handleGenerateClick(e) {
+        const generateBtn = e.target.closest(SELECTORS.generateBtn);
+        if (!generateBtn || generateBtn.disabled) return;
+
+        const templateId = generateBtn.dataset.templateId;
+        const templateName = generateBtn.dataset.templateName;
+
+        fetchTemplateFields(templateId, templateName, generateBtn);
+    }
+
+    function fetchTemplateFields(templateId, templateName, generateBtn) {
+        generateBtn.disabled = true;
+        generateBtn.textContent = 'Loading...';
+
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_get_template_data',
+                nonce: tmpltrData.nonce,
+                template_id: templateId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showGeneratePopup(templateId, templateName, data.data.fields || [], data.data.prompts || []);
+            } else {
+                TmpltrToast.error({
+                    title: 'Failed to load template',
+                    subtext: data.data?.message || 'Could not load template fields',
+                    seconds: 7
+                });
+            }
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate';
+        })
+        .catch(error => {
+            TmpltrToast.error({
+                title: 'Network error',
+                subtext: 'Failed to load template fields. Please check your connection.',
+                seconds: 8
+            });
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate';
+        });
+    }
+
+    function showGeneratePopup(templateId, templateName, fields, prompts) {
+        if (!prompts || prompts.length === 0) {
+            TmpltrToast.warning({
+                title: 'No prompts configured',
+                subtext: 'This template has no prompts to generate content from'
+            });
+            return;
+        }
+
+        const inputs = [
+            {
+                name: 'page_title',
+                type: 'text',
+                placeholder: 'Page Title',
+                required: true,
+                width: '100%',
+                value: ''
+            },
+            ...fields.map(field => ({
+                name: field.unique_identifier,
+                type: 'text',
+                placeholder: field.label,
+                required: field.is_required == 1,
+                width: '100%',
+                value: field.default_value || ''
+            }))
+        ];
+
+        TmpltrPopup.form({
+            title: `Generate from ${templateName}`,
+            subtext: 'Fill in the fields below to generate a new page',
+            level: 'low',
+            inputs: inputs,
+            submitText: 'Generate Page',
+            onSubmit: async (formData) => {
+                await TmpltrGenerator.generate({
+                    templateId,
+                    templateName,
+                    prompts,
+                    fields,
+                    formData
+                });
+            },
+            cancelText: 'Cancel'
+        });
     }
 
     function checkEmptyState() {
