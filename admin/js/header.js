@@ -9,7 +9,8 @@
         DROPDOWN_AVATAR: '#tmpltr-dropdown-avatar',
         DROPDOWN_NAME: '#tmpltr-dropdown-name',
         DROPDOWN_EMAIL: '#tmpltr-dropdown-email',
-        DROPDOWN_PLAN: '#tmpltr-dropdown-plan'
+        DROPDOWN_PLAN: '#tmpltr-dropdown-plan',
+        CREDITS_COUNT: '#tmpltr-credits-count'
     };
 
     const CLASSES = {
@@ -22,6 +23,7 @@
 
     const elements = {};
     let isOpen = false;
+    let creditsSubscription = null;
 
     function cacheElements() {
         elements.trigger = document.querySelector(SELECTORS.TRIGGER);
@@ -32,6 +34,7 @@
         elements.dropdownName = document.querySelector(SELECTORS.DROPDOWN_NAME);
         elements.dropdownEmail = document.querySelector(SELECTORS.DROPDOWN_EMAIL);
         elements.dropdownPlan = document.querySelector(SELECTORS.DROPDOWN_PLAN);
+        elements.creditsCount = document.querySelector(SELECTORS.CREDITS_COUNT);
     }
 
     function getInitials(name) {
@@ -82,6 +85,12 @@
             } else {
                 elements.dropdownPlan.classList.add(CLASSES.PLAN_FREE);
             }
+        }
+    }
+
+    function updateCredits(credits) {
+        if (elements.creditsCount) {
+            elements.creditsCount.textContent = credits ?? 0;
         }
     }
 
@@ -143,6 +152,63 @@
         }
     }
 
+    async function loadCredits() {
+        if (typeof TmpltrAuth === 'undefined' || !TmpltrAuth.getClient || !TmpltrAuth.getSession) {
+            return;
+        }
+
+        const client = TmpltrAuth.getClient();
+        const session = await TmpltrAuth.getSession();
+
+        if (!client || !session) return;
+
+        const { data, error } = await client
+            .from('profiles')
+            .select('credit_balance')
+            .eq('id', session.user.id)
+            .single();
+
+        if (!error && data) {
+            updateCredits(data.credit_balance);
+        }
+    }
+
+    async function subscribeToCredits() {
+        if (typeof TmpltrAuth === 'undefined' || !TmpltrAuth.getClient || !TmpltrAuth.getSession) {
+            return;
+        }
+
+        const client = TmpltrAuth.getClient();
+        const session = await TmpltrAuth.getSession();
+
+        if (!client || !session) return;
+
+        creditsSubscription = client
+            .channel('credits-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'profiles',
+                    filter: `id=eq.${session.user.id}`
+                },
+                (payload) => {
+                    if (payload.new && payload.new.credit_balance !== undefined) {
+                        updateCredits(payload.new.credit_balance);
+                    }
+                }
+            )
+            .subscribe();
+    }
+
+    function unsubscribeFromCredits() {
+        if (creditsSubscription) {
+            creditsSubscription.unsubscribe();
+            creditsSubscription = null;
+        }
+    }
+
     async function init() {
         cacheElements();
 
@@ -152,13 +218,19 @@
 
         bindEvents();
         await loadProfile();
+        await loadCredits();
+        await subscribeToCredits();
     }
+
+    window.addEventListener('beforeunload', unsubscribeFromCredits);
 
     window.TmpltrHeader = {
         open,
         close,
         toggle,
-        refresh: loadProfile
+        refresh: loadProfile,
+        refreshCredits: loadCredits,
+        updateCredits
     };
 
     if (document.readyState === 'loading') {

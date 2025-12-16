@@ -32,6 +32,58 @@
     gap: 12px;
 }
 
+.tmpltr-header__credits {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tmpltr-header__credits-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background-color: #f6f7f7;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e1e1e;
+}
+
+.tmpltr-header__credits-count {
+    font-weight: 600;
+}
+
+.tmpltr-header__credits-label {
+    color: #646970;
+}
+
+.tmpltr-header__credits-add {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #2271b1 0%, #135e96 100%);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(34, 113, 177, 0.3);
+}
+
+.tmpltr-header__credits-add:hover {
+    background: linear-gradient(135deg, #1a5a9e 0%, #0e4a7a 100%);
+    box-shadow: 0 4px 8px rgba(34, 113, 177, 0.4);
+    transform: translateY(-1px);
+}
+
+.tmpltr-header__credits-add-icon {
+    flex-shrink: 0;
+}
+
 .tmpltr-header__logo {
     height: 32px;
     width: auto;

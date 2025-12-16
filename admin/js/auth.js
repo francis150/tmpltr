@@ -79,7 +79,7 @@
         try {
             const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('id, email, display_name, plan_type, status')
+                .select('id, email, display_name, plan_type, credit_balance, status')
                 .eq('id', session.user.id)
                 .single();
 
@@ -161,7 +161,8 @@
         getProfile,
         signIn,
         signUp,
-        signOut
+        signOut,
+        getClient: () => supabaseClient
     };
 
     if (document.readyState === 'loading') {

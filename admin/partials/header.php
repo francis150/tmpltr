@@ -15,6 +15,19 @@
         </nav>
     </div>
     <div class="tmpltr-header__right">
+        <div class="tmpltr-header__credits">
+            <div class="tmpltr-header__credits-display">
+                <span class="tmpltr-header__credits-count" id="tmpltr-credits-count">0</span>
+                <span class="tmpltr-header__credits-label">credits</span>
+            </div>
+            <button class="tmpltr-header__credits-add" id="tmpltr-credits-add">
+                <svg class="tmpltr-header__credits-add-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Credits
+            </button>
+        </div>
         <div class="tmpltr-header__profile" id="tmpltr-profile-trigger">
             <div class="tmpltr-header__profile-avatar" id="tmpltr-profile-avatar"></div>
             <span class="tmpltr-header__profile-name" id="tmpltr-profile-name"></span>
@@ -41,6 +54,7 @@
 
             <div class="tmpltr-header__dropdown-actions">
                 <a href="#" class="tmpltr-header__dropdown-action">Support</a>
+                <a href="#" class="tmpltr-header__dropdown-action">Credits Usage</a>
                 <button class="tmpltr-header__dropdown-action tmpltr-header__dropdown-action--logout tmpltr-logout-btn">Logout</button>
             </div>
         </div>
