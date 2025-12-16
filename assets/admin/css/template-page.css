@@ -1,34 +1,5 @@
 /* Template page specific styles */
 
-.tmpltr-back-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    background: #fff;
-    border: 1px solid #dcdcde;
-    color: #50575e;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-
-.tmpltr-back-btn:hover {
-    background: #f6f7f7;
-    border-color: #2271b1;
-    color: #2271b1;
-}
-
-.tmpltr-back-btn:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px #2271b1;
-}
-
-.tmpltr-back-btn svg {
-    flex-shrink: 0;
-}
-
 .template-form {
     max-width: 100%;
     overflow-x: hidden;

@@ -69,6 +69,18 @@
             handleDuplicateClick(e);
             return;
         }
+
+        const row = e.target.closest(SELECTORS.templateRow);
+        if (row && !e.target.closest('button, a, .template-options')) {
+            handleRowClick(row);
+        }
+    }
+
+    function handleRowClick(row) {
+        const templateId = row.dataset.templateId;
+        if (!templateId) return;
+
+        window.location.href = tmpltrData.siteUrl + 'wp-admin/admin.php?page=tmpltr-pages&template_id=' + templateId;
     }
 
     function handleOptionsToggle(trigger) {

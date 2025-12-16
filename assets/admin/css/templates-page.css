@@ -38,6 +38,14 @@
     color: #646970;
 }
 
+.wp-list-table tbody tr {
+    cursor: pointer;
+}
+
+.wp-list-table tbody tr:hover {
+    background-color: #f6f7f7;
+}
+
 .wp-list-table td {
     vertical-align: middle;
 }

@@ -24,7 +24,7 @@ class TmpltrAuth {
         ],
     ];
 
-    private $protected_pages = ['tmpltr', 'tmpltr-template'];
+    private $protected_pages = ['tmpltr', 'tmpltr-template', 'tmpltr-pages'];
 
     public function __construct() {
         $this->plugin_data = get_plugin_data(TMPLTR_PLUGIN_DIR . 'tmpltr.php');
