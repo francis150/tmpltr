@@ -141,6 +141,15 @@ class TmpltrAdmin {
             true
         );
 
+        // Header dropdown module
+        wp_enqueue_script(
+            'tmpltr-header-dropdown',
+            plugin_dir_url( __FILE__ ) . 'js/header.js',
+            ['tmpltr-auth'],
+            $this->plugin_data['Version'],
+            true
+        );
+
         // Socket.IO client library
         wp_enqueue_script(
             'socket-io',
