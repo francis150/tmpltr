@@ -53,13 +53,13 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         <?php require_once TMPLTR_PLUGIN_DIR . 'admin/partials/header.php'; ?>
 
         <div class="tmpltr-page-header">
-            <h1>Template</h1>
-            <button class="button tmpltr-logout-btn">Logout</button>
+            <div class="tmpltr-page-header__left">
+                <h1><?= $template->get_name(); ?></h1>
+            </div>
+            <div class="tmpltr-page-header__right"></div>
         </div>
-    <span>ID: <?php echo esc_html($template_id); ?></span>
-    <hr>
 
-    <form action="#" class="template-form">
+        <form action="#" class="template-form">
         <h2>Template Information</h2>
         <div class="template-metadata-row">
             <div class="template-metadata-field">
