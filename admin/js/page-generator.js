@@ -152,7 +152,7 @@
                 }
 
                 if (activeJob.resolve) {
-                    activeJob.resolve(data);
+                    activeJob.resolve({ ...data, saveResponse });
                 }
             } catch (saveError) {
                 if (progressToast) {

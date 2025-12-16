@@ -489,7 +489,10 @@ class TmpltrAjax {
 				'message' => 'Page created successfully',
 				'generated_page_id' => $generated_page_id,
 				'page_id' => $new_page_id,
+				'page_title' => $page_title,
+				'view_url' => get_permalink($new_page_id),
 				'edit_url' => get_edit_post_link($new_page_id, 'raw'),
+				'created_at' => wp_date('M j, Y g:i A'),
 				'results_count' => count($results)
 			]);
 

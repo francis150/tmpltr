@@ -191,16 +191,66 @@
             inputs: inputs,
             submitText: 'Generate Page',
             onSubmit: async (formData) => {
-                await TmpltrGenerator.generate({
+                const result = await TmpltrGenerator.generate({
                     templateId,
                     templateName,
                     prompts,
                     fields,
                     formData
                 });
+
+                if (result?.saveResponse) {
+                    addPageRow(result.saveResponse);
+                }
             },
             cancelText: 'Cancel'
         });
+    }
+
+    function addPageRow(page) {
+        const tbody = document.querySelector(SELECTORS.tableBody);
+        if (!tbody) return;
+
+        hideEmptyState();
+
+        const newRow = document.createElement('tr');
+        newRow.dataset.generatedPageId = page.generated_page_id;
+        newRow.innerHTML = `
+            <td>${escapeHtml(page.page_title || '(Untitled)')}</td>
+            <td>${escapeHtml(page.created_at)}</td>
+            <td class="pages-actions">
+                ${page.view_url ? `<a href="${page.view_url}" class="button button-secondary" target="_blank">View</a>` : ''}
+                <button type="button" class="button button-secondary pages-delete-btn">Delete</button>
+            </td>
+        `;
+
+        newRow.style.opacity = '0';
+        tbody.insertBefore(newRow, tbody.firstChild);
+
+        requestAnimationFrame(() => {
+            newRow.style.transition = 'opacity 0.3s';
+            newRow.style.opacity = '1';
+        });
+
+        updateStats();
+    }
+
+    function hideEmptyState() {
+        const emptyState = document.querySelector('.pages-empty-state');
+        const table = document.querySelector('.wp-list-table');
+
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+        if (table) {
+            table.style.display = '';
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 
     function checkEmptyState() {
