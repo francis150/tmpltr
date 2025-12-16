@@ -17,10 +17,14 @@ $templates = TmpltrTemplate::get_all();
         <?php require_once TMPLTR_PLUGIN_DIR . 'admin/partials/header.php'; ?>
 
         <div class="tmpltr-page-header">
-            <h1>Templates</h1>
-            <button class="button tmpltr-logout-btn">Logout</button>
+            <div class="tmpltr-page-header__left">
+                <h1>Templates</h1>
+            </div>
+            <div class="tmpltr-page-header__right">
+                <a href="#" class="button button-secondary button-hero">✨ Community Templates</a>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
+            </div>
         </div>
-    <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
 
     <?php if (empty($templates)) : ?>
         <div class="template-empty-state">
