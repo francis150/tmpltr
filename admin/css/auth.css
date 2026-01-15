@@ -28,10 +28,35 @@
 .tmpltr-page-header {
     display: flex;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 15px;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.tmpltr-page-header__left,
+.tmpltr-page-header__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .tmpltr-page-header h1 {
     margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+    color: #1d2327;
+}
+
+.button-secondary.button-hero {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    color: #2271b1;
+    border-color: #2271b1;
+}
+
+.button-secondary.button-hero:hover {
+    background: #f6f7f7;
+    color: #135e96;
+    border-color: #135e96;
 }

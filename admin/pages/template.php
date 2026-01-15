@@ -50,14 +50,22 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     <div class="tmpltr-auth-loading">Verifying authentication...</div>
 
     <div class="tmpltr-protected-content">
-        <div class="tmpltr-page-header">
-        <h1>template.php</h1>
-        <button class="button tmpltr-logout-btn">Logout</button>
-    </div>
-    <span>ID: <?php echo esc_html($template_id); ?></span>
-    <hr>
+        <?php require_once TMPLTR_PLUGIN_DIR . 'admin/partials/header.php'; ?>
 
-    <form action="#" class="template-form">
+        <div class="tmpltr-page-header">
+            <div class="tmpltr-page-header__left">
+                <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr')); ?>" class="tmpltr-back-btn" title="Back to Templates">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="19" y1="12" x2="5" y2="12"></line>
+                        <polyline points="12 19 5 12 12 5"></polyline>
+                    </svg>
+                </a>
+                <h1><?= $template->get_name(); ?></h1>
+            </div>
+            <div class="tmpltr-page-header__right"></div>
+        </div>
+
+        <form action="#" class="template-form">
         <h2>Template Information</h2>
         <div class="template-metadata-row">
             <div class="template-metadata-field">

@@ -7,6 +7,8 @@
         LOGOUT_BTN: '.tmpltr-logout-btn'
     };
 
+    const PROFILE_CACHE_KEY = 'tmpltr_profile';
+
     let supabaseClient = null;
 
     function initSupabase() {
@@ -56,8 +58,44 @@
         });
     }
 
+    async function getProfile(forceRefresh = false) {
+        const session = await getSession();
+        if (!session) return null;
+
+        if (!forceRefresh) {
+            const cached = localStorage.getItem(PROFILE_CACHE_KEY);
+            if (cached) {
+                try {
+                    const parsed = JSON.parse(cached);
+                    if (parsed.id === session.user.id) {
+                        return parsed;
+                    }
+                } catch (err) {
+                    localStorage.removeItem(PROFILE_CACHE_KEY);
+                }
+            }
+        }
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id, email, display_name, plan_type, credit_balance, status')
+                .eq('id', session.user.id)
+                .single();
+
+            if (error) return null;
+
+            localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(data));
+            return data;
+        } catch (err) {
+            return null;
+        }
+    }
+
     async function signOut() {
         if (!supabaseClient) return;
+
+        localStorage.removeItem(PROFILE_CACHE_KEY);
 
         try {
             await supabaseClient.auth.signOut();
@@ -120,9 +158,11 @@
 
     window.TmpltrAuth = {
         getSession,
+        getProfile,
         signIn,
         signUp,
-        signOut
+        signOut,
+        getClient: () => supabaseClient
     };
 
     if (document.readyState === 'loading') {

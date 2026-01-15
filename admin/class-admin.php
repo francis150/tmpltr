@@ -16,6 +16,11 @@ class TmpltrAdmin {
             'js' => 'template-page.js',
             'handle' => 'tmpltr-template-page',
         ],
+        'tmpltr-pages' => [
+            'css' => 'pages-page.css',
+            'js' => 'pages-page.js',
+            'handle' => 'tmpltr-pages-page',
+        ],
     ];
 
     public function __construct() {
@@ -54,6 +59,15 @@ class TmpltrAdmin {
             'tmpltr-template',
             [$this, 'render_template_page']
         );
+
+        add_submenu_page(
+            null,
+            'Pages - Tmpltr',
+            'Pages',
+            'manage_options',
+            'tmpltr-pages',
+            [$this, 'render_pages_page']
+        );
     }
 
     public function render_templates_page() {
@@ -62,6 +76,10 @@ class TmpltrAdmin {
 
     public function render_template_page() {
         require_once plugin_dir_path( __FILE__ ) . 'pages/template.php';
+    }
+
+    public function render_pages_page() {
+        require_once plugin_dir_path( __FILE__ ) . 'pages/pages.php';
     }
 
     public function enqueue_admin_assets($hook) {
@@ -76,6 +94,13 @@ class TmpltrAdmin {
             'tmpltr-admin-global',
             plugin_dir_url( __FILE__ ) . 'css/admin-styles.css',
             [],
+            $this->plugin_data['Version']
+        );
+
+        wp_enqueue_style(
+            'tmpltr-header',
+            plugin_dir_url( __FILE__ ) . 'css/header.css',
+            ['tmpltr-admin-global'],
             $this->plugin_data['Version']
         );
 
@@ -130,6 +155,15 @@ class TmpltrAdmin {
             'tmpltr-popup',
             plugin_dir_url( __FILE__ ) . 'js/popup.js',
             ['tmpltr-admin-global', 'tmpltr-toast'],
+            $this->plugin_data['Version'],
+            true
+        );
+
+        // Header dropdown module
+        wp_enqueue_script(
+            'tmpltr-header-dropdown',
+            plugin_dir_url( __FILE__ ) . 'js/header.js',
+            ['tmpltr-auth'],
             $this->plugin_data['Version'],
             true
         );

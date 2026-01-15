@@ -13,9 +13,11 @@ class TmpltrAjax {
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
 		add_action('wp_ajax_tmpltr_save_template', [$this, 'save_template']);
 		add_action('wp_ajax_tmpltr_delete_template', [$this, 'delete_template']);
+		add_action('wp_ajax_tmpltr_duplicate_template', [$this, 'duplicate_template']);
 
 		// Generation handlers
 		add_action('wp_ajax_tmpltr_save_generation', [$this, 'save_generation']);
+		add_action('wp_ajax_tmpltr_delete_generated_page', [$this, 'delete_generated_page']);
 	}
 
 	// ===== PAGE HANDLERS =====
@@ -292,6 +294,68 @@ class TmpltrAjax {
 		]);
 	}
 
+	/**
+	 * AJAX handler: Duplicate template
+	 * Creates a copy of the template with all fields and prompts
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function duplicate_template() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error([
+				'message' => 'Security check failed'
+			]);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error([
+				'message' => 'Insufficient permissions'
+			]);
+			return;
+		}
+
+		$template_id = isset($_POST['template_id']) ? absint($_POST['template_id']) : 0;
+
+		if (empty($template_id)) {
+			wp_send_json_error([
+				'message' => 'Template ID is required'
+			]);
+			return;
+		}
+
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+		$template = new TmpltrTemplate($template_id);
+
+		if (!$template->exists()) {
+			wp_send_json_error([
+				'message' => 'Template not found'
+			]);
+			return;
+		}
+
+		$new_template_id = $template->duplicate();
+
+		if (!$new_template_id) {
+			wp_send_json_error([
+				'message' => 'Failed to duplicate template'
+			]);
+			return;
+		}
+
+		$new_template = new TmpltrTemplate($new_template_id);
+
+		wp_send_json_success([
+			'message' => 'Template duplicated successfully',
+			'template' => [
+				'id' => $new_template->get_id(),
+				'name' => $new_template->get_name(),
+				'status' => $new_template->get_status(),
+				'created_at' => wp_date('M j, Y g:i A')
+			]
+		]);
+	}
+
 	// ===== GENERATION HANDLERS =====
 
 	/**
@@ -425,7 +489,10 @@ class TmpltrAjax {
 				'message' => 'Page created successfully',
 				'generated_page_id' => $generated_page_id,
 				'page_id' => $new_page_id,
+				'page_title' => $page_title,
+				'view_url' => get_permalink($new_page_id),
 				'edit_url' => get_edit_post_link($new_page_id, 'raw'),
+				'created_at' => wp_date('M j, Y g:i A'),
 				'results_count' => count($results)
 			]);
 
@@ -438,6 +505,92 @@ class TmpltrAjax {
 
 			wp_send_json_error([
 				'message' => 'Failed to save generation results. Please try again.'
+			]);
+		}
+	}
+
+	/**
+	 * AJAX handler: Delete generated page
+	 * Removes the generated page record and deletes the WordPress page
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function delete_generated_page() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error([
+				'message' => 'Security check failed'
+			]);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error([
+				'message' => 'Insufficient permissions'
+			]);
+			return;
+		}
+
+		$generated_page_id = isset($_POST['generated_page_id']) ? absint($_POST['generated_page_id']) : 0;
+
+		if (empty($generated_page_id)) {
+			wp_send_json_error([
+				'message' => 'Generated page ID is required'
+			]);
+			return;
+		}
+
+		global $wpdb;
+
+		$generated_page = $wpdb->get_row($wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}tmpltr_generated_pages WHERE id = %d",
+			$generated_page_id
+		));
+
+		if (!$generated_page) {
+			wp_send_json_error([
+				'message' => 'Generated page not found'
+			]);
+			return;
+		}
+
+		$wpdb->query('START TRANSACTION');
+
+		try {
+			$wpdb->delete(
+				$wpdb->prefix . 'tmpltr_prompt_results',
+				['generated_page_id' => $generated_page_id],
+				['%d']
+			);
+
+			$wpdb->delete(
+				$wpdb->prefix . 'tmpltr_generated_pages',
+				['id' => $generated_page_id],
+				['%d']
+			);
+
+			if ($generated_page->page_id) {
+				$delete_result = wp_delete_post($generated_page->page_id, true);
+
+				if (!$delete_result) {
+					throw new Exception('Failed to delete WordPress page');
+				}
+			}
+
+			$wpdb->query('COMMIT');
+
+			wp_send_json_success([
+				'message' => 'Page deleted successfully'
+			]);
+
+		} catch (Exception $e) {
+			$wpdb->query('ROLLBACK');
+
+			if (TMPLTR_DEBUG_MODE) {
+				error_log('Tmpltr: Failed to delete generated page - ' . $e->getMessage());
+			}
+
+			wp_send_json_error([
+				'message' => 'Failed to delete page. Please try again.'
 			]);
 		}
 	}
