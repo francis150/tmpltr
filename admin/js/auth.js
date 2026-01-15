@@ -36,6 +36,23 @@
         }
     }
 
+    async function checkUserExists(email) {
+        if (!supabaseClient) return null;
+
+        try {
+            const { data, error } = await supabaseClient
+                .from('profiles')
+                .select('id')
+                .eq('email', email)
+                .maybeSingle();
+
+            if (error) return null;
+            return !!data;
+        } catch (err) {
+            return null;
+        }
+    }
+
     async function signIn(email, password) {
         if (!supabaseClient) {
             return { error: { message: 'Auth not initialized' } };
@@ -79,7 +96,7 @@
         try {
             const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('id, email, display_name, plan_type, credit_balance, status')
+                .select('id, email, display_name, plan_type, subscription_credits, purchased_credits, status')
                 .eq('id', session.user.id)
                 .single();
 

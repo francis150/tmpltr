@@ -164,12 +164,13 @@
 
         const { data, error } = await client
             .from('profiles')
-            .select('credit_balance')
+            .select('subscription_credits, purchased_credits')
             .eq('id', session.user.id)
             .single();
 
         if (!error && data) {
-            updateCredits(data.credit_balance);
+            const total = (data.subscription_credits ?? 0) + (data.purchased_credits ?? 0);
+            updateCredits(total);
         }
     }
 
@@ -194,8 +195,10 @@
                     filter: `id=eq.${session.user.id}`
                 },
                 (payload) => {
-                    if (payload.new && payload.new.credit_balance !== undefined) {
-                        updateCredits(payload.new.credit_balance);
+                    if (payload.new) {
+                        const subscription = payload.new.subscription_credits ?? 0;
+                        const purchased = payload.new.purchased_credits ?? 0;
+                        updateCredits(subscription + purchased);
                     }
                 }
             )
