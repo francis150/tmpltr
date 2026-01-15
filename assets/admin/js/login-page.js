@@ -32,7 +32,13 @@
         const { data, error } = await TmpltrAuth.signIn(email, password);
 
         if (error) {
-            TmpltrToast.error({ title: 'Login Failed', subtext: error.message });
+            let errorMessage = error.message;
+
+            if (error.message === 'Invalid login credentials') {
+                errorMessage = 'Invalid email or password.';
+            }
+
+            TmpltrToast.error({ title: 'Login Failed', subtext: errorMessage });
             setLoading(false);
             return;
         }
