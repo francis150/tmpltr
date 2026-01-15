@@ -33,6 +33,7 @@
 }
 
 .tmpltr-header__credits {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -48,6 +49,12 @@
     font-size: 14px;
     font-weight: 500;
     color: #1e1e1e;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.tmpltr-header__credits-display:hover {
+    background-color: #e8e8e8;
 }
 
 .tmpltr-header__credits-count {
@@ -294,4 +301,46 @@
 
 .tmpltr-header__dropdown-action--logout:hover {
     color: #d63638;
+}
+
+/* Credits Dropdown */
+.tmpltr-header__credits-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    min-width: 180px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 9999;
+    padding: 8px 0;
+}
+
+.tmpltr-header__credits-dropdown--open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.tmpltr-header__credits-dropdown-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+}
+
+.tmpltr-header__credits-dropdown-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #646970;
+}
+
+.tmpltr-header__credits-dropdown-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e1e1e;
 }

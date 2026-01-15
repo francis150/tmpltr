@@ -16,9 +16,19 @@
     </div>
     <div class="tmpltr-header__right">
         <div class="tmpltr-header__credits">
-            <div class="tmpltr-header__credits-display">
+            <div class="tmpltr-header__credits-display" id="tmpltr-credits-trigger">
                 <span class="tmpltr-header__credits-count" id="tmpltr-credits-count">0</span>
                 <span class="tmpltr-header__credits-label">credits</span>
+            </div>
+            <div class="tmpltr-header__credits-dropdown" id="tmpltr-credits-dropdown">
+                <div class="tmpltr-header__credits-dropdown-row">
+                    <span class="tmpltr-header__credits-dropdown-label">Subscription</span>
+                    <span class="tmpltr-header__credits-dropdown-value" id="tmpltr-subscription-credits">0</span>
+                </div>
+                <div class="tmpltr-header__credits-dropdown-row">
+                    <span class="tmpltr-header__credits-dropdown-label">Purchased</span>
+                    <span class="tmpltr-header__credits-dropdown-value" id="tmpltr-purchased-credits">0</span>
+                </div>
             </div>
             <button class="tmpltr-header__credits-add" id="tmpltr-credits-add">
                 <svg class="tmpltr-header__credits-add-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
