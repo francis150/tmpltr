@@ -265,9 +265,18 @@
     color: #1e1e1e;
 }
 
-.tmpltr-header__dropdown-plan-badge--pro,
-.tmpltr-header__dropdown-plan-badge--premium {
+.tmpltr-header__dropdown-plan-badge--starter {
+    background-color: #2271b1;
+    color: #fff;
+}
+
+.tmpltr-header__dropdown-plan-badge--pro {
     background-color: #00a32a;
+    color: #fff;
+}
+
+.tmpltr-header__dropdown-plan-badge--agency {
+    background-color: #8b5cf6;
     color: #fff;
 }
 

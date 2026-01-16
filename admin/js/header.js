@@ -21,15 +21,18 @@
         TRIGGER_OPEN: 'tmpltr-header__profile--open',
         DROPDOWN_OPEN: 'tmpltr-header__dropdown--open',
         PLAN_FREE: 'tmpltr-header__dropdown-plan-badge--free',
+        PLAN_STARTER: 'tmpltr-header__dropdown-plan-badge--starter',
         PLAN_PRO: 'tmpltr-header__dropdown-plan-badge--pro',
-        PLAN_PREMIUM: 'tmpltr-header__dropdown-plan-badge--premium',
+        PLAN_AGENCY: 'tmpltr-header__dropdown-plan-badge--agency',
         CREDITS_DROPDOWN_OPEN: 'tmpltr-header__credits-dropdown--open'
     };
+
+    const PROFILE_CACHE_KEY = 'tmpltr_profile';
 
     const elements = {};
     let isOpen = false;
     let isCreditsOpen = false;
-    let creditsSubscription = null;
+    let profileSubscription = null;
 
     function cacheElements() {
         elements.trigger = document.querySelector(SELECTORS.TRIGGER);
@@ -84,18 +87,7 @@
             elements.dropdownEmail.textContent = email;
         }
 
-        if (elements.dropdownPlan) {
-            elements.dropdownPlan.textContent = planType;
-            elements.dropdownPlan.classList.remove(CLASSES.PLAN_FREE, CLASSES.PLAN_PRO, CLASSES.PLAN_PREMIUM);
-
-            if (planType === 'pro') {
-                elements.dropdownPlan.classList.add(CLASSES.PLAN_PRO);
-            } else if (planType === 'premium') {
-                elements.dropdownPlan.classList.add(CLASSES.PLAN_PREMIUM);
-            } else {
-                elements.dropdownPlan.classList.add(CLASSES.PLAN_FREE);
-            }
-        }
+        updatePlanBadge(planType);
     }
 
     function updateCredits(subscription, purchased) {
@@ -108,6 +100,41 @@
         }
         if (elements.purchasedCredits) {
             elements.purchasedCredits.textContent = purchased;
+        }
+    }
+
+    function updatePlanBadge(planType) {
+        if (!elements.dropdownPlan) return;
+
+        elements.dropdownPlan.textContent = planType;
+        elements.dropdownPlan.classList.remove(
+            CLASSES.PLAN_FREE,
+            CLASSES.PLAN_STARTER,
+            CLASSES.PLAN_PRO,
+            CLASSES.PLAN_AGENCY
+        );
+
+        if (planType === 'starter') {
+            elements.dropdownPlan.classList.add(CLASSES.PLAN_STARTER);
+        } else if (planType === 'pro') {
+            elements.dropdownPlan.classList.add(CLASSES.PLAN_PRO);
+        } else if (planType === 'agency') {
+            elements.dropdownPlan.classList.add(CLASSES.PLAN_AGENCY);
+        } else {
+            elements.dropdownPlan.classList.add(CLASSES.PLAN_FREE);
+        }
+    }
+
+    function updateProfileCache(updates) {
+        const cached = localStorage.getItem(PROFILE_CACHE_KEY);
+        if (!cached) return;
+
+        try {
+            const profile = JSON.parse(cached);
+            Object.assign(profile, updates);
+            localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify(profile));
+        } catch (err) {
+            localStorage.removeItem(PROFILE_CACHE_KEY);
         }
     }
 
@@ -225,7 +252,7 @@
         }
     }
 
-    async function subscribeToCredits() {
+    async function subscribeToProfileChanges() {
         if (typeof TmpltrAuth === 'undefined' || !TmpltrAuth.getClient || !TmpltrAuth.getSession) {
             return;
         }
@@ -235,8 +262,8 @@
 
         if (!client || !session) return;
 
-        creditsSubscription = client
-            .channel('credits-changes')
+        profileSubscription = client
+            .channel('profile-changes')
             .on(
                 'postgres_changes',
                 {
@@ -251,16 +278,22 @@
                             payload.new.subscription_credits ?? 0,
                             payload.new.purchased_credits ?? 0
                         );
+                        updatePlanBadge(payload.new.plan_type ?? 'free');
+                        updateProfileCache({
+                            subscription_credits: payload.new.subscription_credits,
+                            purchased_credits: payload.new.purchased_credits,
+                            plan_type: payload.new.plan_type
+                        });
                     }
                 }
             )
             .subscribe();
     }
 
-    function unsubscribeFromCredits() {
-        if (creditsSubscription) {
-            creditsSubscription.unsubscribe();
-            creditsSubscription = null;
+    function unsubscribeFromProfileChanges() {
+        if (profileSubscription) {
+            profileSubscription.unsubscribe();
+            profileSubscription = null;
         }
     }
 
@@ -274,10 +307,10 @@
         bindEvents();
         await loadProfile();
         await loadCredits();
-        await subscribeToCredits();
+        await subscribeToProfileChanges();
     }
 
-    window.addEventListener('beforeunload', unsubscribeFromCredits);
+    window.addEventListener('beforeunload', unsubscribeFromProfileChanges);
 
     window.TmpltrHeader = {
         open,
@@ -288,7 +321,8 @@
         toggleCredits,
         refresh: loadProfile,
         refreshCredits: loadCredits,
-        updateCredits
+        updateCredits,
+        updatePlanBadge
     };
 
     if (document.readyState === 'loading') {
