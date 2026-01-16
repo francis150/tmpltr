@@ -54,13 +54,14 @@
         }
 
         if (data.user && !data.session) {
-            TmpltrToast.success({ title: 'Registration Successful', subtext: 'Please check your email to confirm your account.', seconds: 10 });
-            setLoading(false);
-            return;
+            TmpltrToast.success({ title: 'Registration Successful', subtext: 'Please check your email to confirm your account.' });
+        } else {
+            TmpltrToast.success({ title: 'Registration Successful', subtext: 'Redirecting to login...' });
         }
 
-        TmpltrToast.success({ title: 'Registration Successful', subtext: 'Redirecting...' });
-        window.location.href = tmpltrAuth.dashboardUrl;
+        setTimeout(() => {
+            window.location.href = tmpltrAuth.loginUrl;
+        }, 3000);
     }
 
     function init() {

@@ -30,13 +30,13 @@
                     <span class="tmpltr-header__credits-dropdown-value" id="tmpltr-purchased-credits">0</span>
                 </div>
             </div>
-            <button class="tmpltr-header__credits-add" id="tmpltr-credits-add">
+            <a href="<?php echo esc_url(TmpltrConstants::WEBSITE_URL); ?>" class="tmpltr-header__credits-add" target="_blank" rel="noopener noreferrer">
                 <svg class="tmpltr-header__credits-add-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <line x1="12" y1="5" x2="12" y2="19"></line>
                     <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 Add Credits
-            </button>
+            </a>
         </div>
         <div class="tmpltr-header__profile" id="tmpltr-profile-trigger">
             <div class="tmpltr-header__profile-avatar" id="tmpltr-profile-avatar"></div>
@@ -57,7 +57,10 @@
 
             <div class="tmpltr-header__dropdown-plan">
                 <span class="tmpltr-header__dropdown-plan-label">Plan</span>
-                <span class="tmpltr-header__dropdown-plan-badge" id="tmpltr-dropdown-plan"></span>
+                <div class="tmpltr-header__dropdown-plan-info">
+                    <span class="tmpltr-header__dropdown-plan-badge" id="tmpltr-dropdown-plan"></span>
+                    <span class="tmpltr-header__dropdown-plan-expiry" id="tmpltr-dropdown-plan-expiry"></span>
+                </div>
             </div>
 
             <div class="tmpltr-header__dropdown-divider"></div>

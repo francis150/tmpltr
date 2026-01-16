@@ -79,12 +79,15 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(34, 113, 177, 0.3);
+    text-decoration: none;
 }
 
 .tmpltr-header__credits-add:hover {
     background: linear-gradient(135deg, #1a5a9e 0%, #0e4a7a 100%);
     box-shadow: 0 4px 8px rgba(34, 113, 177, 0.4);
     transform: translateY(-1px);
+    color: #fff;
+    text-decoration: none;
 }
 
 .tmpltr-header__credits-add-icon {
@@ -262,10 +265,41 @@
     color: #1e1e1e;
 }
 
-.tmpltr-header__dropdown-plan-badge--pro,
-.tmpltr-header__dropdown-plan-badge--premium {
+.tmpltr-header__dropdown-plan-badge--starter {
+    background-color: #2271b1;
+    color: #fff;
+}
+
+.tmpltr-header__dropdown-plan-badge--pro {
     background-color: #00a32a;
     color: #fff;
+}
+
+.tmpltr-header__dropdown-plan-badge--agency {
+    background-color: #8b5cf6;
+    color: #fff;
+}
+
+.tmpltr-header__dropdown-plan-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.tmpltr-header__dropdown-plan-expiry {
+    font-size: 11px;
+    color: #646970;
+}
+
+.tmpltr-header__dropdown-plan-expiry--warning {
+    color: #996800;
+    font-weight: 500;
+}
+
+.tmpltr-header__dropdown-plan-expiry--expired {
+    color: #d63638;
+    font-weight: 500;
 }
 
 /* Divider */
