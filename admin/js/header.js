@@ -10,6 +10,7 @@
         DROPDOWN_NAME: '#tmpltr-dropdown-name',
         DROPDOWN_EMAIL: '#tmpltr-dropdown-email',
         DROPDOWN_PLAN: '#tmpltr-dropdown-plan',
+        DROPDOWN_PLAN_EXPIRY: '#tmpltr-dropdown-plan-expiry',
         CREDITS_COUNT: '#tmpltr-credits-count',
         CREDITS_TRIGGER: '#tmpltr-credits-trigger',
         CREDITS_DROPDOWN: '#tmpltr-credits-dropdown',
@@ -43,6 +44,7 @@
         elements.dropdownName = document.querySelector(SELECTORS.DROPDOWN_NAME);
         elements.dropdownEmail = document.querySelector(SELECTORS.DROPDOWN_EMAIL);
         elements.dropdownPlan = document.querySelector(SELECTORS.DROPDOWN_PLAN);
+        elements.dropdownPlanExpiry = document.querySelector(SELECTORS.DROPDOWN_PLAN_EXPIRY);
         elements.creditsCount = document.querySelector(SELECTORS.CREDITS_COUNT);
         elements.creditsTrigger = document.querySelector(SELECTORS.CREDITS_TRIGGER);
         elements.creditsDropdown = document.querySelector(SELECTORS.CREDITS_DROPDOWN);
@@ -57,6 +59,14 @@
             return parts[0].charAt(0).toUpperCase();
         }
         return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    }
+
+    function formatExpiryDate(dateString) {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return '';
+        const options = { month: 'short', day: 'numeric', year: 'numeric' };
+        return 'Renews on ' + date.toLocaleDateString('en-US', options);
     }
 
     function populateUI(profile) {
@@ -88,6 +98,7 @@
         }
 
         updatePlanBadge(planType);
+        updatePlanExpiry(planType, profile.plan_expires_at);
     }
 
     function updateCredits(subscription, purchased) {
@@ -123,6 +134,17 @@
         } else {
             elements.dropdownPlan.classList.add(CLASSES.PLAN_FREE);
         }
+    }
+
+    function updatePlanExpiry(planType, expiresAt) {
+        if (!elements.dropdownPlanExpiry) return;
+
+        if (planType === 'free' || !expiresAt) {
+            elements.dropdownPlanExpiry.textContent = '';
+            return;
+        }
+
+        elements.dropdownPlanExpiry.textContent = formatExpiryDate(expiresAt);
     }
 
     function updateProfileCache(updates) {
@@ -274,15 +296,18 @@
                 },
                 (payload) => {
                     if (payload.new) {
+                        const planType = payload.new.plan_type ?? 'free';
                         updateCredits(
                             payload.new.subscription_credits ?? 0,
                             payload.new.purchased_credits ?? 0
                         );
-                        updatePlanBadge(payload.new.plan_type ?? 'free');
+                        updatePlanBadge(planType);
+                        updatePlanExpiry(planType, payload.new.plan_expires_at);
                         updateProfileCache({
                             subscription_credits: payload.new.subscription_credits,
                             purchased_credits: payload.new.purchased_credits,
-                            plan_type: payload.new.plan_type
+                            plan_type: payload.new.plan_type,
+                            plan_expires_at: payload.new.plan_expires_at
                         });
                     }
                 }
@@ -322,7 +347,8 @@
         refresh: loadProfile,
         refreshCredits: loadCredits,
         updateCredits,
-        updatePlanBadge
+        updatePlanBadge,
+        updatePlanExpiry
     };
 
     if (document.readyState === 'loading') {

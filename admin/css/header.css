@@ -280,6 +280,18 @@
     color: #fff;
 }
 
+.tmpltr-header__dropdown-plan-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.tmpltr-header__dropdown-plan-expiry {
+    font-size: 11px;
+    color: #646970;
+}
+
 /* Divider */
 .tmpltr-header__dropdown-divider {
     height: 1px;

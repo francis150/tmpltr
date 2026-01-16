@@ -96,7 +96,7 @@
         try {
             const { data, error } = await supabaseClient
                 .from('profiles')
-                .select('id, email, display_name, plan_type, subscription_credits, purchased_credits, status')
+                .select('id, email, display_name, plan_type, plan_expires_at, subscription_credits, purchased_credits, status')
                 .eq('id', session.user.id)
                 .single();
 

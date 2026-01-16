@@ -57,7 +57,10 @@
 
             <div class="tmpltr-header__dropdown-plan">
                 <span class="tmpltr-header__dropdown-plan-label">Plan</span>
-                <span class="tmpltr-header__dropdown-plan-badge" id="tmpltr-dropdown-plan"></span>
+                <div class="tmpltr-header__dropdown-plan-info">
+                    <span class="tmpltr-header__dropdown-plan-badge" id="tmpltr-dropdown-plan"></span>
+                    <span class="tmpltr-header__dropdown-plan-expiry" id="tmpltr-dropdown-plan-expiry"></span>
+                </div>
             </div>
 
             <div class="tmpltr-header__dropdown-divider"></div>
