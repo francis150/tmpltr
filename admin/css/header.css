@@ -79,12 +79,15 @@
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(34, 113, 177, 0.3);
+    text-decoration: none;
 }
 
 .tmpltr-header__credits-add:hover {
     background: linear-gradient(135deg, #1a5a9e 0%, #0e4a7a 100%);
     box-shadow: 0 4px 8px rgba(34, 113, 177, 0.4);
     transform: translateY(-1px);
+    color: #fff;
+    text-decoration: none;
 }
 
 .tmpltr-header__credits-add-icon {
