@@ -292,6 +292,16 @@
     color: #646970;
 }
 
+.tmpltr-header__dropdown-plan-expiry--warning {
+    color: #996800;
+    font-weight: 500;
+}
+
+.tmpltr-header__dropdown-plan-expiry--expired {
+    color: #d63638;
+    font-weight: 500;
+}
+
 /* Divider */
 .tmpltr-header__dropdown-divider {
     height: 1px;
