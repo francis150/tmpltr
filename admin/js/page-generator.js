@@ -226,7 +226,6 @@
                 job_id: activeJob.id,
                 engine: CONFIG.engine,
                 token: activeJob.token,
-                requesting_domain: tmpltrData.siteUrl,
                 template: {
                     id: activeJob.templateId,
                     name: activeJob.templateName
@@ -236,7 +235,8 @@
                 metadata: {
                     user_id: tmpltrData.userId,
                     timestamp: new Date().toISOString(),
-                    plugin_version: tmpltrData.pluginVersion
+                    plugin_version: tmpltrData.pluginVersion,
+                    requesting_domain: tmpltrData.siteUrl
                 }
             };
         },
