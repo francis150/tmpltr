@@ -24,11 +24,13 @@ class TmpltrAdmin {
     ];
 
     public function __construct() {
-        $this->plugin_data = get_plugin_data( plugin_dir_path( __FILE__ ) . '../tmpltr.php' );
-
+        add_action('admin_init', [$this, 'init']);
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
+    }
 
+    public function init() {
+        $this->plugin_data = get_plugin_data(TMPLTR_PLUGIN_DIR . 'tmpltr.php');
     }
 
     public function add_admin_menu() {

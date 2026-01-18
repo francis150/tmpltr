@@ -27,10 +27,13 @@ class TmpltrAuth {
     private $protected_pages = ['tmpltr', 'tmpltr-template', 'tmpltr-pages'];
 
     public function __construct() {
-        $this->plugin_data = get_plugin_data(TMPLTR_PLUGIN_DIR . 'tmpltr.php');
-
+        add_action('admin_init', [$this, 'init']);
         add_action('admin_menu', [$this, 'add_auth_pages']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_auth_assets']);
+    }
+
+    public function init() {
+        $this->plugin_data = get_plugin_data(TMPLTR_PLUGIN_DIR . 'tmpltr.php');
     }
 
     public function add_auth_pages() {
