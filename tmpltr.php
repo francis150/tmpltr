@@ -6,7 +6,7 @@
  * 
  * Plugin Name: Tmpltr
  * Description: Create reusable page templates with AI-powered content generation. Design once, generate unlimited unique pages by filling in custom fields that dynamically populate AI prompts.
- * Version: 0.0.2
+ * Version: 0.0.1
  * Requires at least: 5.2
  * Tested up to: 6.7
  * Requires PHP: 7.2

@@ -5,14 +5,14 @@
 
 class TmpltrCore {
     public function __construct() {
-        $this->init_updater();
+        add_action('init', [$this, 'init_updater']);
         $this->init_shortcodes();
         $this->init_admin();
 
         add_action('admin_init', [$this, 'check_db_version']);
     }
 
-    private function init_updater() {
+    public function init_updater() {
         require_once TMPLTR_PLUGIN_DIR . 'includes/class-updater.php';
         new TmpltrUpdater(TMPLTR_PLUGIN_DIR . 'tmpltr.php');
     }
