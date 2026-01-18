@@ -16,4 +16,5 @@ class TmpltrConstants {
 
 	// ===== EXTERNAL LINKS =====
 	const WEBSITE_URL = 'https://tmpltr-website.vercel.app/';
+	const CREDIT_LOGS_URL = self::WEBSITE_URL . 'credit-logs';
 }

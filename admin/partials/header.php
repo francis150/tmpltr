@@ -67,7 +67,7 @@
 
             <div class="tmpltr-header__dropdown-actions">
                 <a href="#" class="tmpltr-header__dropdown-action">Support</a>
-                <a href="#" class="tmpltr-header__dropdown-action">Credits Usage</a>
+                <a href="#" class="tmpltr-header__dropdown-action" id="tmpltr-credits-usage-btn">Credits Usage</a>
                 <button class="tmpltr-header__dropdown-action tmpltr-header__dropdown-action--logout tmpltr-logout-btn">Logout</button>
             </div>
         </div>

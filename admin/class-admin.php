@@ -123,7 +123,8 @@ class TmpltrAdmin {
                 'siteUrl' => home_url('/'),
                 'pluginVersion' => $this->plugin_data['Version'],
                 'userId' => get_current_user_id(),
-                'generatorServerUrl' => TmpltrConstants::GENERATOR_SERVER_URL
+                'generatorServerUrl' => TmpltrConstants::GENERATOR_SERVER_URL,
+                'creditLogsUrl' => TmpltrConstants::CREDIT_LOGS_URL
             ]
         );
 

@@ -15,7 +15,8 @@
         CREDITS_TRIGGER: '#tmpltr-credits-trigger',
         CREDITS_DROPDOWN: '#tmpltr-credits-dropdown',
         SUBSCRIPTION_CREDITS: '#tmpltr-subscription-credits',
-        PURCHASED_CREDITS: '#tmpltr-purchased-credits'
+        PURCHASED_CREDITS: '#tmpltr-purchased-credits',
+        CREDITS_USAGE_BTN: '#tmpltr-credits-usage-btn'
     };
 
     const CLASSES = {
@@ -52,6 +53,7 @@
         elements.creditsDropdown = document.querySelector(SELECTORS.CREDITS_DROPDOWN);
         elements.subscriptionCredits = document.querySelector(SELECTORS.SUBSCRIPTION_CREDITS);
         elements.purchasedCredits = document.querySelector(SELECTORS.PURCHASED_CREDITS);
+        elements.creditsUsageBtn = document.querySelector(SELECTORS.CREDITS_USAGE_BTN);
     }
 
     function getInitials(name) {
@@ -262,6 +264,23 @@
         }
     }
 
+    async function handleCreditsUsageClick(e) {
+        e.preventDefault();
+
+        if (typeof TmpltrAuth === 'undefined' || !TmpltrAuth.getSession) {
+            return;
+        }
+
+        const session = await TmpltrAuth.getSession();
+        if (!session || !session.access_token) {
+            return;
+        }
+
+        const url = tmpltrData.creditLogsUrl + '#auth_token=' + encodeURIComponent(session.access_token);
+        window.open(url, '_blank', 'noopener,noreferrer');
+        close();
+    }
+
     function bindEvents() {
         if (elements.trigger) {
             elements.trigger.addEventListener('click', function(e) {
@@ -275,6 +294,10 @@
                 e.stopPropagation();
                 toggleCredits();
             });
+        }
+
+        if (elements.creditsUsageBtn) {
+            elements.creditsUsageBtn.addEventListener('click', handleCreditsUsageClick);
         }
 
         document.addEventListener('click', handleClickOutside);
