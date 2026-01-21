@@ -1016,36 +1016,9 @@
                     >
                 </div>
 
-                <div class="prompt-group">
-                    <label for="prompt-guide-${promptNumber}">Guide</label>
-                    <textarea
-                        id="prompt-guide-${promptNumber}"
-                        name="prompt_guide-${promptNumber}"
-                        rows="2"
-                        class="large-text"
-                        placeholder="e.g., &quot;Place this text in the main hero section headline.&quot;"
-                    >${promptGuide}</textarea>
-                </div>
-
-                <div class="prompt-group">
-                    <label for="prompt-text-${promptNumber}">Prompt</label>
-                    <div class="highlight-wrapper">
-                        <div class="backdrop" id="prompt-backdrop-${promptNumber}"></div>
-                        <textarea
-                            id="prompt-text-${promptNumber}"
-                            name="prompt_text-${promptNumber}"
-                            rows="4"
-                            class="large-text"
-                            role="combobox"
-                            aria-autocomplete="list"
-                            aria-expanded="false"
-                        >${promptText}</textarea>
-                    </div>
-                </div>
-
-                <div class="prompt-group prompt-group-with-copy">
+                <div class="prompt-group prompt-group--actions">
                     <label for="prompt-placeholder-${promptNumber}">Placeholder</label>
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="prompt-actions-wrapper">
                         <input
                             type="text"
                             id="prompt-placeholder-${promptNumber}"
@@ -1057,12 +1030,38 @@
                         <button type="button" class="button button-small copy-btn" data-copy-target="prompt-placeholder-${promptNumber}" aria-label="Copy placeholder">
                             <span class="dashicons dashicons-admin-page"></span>
                         </button>
+                        <button type="button" class="button button-link-delete remove-prompt-btn" aria-label="Remove prompt">
+                            Remove
+                        </button>
                     </div>
                 </div>
 
-                <button type="button" class="button button-link-delete remove-prompt-btn" aria-label="Remove prompt">
-                    Remove
-                </button>
+                <div class="prompt-group">
+                    <label for="prompt-text-${promptNumber}">Prompt</label>
+                    <div class="highlight-wrapper">
+                        <div class="backdrop" id="prompt-backdrop-${promptNumber}"></div>
+                        <textarea
+                            id="prompt-text-${promptNumber}"
+                            name="prompt_text-${promptNumber}"
+                            rows="3"
+                            class="large-text"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                        >${promptText}</textarea>
+                    </div>
+                </div>
+
+                <div class="prompt-group">
+                    <label for="prompt-guide-${promptNumber}">Guide</label>
+                    <textarea
+                        id="prompt-guide-${promptNumber}"
+                        name="prompt_guide-${promptNumber}"
+                        rows="3"
+                        class="large-text"
+                        placeholder="e.g., Place this text in the main hero section headline."
+                    >${promptGuide}</textarea>
+                </div>
             </div>
         `;
     }
