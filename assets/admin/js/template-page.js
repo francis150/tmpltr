@@ -272,6 +272,7 @@
         promptRowsContainer.insertAdjacentHTML('beforeend', newPromptRow);
 
         setupTextareaHighlighting(promptCounter);
+        setupPromptTitleListener(promptCounter);
 
         debugLog(`Prompt ${promptCounter} added`);
 
@@ -996,7 +997,8 @@
         const promptTitle = promptData?.title || '';
         const promptGuide = promptData?.guide || '';
         const promptText = promptData?.prompt_text || '';
-        const promptPlaceholder = promptData?.placeholder || `{prompt_${promptNumber}}`;
+        const promptPlaceholder = promptData?.placeholder ||
+            (promptTitle ? generatePromptPlaceholder(promptTitle) : '');
 
         return `
             <div class="prompt-row" data-prompt-number="${promptNumber}">
@@ -1079,6 +1081,20 @@
         });
     }
 
+    function setupPromptTitleListener(promptNumber) {
+        const promptTitleInput = document.getElementById(`prompt-title-${promptNumber}`);
+        const promptPlaceholderInput = document.getElementById(`prompt-placeholder-${promptNumber}`);
+
+        if (!promptTitleInput || !promptPlaceholderInput) {
+            return;
+        }
+
+        promptTitleInput.addEventListener('input', function() {
+            promptPlaceholderInput.value = generatePromptPlaceholder(this.value);
+            validatePromptTitles();
+        });
+    }
+
     /**
      * Generates identifier from field name (e.g., "My Field" → "@my_field")
      */
@@ -1087,6 +1103,14 @@
             .toLowerCase()
             .replace(/\s+/g, '_')
             .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function generatePromptPlaceholder(title) {
+        const base = title
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/[^a-z0-9_]/g, '');
+        return base ? `{${base}}` : '';
     }
 
     function validateDuplicates(selector, errorMessage, options = {}) {
@@ -1179,6 +1203,18 @@
         );
     }
 
+    function validatePromptTitles() {
+        validateDuplicates(
+            '[id^="prompt-title-"]',
+            'This prompt title is already in use',
+            {
+                caseSensitive: false,
+                trimWhitespace: true,
+                ignoreEmpty: true
+            }
+        );
+    }
+
     function validateFormBeforeSubmit() {
         clearValidationErrors();
 
@@ -1187,6 +1223,7 @@
         const promptTextareas = document.querySelectorAll('[id^="prompt-text-"]');
 
         validateFieldNames();
+        validatePromptTitles();
 
         fieldNameInputs.forEach(input => {
             if (!input.value.trim()) {
@@ -1321,6 +1358,7 @@
             const promptRow = createPromptRow(promptCounter, prompt);
             promptRowsContainer.insertAdjacentHTML('beforeend', promptRow);
             setupTextareaHighlighting(promptCounter);
+            setupPromptTitleListener(promptCounter);
         });
     }
 
