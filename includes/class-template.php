@@ -214,6 +214,8 @@ class TmpltrTemplate {
             if (!empty($prompts)) {
                 $prompts_to_save = array_map(function($prompt) {
                     return [
+                        'title' => $prompt['title'],
+                        'guide' => $prompt['guide'],
                         'placeholder' => $prompt['placeholder'],
                         'text' => $prompt['prompt_text']
                     ];
@@ -462,6 +464,8 @@ class TmpltrTemplate {
         foreach ($prompts_array as $index => $prompt) {
             $prompt_data = [
                 'template_id' => $this->id,
+                'title' => sanitize_text_field($prompt['title'] ?? ''),
+                'guide' => wp_kses_post($prompt['guide'] ?? ''),
                 'placeholder' => sanitize_text_field($prompt['placeholder'] ?? ''),
                 'prompt_text' => wp_kses_post($prompt['text'] ?? ''),
                 'prompt_order' => $index
@@ -474,7 +478,7 @@ class TmpltrTemplate {
                     $wpdb->prefix . 'tmpltr_template_prompts',
                     $prompt_data,
                     ['id' => $prompt_id],
-                    ['%d', '%s', '%s', '%d'],
+                    ['%d', '%s', '%s', '%s', '%s', '%d'],
                     ['%d']
                 );
 
@@ -490,7 +494,7 @@ class TmpltrTemplate {
                 $result = $wpdb->insert(
                     $wpdb->prefix . 'tmpltr_template_prompts',
                     $prompt_data,
-                    ['%d', '%s', '%s', '%d']
+                    ['%d', '%s', '%s', '%s', '%s', '%d']
                 );
 
                 if ($result === false) {

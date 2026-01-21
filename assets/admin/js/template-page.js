@@ -993,12 +993,35 @@
 
     function createPromptRow(promptNumber, promptData = null) {
         const promptId = promptData?.id || '';
+        const promptTitle = promptData?.title || '';
+        const promptGuide = promptData?.guide || '';
         const promptText = promptData?.prompt_text || '';
         const promptPlaceholder = promptData?.placeholder || `{prompt_${promptNumber}}`;
 
         return `
             <div class="prompt-row" data-prompt-number="${promptNumber}">
                 <input type="hidden" name="prompt_id-${promptNumber}" value="${promptId}">
+
+                <div class="prompt-group">
+                    <label for="prompt-title-${promptNumber}">Title</label>
+                    <input
+                        type="text"
+                        id="prompt-title-${promptNumber}"
+                        name="prompt_title-${promptNumber}"
+                        value="${promptTitle}"
+                        class="regular-text"
+                    >
+                </div>
+
+                <div class="prompt-group">
+                    <label for="prompt-guide-${promptNumber}">Guide</label>
+                    <textarea
+                        id="prompt-guide-${promptNumber}"
+                        name="prompt_guide-${promptNumber}"
+                        rows="2"
+                        class="large-text"
+                    >${promptGuide}</textarea>
+                </div>
 
                 <div class="prompt-group">
                     <label for="prompt-text-${promptNumber}">Prompt</label>
@@ -1173,6 +1196,14 @@
         promptTextareas.forEach(textarea => {
             if (!textarea.value.trim()) {
                 showValidationError(textarea, 'Prompt text is required');
+                hasErrors = true;
+            }
+        });
+
+        const promptTitleInputs = document.querySelectorAll('[id^="prompt-title-"]');
+        promptTitleInputs.forEach(input => {
+            if (!input.value.trim()) {
+                showValidationError(input, 'Prompt title is required');
                 hasErrors = true;
             }
         });
