@@ -1010,6 +1010,7 @@
                         name="prompt_title-${promptNumber}"
                         value="${promptTitle}"
                         class="regular-text"
+                        placeholder="e.g., Hero Section Headline"
                     >
                 </div>
 
@@ -1020,6 +1021,7 @@
                         name="prompt_guide-${promptNumber}"
                         rows="2"
                         class="large-text"
+                        placeholder="e.g., &quot;Place this text in the main hero section headline.&quot;"
                     >${promptGuide}</textarea>
                 </div>
 
