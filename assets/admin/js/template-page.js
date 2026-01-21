@@ -272,6 +272,7 @@
         promptRowsContainer.insertAdjacentHTML('beforeend', newPromptRow);
 
         setupTextareaHighlighting(promptCounter);
+        setupPromptTitleListener(promptCounter);
 
         debugLog(`Prompt ${promptCounter} added`);
 
@@ -993,32 +994,31 @@
 
     function createPromptRow(promptNumber, promptData = null) {
         const promptId = promptData?.id || '';
+        const promptTitle = promptData?.title || '';
+        const promptGuide = promptData?.guide || '';
         const promptText = promptData?.prompt_text || '';
-        const promptPlaceholder = promptData?.placeholder || `{prompt_${promptNumber}}`;
+        const promptPlaceholder = promptData?.placeholder ||
+            (promptTitle ? generatePromptPlaceholder(promptTitle) : '');
 
         return `
             <div class="prompt-row" data-prompt-number="${promptNumber}">
                 <input type="hidden" name="prompt_id-${promptNumber}" value="${promptId}">
 
                 <div class="prompt-group">
-                    <label for="prompt-text-${promptNumber}">Prompt</label>
-                    <div class="highlight-wrapper">
-                        <div class="backdrop" id="prompt-backdrop-${promptNumber}"></div>
-                        <textarea
-                            id="prompt-text-${promptNumber}"
-                            name="prompt_text-${promptNumber}"
-                            rows="4"
-                            class="large-text"
-                            role="combobox"
-                            aria-autocomplete="list"
-                            aria-expanded="false"
-                        >${promptText}</textarea>
-                    </div>
+                    <label for="prompt-title-${promptNumber}">Title</label>
+                    <input
+                        type="text"
+                        id="prompt-title-${promptNumber}"
+                        name="prompt_title-${promptNumber}"
+                        value="${promptTitle}"
+                        class="regular-text"
+                        placeholder="e.g., Hero Section Headline"
+                    >
                 </div>
 
-                <div class="prompt-group prompt-group-with-copy">
+                <div class="prompt-group prompt-group--actions">
                     <label for="prompt-placeholder-${promptNumber}">Placeholder</label>
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="prompt-actions-wrapper">
                         <input
                             type="text"
                             id="prompt-placeholder-${promptNumber}"
@@ -1030,12 +1030,38 @@
                         <button type="button" class="button button-small copy-btn" data-copy-target="prompt-placeholder-${promptNumber}" aria-label="Copy placeholder">
                             <span class="dashicons dashicons-admin-page"></span>
                         </button>
+                        <button type="button" class="button button-link-delete remove-prompt-btn" aria-label="Remove prompt">
+                            Remove
+                        </button>
                     </div>
                 </div>
 
-                <button type="button" class="button button-link-delete remove-prompt-btn" aria-label="Remove prompt">
-                    Remove
-                </button>
+                <div class="prompt-group">
+                    <label for="prompt-text-${promptNumber}">Prompt</label>
+                    <div class="highlight-wrapper">
+                        <div class="backdrop" id="prompt-backdrop-${promptNumber}"></div>
+                        <textarea
+                            id="prompt-text-${promptNumber}"
+                            name="prompt_text-${promptNumber}"
+                            rows="3"
+                            class="large-text"
+                            role="combobox"
+                            aria-autocomplete="list"
+                            aria-expanded="false"
+                        >${promptText}</textarea>
+                    </div>
+                </div>
+
+                <div class="prompt-group">
+                    <label for="prompt-guide-${promptNumber}">Guide</label>
+                    <textarea
+                        id="prompt-guide-${promptNumber}"
+                        name="prompt_guide-${promptNumber}"
+                        rows="3"
+                        class="large-text"
+                        placeholder="e.g., Place this text in the main hero section headline."
+                    >${promptGuide}</textarea>
+                </div>
             </div>
         `;
     }
@@ -1054,6 +1080,20 @@
         });
     }
 
+    function setupPromptTitleListener(promptNumber) {
+        const promptTitleInput = document.getElementById(`prompt-title-${promptNumber}`);
+        const promptPlaceholderInput = document.getElementById(`prompt-placeholder-${promptNumber}`);
+
+        if (!promptTitleInput || !promptPlaceholderInput) {
+            return;
+        }
+
+        promptTitleInput.addEventListener('input', function() {
+            promptPlaceholderInput.value = generatePromptPlaceholder(this.value);
+            validatePromptTitles();
+        });
+    }
+
     /**
      * Generates identifier from field name (e.g., "My Field" → "@my_field")
      */
@@ -1062,6 +1102,14 @@
             .toLowerCase()
             .replace(/\s+/g, '_')
             .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function generatePromptPlaceholder(title) {
+        const base = title
+            .toLowerCase()
+            .replace(/\s+/g, '_')
+            .replace(/[^a-z0-9_]/g, '');
+        return base ? `{${base}}` : '';
     }
 
     function validateDuplicates(selector, errorMessage, options = {}) {
@@ -1154,6 +1202,18 @@
         );
     }
 
+    function validatePromptTitles() {
+        validateDuplicates(
+            '[id^="prompt-title-"]',
+            'This prompt title is already in use',
+            {
+                caseSensitive: false,
+                trimWhitespace: true,
+                ignoreEmpty: true
+            }
+        );
+    }
+
     function validateFormBeforeSubmit() {
         clearValidationErrors();
 
@@ -1162,6 +1222,7 @@
         const promptTextareas = document.querySelectorAll('[id^="prompt-text-"]');
 
         validateFieldNames();
+        validatePromptTitles();
 
         fieldNameInputs.forEach(input => {
             if (!input.value.trim()) {
@@ -1173,6 +1234,14 @@
         promptTextareas.forEach(textarea => {
             if (!textarea.value.trim()) {
                 showValidationError(textarea, 'Prompt text is required');
+                hasErrors = true;
+            }
+        });
+
+        const promptTitleInputs = document.querySelectorAll('[id^="prompt-title-"]');
+        promptTitleInputs.forEach(input => {
+            if (!input.value.trim()) {
+                showValidationError(input, 'Prompt title is required');
                 hasErrors = true;
             }
         });
@@ -1288,6 +1357,7 @@
             const promptRow = createPromptRow(promptCounter, prompt);
             promptRowsContainer.insertAdjacentHTML('beforeend', promptRow);
             setupTextareaHighlighting(promptCounter);
+            setupPromptTitleListener(promptCounter);
         });
     }
 

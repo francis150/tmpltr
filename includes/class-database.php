@@ -54,6 +54,8 @@ class TmpltrDatabase {
         $sql_prompts = "CREATE TABLE {$wpdb->prefix}tmpltr_template_prompts (
           id bigint(20) NOT NULL AUTO_INCREMENT,
           template_id bigint(20) NOT NULL,
+          title varchar(255) NOT NULL,
+          guide longtext,
           placeholder varchar(100) NOT NULL,
           prompt_text longtext NOT NULL,
           prompt_order int(11) DEFAULT 0,

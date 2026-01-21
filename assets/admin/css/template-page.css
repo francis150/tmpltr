@@ -101,19 +101,36 @@ select.validation-error:focus {
 }
 
 .prompt-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 15px;
     margin-bottom: 10px;
     padding: 10px;
     background: #f9f9f9;
     border: 1px solid #ddd;
 }
 
-.prompt-group {
-    flex: 1 1 300px;
-    min-width: 200px;
+.prompt-row > input[type="hidden"] {
+    display: none;
+}
+
+.prompt-group--actions {
+    display: flex;
+    flex-direction: column;
+}
+
+.prompt-actions-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.prompt-actions-wrapper input {
+    flex: 1;
+}
+
+.prompt-actions-wrapper .remove-prompt-btn {
+    flex-shrink: 0;
 }
 
 .prompt-group textarea {
@@ -136,12 +153,6 @@ select.validation-error:focus {
     font-weight: 500;
 }
 
-.remove-prompt-btn {
-    flex-shrink: 0;
-    align-self: flex-start;
-    margin-top: 28px;
-}
-
 .copy-btn {
     margin-left: 8px;
     padding: 4px 8px;
@@ -162,10 +173,6 @@ select.validation-error:focus {
     background-color: #00a32a;
     color: white;
     border-color: #00a32a;
-}
-
-.prompt-group-with-copy input {
-    flex: 1;
 }
 
 .highlight-wrapper {
@@ -287,13 +294,8 @@ select.validation-error:focus {
         padding: 15px 10px;
     }
 
-    .prompt-group {
-        flex: 1 1 100%;
-    }
-
-    .remove-prompt-btn {
-        flex: 0 0 100%;
-        margin-top: 10px;
+    .prompt-row {
+        gap: 10px;
     }
 }
 
@@ -345,22 +347,21 @@ select.validation-error:focus {
     }
 
     .prompt-row {
+        grid-template-columns: 1fr;
         gap: 8px;
         padding: 12px 8px;
-    }
-
-    .prompt-group {
-        flex: 1 1 100%;
-        min-width: 100%;
     }
 
     .prompt-group textarea {
         font-size: 16px; /* Prevents zoom on iOS */
     }
 
-    .remove-prompt-btn {
-        flex: 0 0 100%;
-        margin-top: 10px;
+    .prompt-actions-wrapper {
+        flex-wrap: wrap;
+    }
+
+    .prompt-actions-wrapper .remove-prompt-btn {
+        width: 100%;
         padding: 10px 15px;
         min-height: 44px;
     }
