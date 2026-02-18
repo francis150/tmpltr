@@ -30,6 +30,7 @@
     let promptCounter = 0;
     let lastPageLoadTime = 0;
     let pageSelectorLoaded = false;
+    let promptTitleWarningShown = false;
     const PAGE_LOAD_DEBOUNCE = 1000; // 1 second
 
     function initFieldManagement() {
@@ -1013,6 +1014,7 @@
                         value="${promptTitle}"
                         class="regular-text"
                         placeholder="e.g., Hero Section Headline"
+                        ${promptData?.id ? `data-original-title="${promptTitle}"` : ''}
                     >
                 </div>
 
@@ -1083,12 +1085,33 @@
     function setupPromptTitleListener(promptNumber) {
         const promptTitleInput = document.getElementById(`prompt-title-${promptNumber}`);
         const promptPlaceholderInput = document.getElementById(`prompt-placeholder-${promptNumber}`);
+        const promptIdInput = document.querySelector(`input[name="prompt_id-${promptNumber}"]`);
 
         if (!promptTitleInput || !promptPlaceholderInput) {
             return;
         }
 
         promptTitleInput.addEventListener('input', function() {
+            const isExistingPrompt = promptIdInput && promptIdInput.value !== '';
+            const originalTitle = this.dataset.originalTitle;
+
+            if (isExistingPrompt && !promptTitleWarningShown && originalTitle && this.value !== originalTitle) {
+                promptTitleWarningShown = true;
+
+                TmpltrPopup.confirmation({
+                    title: 'Title Change Warning',
+                    subtext: 'Changing the title will update the placeholder. You may need to update the template where this placeholder is used.',
+                    level: 'medium',
+                    cancelText: 'Proceed',
+                    confirmText: 'Revert',
+                    onConfirm: () => {
+                        this.value = originalTitle;
+                        promptPlaceholderInput.value = generatePromptPlaceholder(originalTitle);
+                        validatePromptTitles();
+                    }
+                });
+            }
+
             promptPlaceholderInput.value = generatePromptPlaceholder(this.value);
             validatePromptTitles();
         });
