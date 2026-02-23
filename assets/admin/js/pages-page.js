@@ -16,10 +16,7 @@
     };
 
     function init() {
-        const tableBody = document.querySelector(SELECTORS.tableBody);
-        if (tableBody) {
-            tableBody.addEventListener('click', handleTableClick);
-        }
+        document.addEventListener('click', handleTableClick);
 
         const generateBtn = document.querySelector(SELECTORS.generateBtn);
         if (generateBtn) {
@@ -208,8 +205,24 @@
     }
 
     function addPageRow(page) {
-        const tbody = document.querySelector(SELECTORS.tableBody);
-        if (!tbody) return;
+        let tbody = document.querySelector(SELECTORS.tableBody);
+
+        if (!tbody) {
+            const section = document.querySelector('.pages-section');
+            if (!section) return;
+
+            const table = document.createElement('table');
+            table.className = 'wp-list-table widefat striped';
+
+            const thead = document.createElement('thead');
+            thead.innerHTML = '<tr><th>Page Title</th><th>Created</th><th>Actions</th></tr>';
+
+            tbody = document.createElement('tbody');
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            section.appendChild(table);
+        }
 
         hideEmptyState();
 
