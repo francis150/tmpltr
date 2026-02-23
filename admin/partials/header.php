@@ -29,6 +29,8 @@
                     <span class="tmpltr-header__credits-dropdown-label">Purchased</span>
                     <span class="tmpltr-header__credits-dropdown-value" id="tmpltr-purchased-credits">0</span>
                 </div>
+                <div class="tmpltr-header__credits-dropdown-divider"></div>
+                <p class="tmpltr-header__credits-dropdown-hint">1 prompt = 1 credit</p>
             </div>
             <a href="<?php echo esc_url(TmpltrConstants::WEBSITE_URL); ?>" class="tmpltr-header__credits-add" target="_blank" rel="noopener noreferrer">
                 <svg class="tmpltr-header__credits-add-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
