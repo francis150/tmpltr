@@ -23,7 +23,8 @@
         FIELD_IDENTIFIER: '[id^="field-identifier-"]',
         AUTOCOMPLETE_DROPDOWN: '.prompt-autocomplete',
         HIGHLIGHT_WRAPPER: '.highlight-wrapper',
-        BACKDROP: '.backdrop'
+        BACKDROP: '.backdrop',
+        CREDIT_COST_VALUE: '#tmpltr-credit-cost-value'
     };
 
     let fieldCounter = 0;
@@ -274,6 +275,7 @@
 
         setupTextareaHighlighting(promptCounter);
         setupPromptTitleListener(promptCounter);
+        updateCreditCost();
 
         debugLog(`Prompt ${promptCounter} added`);
 
@@ -294,8 +296,17 @@
         if (promptRow) {
             const promptNumber = promptRow.dataset.promptNumber;
             promptRow.remove();
+            updateCreditCost();
             debugLog(`Prompt ${promptNumber} removed`);
         }
+    }
+
+    function updateCreditCost() {
+        const promptRows = document.querySelectorAll(SELECTORS.PROMPT_ROW);
+        const creditCostEl = document.querySelector(SELECTORS.CREDIT_COST_VALUE);
+        if (!creditCostEl) return;
+        creditCostEl.textContent = promptRows.length;
+        debugLog(`Credit cost updated: ${promptRows.length}`);
     }
 
     function handleCopyPlaceholder(e) {
@@ -1382,6 +1393,8 @@
             setupTextareaHighlighting(promptCounter);
             setupPromptTitleListener(promptCounter);
         });
+
+        updateCreditCost();
     }
 
 
