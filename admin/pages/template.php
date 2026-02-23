@@ -62,7 +62,12 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                 </a>
                 <h1><?= $template->get_name(); ?></h1>
             </div>
-            <div class="tmpltr-page-header__right"></div>
+            <div class="tmpltr-page-header__right">
+                <div class="tmpltr-page-header__credit-cost">
+                    <span class="tmpltr-page-header__credit-cost-label">Credit Cost:</span>
+                    <span class="tmpltr-page-header__credit-cost-value" id="tmpltr-credit-cost-value">0</span>
+                </div>
+            </div>
         </div>
 
         <form action="#" class="template-form">

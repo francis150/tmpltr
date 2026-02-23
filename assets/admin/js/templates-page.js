@@ -260,7 +260,7 @@
 
         TmpltrPopup.form({
             title: `Generate from ${templateName}`,
-            subtext: 'Fill in the fields below to generate a new page',
+            subtext: `Fill in the fields below to generate a new page. <strong>Credit cost: ${prompts.length}</strong>`,
             level: 'low',
             inputs: inputs,
             submitText: 'Generate Page',

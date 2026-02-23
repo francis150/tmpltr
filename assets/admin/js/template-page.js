@@ -23,7 +23,9 @@
         FIELD_IDENTIFIER: '[id^="field-identifier-"]',
         AUTOCOMPLETE_DROPDOWN: '.prompt-autocomplete',
         HIGHLIGHT_WRAPPER: '.highlight-wrapper',
-        BACKDROP: '.backdrop'
+        BACKDROP: '.backdrop',
+        CREDIT_COST_VALUE: '#tmpltr-credit-cost-value',
+        BACK_BTN: '.tmpltr-back-btn'
     };
 
     let fieldCounter = 0;
@@ -252,12 +254,26 @@
         e.preventDefault();
         const fieldRow = e.target.closest(SELECTORS.FIELD_ROW);
 
-        if (fieldRow) {
-            const fieldNumber = fieldRow.dataset.fieldNumber;
-            fieldRow.remove();
-            debugLog(`Field ${fieldNumber} removed`);
-            validateFieldNames();
+        if (!fieldRow) {
+            return;
         }
+
+        const fieldNumber = fieldRow.dataset.fieldNumber;
+        const fieldNameInput = fieldRow.querySelector(`#field-name-${fieldNumber}`);
+        const fieldName = fieldNameInput?.value.trim() || 'this field';
+
+        TmpltrPopup.confirmation({
+            title: 'Remove Field?',
+            subtext: `Are you sure you want to remove "${fieldName}"?`,
+            level: 'high',
+            confirmText: 'Remove',
+            cancelText: 'Cancel',
+            onConfirm: () => {
+                fieldRow.remove();
+                debugLog(`Field ${fieldNumber} removed`);
+                validateFieldNames();
+            }
+        });
     }
 
     function handleAddPrompt(e) {
@@ -274,6 +290,7 @@
 
         setupTextareaHighlighting(promptCounter);
         setupPromptTitleListener(promptCounter);
+        updateCreditCost();
 
         debugLog(`Prompt ${promptCounter} added`);
 
@@ -291,11 +308,34 @@
         e.preventDefault();
         const promptRow = e.target.closest(SELECTORS.PROMPT_ROW);
 
-        if (promptRow) {
-            const promptNumber = promptRow.dataset.promptNumber;
-            promptRow.remove();
-            debugLog(`Prompt ${promptNumber} removed`);
+        if (!promptRow) {
+            return;
         }
+
+        const promptNumber = promptRow.dataset.promptNumber;
+        const promptTitleInput = promptRow.querySelector(`#prompt-title-${promptNumber}`);
+        const promptTitle = promptTitleInput?.value.trim() || 'this prompt';
+
+        TmpltrPopup.confirmation({
+            title: 'Remove Prompt?',
+            subtext: `Are you sure you want to remove "${promptTitle}"?`,
+            level: 'high',
+            confirmText: 'Remove',
+            cancelText: 'Cancel',
+            onConfirm: () => {
+                promptRow.remove();
+                updateCreditCost();
+                debugLog(`Prompt ${promptNumber} removed`);
+            }
+        });
+    }
+
+    function updateCreditCost() {
+        const promptRows = document.querySelectorAll(SELECTORS.PROMPT_ROW);
+        const creditCostEl = document.querySelector(SELECTORS.CREDIT_COST_VALUE);
+        if (!creditCostEl) return;
+        creditCostEl.textContent = promptRows.length;
+        debugLog(`Credit cost updated: ${promptRows.length}`);
     }
 
     function handleCopyPlaceholder(e) {
@@ -1309,6 +1349,16 @@
         initPromptManagement();
         initPageSelector();
         loadExistingData();
+
+        const backBtn = document.querySelector(SELECTORS.BACK_BTN);
+        if (backBtn) {
+            backBtn.addEventListener('click', function (e) {
+                if (history.length > 1) {
+                    e.preventDefault();
+                    history.back();
+                }
+            });
+        }
     }
 
     function getTemplateId() {
@@ -1382,6 +1432,8 @@
             setupTextareaHighlighting(promptCounter);
             setupPromptTitleListener(promptCounter);
         });
+
+        updateCreditCost();
     }
 
 

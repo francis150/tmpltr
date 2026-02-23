@@ -12,18 +12,26 @@
         pageRow: 'tr[data-generated-page-id]',
         deleteBtn: '.pages-delete-btn',
         statsNumber: '.pages-stats__number',
-        generateBtn: '.generate-template-btn'
+        generateBtn: '.generate-template-btn',
+        backBtn: '.tmpltr-back-btn'
     };
 
     function init() {
-        const tableBody = document.querySelector(SELECTORS.tableBody);
-        if (tableBody) {
-            tableBody.addEventListener('click', handleTableClick);
-        }
+        document.addEventListener('click', handleTableClick);
 
         const generateBtn = document.querySelector(SELECTORS.generateBtn);
         if (generateBtn) {
             generateBtn.addEventListener('click', handleGenerateClick);
+        }
+
+        const backBtn = document.querySelector(SELECTORS.backBtn);
+        if (backBtn) {
+            backBtn.addEventListener('click', function (e) {
+                if (history.length > 1) {
+                    e.preventDefault();
+                    history.back();
+                }
+            });
         }
     }
 
@@ -186,7 +194,7 @@
 
         TmpltrPopup.form({
             title: `Generate from ${templateName}`,
-            subtext: 'Fill in the fields below to generate a new page',
+            subtext: `Fill in the fields below to generate a new page. <strong>Credit cost: ${prompts.length}</strong>`,
             level: 'low',
             inputs: inputs,
             submitText: 'Generate Page',
@@ -208,8 +216,24 @@
     }
 
     function addPageRow(page) {
-        const tbody = document.querySelector(SELECTORS.tableBody);
-        if (!tbody) return;
+        let tbody = document.querySelector(SELECTORS.tableBody);
+
+        if (!tbody) {
+            const section = document.querySelector('.pages-section');
+            if (!section) return;
+
+            const table = document.createElement('table');
+            table.className = 'wp-list-table widefat striped';
+
+            const thead = document.createElement('thead');
+            thead.innerHTML = '<tr><th>Page Title</th><th>Created</th><th>Actions</th></tr>';
+
+            tbody = document.createElement('tbody');
+
+            table.appendChild(thead);
+            table.appendChild(tbody);
+            section.appendChild(table);
+        }
 
         hideEmptyState();
 

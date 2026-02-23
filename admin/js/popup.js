@@ -202,7 +202,7 @@
             if (opts.subtext) {
                 const subtext = document.createElement('p');
                 subtext.className = 'tmpltr-popup__subtext';
-                subtext.textContent = opts.subtext;
+                subtext.innerHTML = opts.subtext;
                 body.appendChild(subtext);
             }
 
@@ -281,7 +281,7 @@
             if (opts.subtext) {
                 const subtext = document.createElement('p');
                 subtext.className = 'tmpltr-popup__subtext';
-                subtext.textContent = opts.subtext;
+                subtext.innerHTML = opts.subtext;
                 body.appendChild(subtext);
             }
 
