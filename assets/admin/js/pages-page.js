@@ -12,7 +12,8 @@
         pageRow: 'tr[data-generated-page-id]',
         deleteBtn: '.pages-delete-btn',
         statsNumber: '.pages-stats__number',
-        generateBtn: '.generate-template-btn'
+        generateBtn: '.generate-template-btn',
+        backBtn: '.tmpltr-back-btn'
     };
 
     function init() {
@@ -21,6 +22,16 @@
         const generateBtn = document.querySelector(SELECTORS.generateBtn);
         if (generateBtn) {
             generateBtn.addEventListener('click', handleGenerateClick);
+        }
+
+        const backBtn = document.querySelector(SELECTORS.backBtn);
+        if (backBtn) {
+            backBtn.addEventListener('click', function (e) {
+                if (history.length > 1) {
+                    e.preventDefault();
+                    history.back();
+                }
+            });
         }
     }
 

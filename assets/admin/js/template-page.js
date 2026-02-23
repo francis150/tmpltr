@@ -24,7 +24,8 @@
         AUTOCOMPLETE_DROPDOWN: '.prompt-autocomplete',
         HIGHLIGHT_WRAPPER: '.highlight-wrapper',
         BACKDROP: '.backdrop',
-        CREDIT_COST_VALUE: '#tmpltr-credit-cost-value'
+        CREDIT_COST_VALUE: '#tmpltr-credit-cost-value',
+        BACK_BTN: '.tmpltr-back-btn'
     };
 
     let fieldCounter = 0;
@@ -1320,6 +1321,16 @@
         initPromptManagement();
         initPageSelector();
         loadExistingData();
+
+        const backBtn = document.querySelector(SELECTORS.BACK_BTN);
+        if (backBtn) {
+            backBtn.addEventListener('click', function (e) {
+                if (history.length > 1) {
+                    e.preventDefault();
+                    history.back();
+                }
+            });
+        }
     }
 
     function getTemplateId() {
