@@ -148,6 +148,49 @@
     color: #d63638;
 }
 
+.template-starter-notice {
+    width: fit-content;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    background-color: #fffbeb;
+    border-left: 3px solid #ff99006e;
+    border-bottom: 1px solid #ff99006e;
+    border-right: 1px solid #ff99006e;
+    border-top: 1px solid #ff99006e;
+    border-radius: 6px;
+}
+
+.template-starter-notice p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #996800;
+    white-space: nowrap;
+}
+
+.template-starter-notice__btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    background-color: #ff9b00;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    white-space: nowrap;
+    line-height: 1.6;
+}
+
+.template-starter-notice__btn:hover {
+    background-color: #e68a00;
+    color: #fff;
+}
+
 @media screen and (max-width: 782px) {
     .wp-list-table td {
         padding: 10px;
