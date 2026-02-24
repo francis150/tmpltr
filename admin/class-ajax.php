@@ -8,6 +8,7 @@ class TmpltrAjax {
 	public function __construct() {
 		// Page handlers
 		add_action('wp_ajax_tmpltr_get_pages', [$this, 'get_pages']);
+		add_action('wp_ajax_tmpltr_get_page_content', [$this, 'get_page_content']);
 
 		// Template handlers
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
@@ -80,6 +81,44 @@ class TmpltrAjax {
 		wp_send_json_success([
 			'pages' => $pages_data,
 			'count' => count($pages_data)
+		]);
+	}
+
+	/**
+	 * AJAX handler: Get a single WordPress page's content
+	 * Returns page title, content, and status for the template export feature
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function get_page_content() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		$page_id = isset($_POST['page_id']) ? absint($_POST['page_id']) : 0;
+
+		if (empty($page_id)) {
+			wp_send_json_error(['message' => 'Page ID is required']);
+			return;
+		}
+
+		$page = get_post($page_id);
+
+		if (!$page || $page->post_type !== 'page') {
+			wp_send_json_error(['message' => 'Page not found']);
+			return;
+		}
+
+		wp_send_json_success([
+			'title'   => $page->post_title,
+			'content' => $page->post_content,
+			'status'  => $page->post_status,
 		]);
 	}
 

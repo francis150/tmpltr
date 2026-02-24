@@ -275,6 +275,7 @@ select.validation-error:focus {
     font-size: 13px;
     font-weight: 500;
     color: #1d2327;
+    cursor: pointer;
 }
 
 .tmpltr-page-header__credit-cost-label {
