@@ -1,0 +1,113 @@
+{
+  "tmpltr_version": "1.0.4",
+  "template": {
+    "name": "SEO-Focused Location Page (Starter Template)",
+    "description": "",
+    "status": "published",
+    "fields": [
+      {
+        "identifier": "@city",
+        "name": "City",
+        "default_value": "",
+        "required": true
+      },
+      {
+        "identifier": "@state",
+        "name": "State",
+        "default_value": "",
+        "required": true
+      },
+      {
+        "identifier": "@target_keyword",
+        "name": "Target Keyword",
+        "default_value": "",
+        "required": true
+      }
+    ],
+    "prompts": [
+      {
+        "title": "H1 Heading",
+        "placeholder": "{h1_heading}",
+        "guide": "Use as the main page headline. There should only be one H1 per page. Place it at the very top of your page content.",
+        "text": "Write a single H1 heading for a location page about @target_keyword in @city, @state. Include the keyword and city naturally. Keep it under 70 characters."
+      },
+      {
+        "title": "Hero Paragraph",
+        "placeholder": "{hero_paragraph}",
+        "guide": "Place directly below the H1 heading as the opening text visitors see first.",
+        "text": "Write a short 2-3 sentence opening paragraph for a location page about @target_keyword in @city, @state. Immediately establish what the business does and where it operates. Weave in the keyword naturally within the first two sentences. Keep the tone professional and confident."
+      },
+      {
+        "title": "Local Area Section Heading",
+        "placeholder": "{local_area_section_heading}",
+        "guide": "Use as an H2 heading to introduce the local area section.",
+        "text": "Write a short H2 heading for a section about the @city, @state area and how it relates to @target_keyword. Make it natural and locally relevant, not generic."
+      },
+      {
+        "title": "Local Area Content",
+        "placeholder": "{local_area_content}",
+        "guide": "Place directly below the Local Area heading. This section builds local relevance for SEO.",
+        "text": "Write a 150-200 word paragraph about @city, @state that establishes local relevance for a @target_keyword business. Reference well-known neighborhoods, landmarks, or characteristics of the area. Explain why residents in @city need or benefit from this service. Include @target_keyword once naturally. Do not make up specific statistics. Write naturally — this should read like it was written by someone who knows the area."
+      },
+      {
+        "title": "Services Section Heading",
+        "placeholder": "{services_section_heading}",
+        "guide": "Use as an H2 heading to introduce the services section.",
+        "text": "Write a short H2 heading for a section describing @target_keyword offerings in @city, @state. Keep it keyword-rich but not stuffed."
+      },
+      {
+        "title": "Services Content",
+        "placeholder": "{services_content}",
+        "guide": "Place directly below the Services heading. Describes what the business offers.",
+        "text": "Write a 150-200 word paragraph describing the services related to @target_keyword available in @city, @state. Cover 3-4 specific sub-services or specializations that would be relevant. Tailor the sub-services to what makes sense for @target_keyword. Include the keyword once naturally. Write with authority."
+      },
+      {
+        "title": "Why Choose Us Heading",
+        "placeholder": "{why_choose_us_heading}",
+        "guide": "Use as an H2 heading to introduce the trust/credibility section.",
+        "text": "Write a short H2 heading for a trust-building section about choosing a @target_keyword provider in @city, @state. Avoid the generic phrase \"Why Choose Us\" — make it more compelling."
+      },
+      {
+        "title": "Why Choose Us Content",
+        "placeholder": "{why_choose_us_content}",
+        "guide": "Place directly below the Why Choose Us heading. Builds trust and credibility.",
+        "text": "Write a 120-150 word paragraph explaining why someone in @city, @state should choose a trusted local provider for @target_keyword. Focus on trust signals: experience, local knowledge, customer commitment, and reliability. Include the keyword once naturally. Do not fabricate specific numbers, awards, or certifications."
+      },
+      {
+        "title": "FAQ Heading",
+        "placeholder": "{faq_heading}",
+        "guide": "Use as an H2 heading to introduce the FAQ section.",
+        "text": "Write a short H2 heading for a FAQ section about @target_keyword in @city, @state. Keep it simple and SEO-friendly."
+      },
+      {
+        "title": "FAQ Content",
+        "placeholder": "{faq_content}",
+        "guide": "Place directly below the FAQ heading. These target featured snippets in Google search results.",
+        "text": "Write 4 frequently asked questions with answers about @target_keyword in @city, @state. Format each as: the question in bold followed by a 2-3 sentence answer. Questions should reflect what real customers would search for on Google. Include @target_keyword naturally in at least one question. Include the city name naturally in at least 2 of the answers. Do not use numbered lists. Make sure to use new line after every question and every answer."
+      },
+      {
+        "title": "CTA",
+        "placeholder": "{cta}",
+        "guide": "Place near the bottom of the page. Add a contact button or phone number next to this text.",
+        "text": "Write 7 to 10 word short phrase/sentence call-to-action paragraph encouraging the reader to get in touch for @target_keyword in @city, @state. Create urgency without being pushy. End with a clear next step."
+      },
+      {
+        "title": "Service Areas Heading",
+        "placeholder": "{service_areas_heading}",
+        "guide": "Place this as the H2 heading for the service areas section, typically near the bottom of the page above the footer.",
+        "text": "Write a short H2 heading for a section about the areas near @city, @state where the business provides @service. Keep it locally relevant and natural."
+      },
+      {
+        "title": "Service Areas Content",
+        "placeholder": "{service_areas_content}",
+        "guide": "Place this below the Service Areas heading. This paragraph mentions nearby cities to show coverage area and boost local SEO relevance.",
+        "text": "Write a brief 2-3 sentence paragraph mentioning 4-6 nearby cities or communities surrounding @city, @state where the business also provides services. Also for each of the nearby location, make sure to link it to a wikipedia link. Write it naturally, not as a list. Make it read like a helpful note about coverage area."
+      }
+    ]
+  },
+  "page": {
+    "title": "Location Page Template (Starter)",
+    "content": "<!-- wp:heading {\"level\":1} -->\n<h1 class=\"wp-block-heading\">{h1_heading}</h1>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{hero_paragraph}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{local_area_section_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{local_area_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{services_section_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{services_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{why_choose_us_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{why_choose_us_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{faq_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{faq_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{cta}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{service_areas_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{service_areas_content}</p>\n<!-- /wp:paragraph -->",
+    "status": "draft"
+  }
+}

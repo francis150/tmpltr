@@ -16,7 +16,8 @@
         statusBadge: '.template-status-badge',
         optionsTrigger: '.template-options__trigger',
         optionsDropdown: '.template-options__dropdown',
-        optionsContainer: '.template-options'
+        optionsContainer: '.template-options',
+        importStarterBtn: '.import-starter-btn'
     };
 
     const CLASSES = {
@@ -33,6 +34,62 @@
         tableBody.addEventListener('click', handleTableClick);
         document.addEventListener('click', handleDocumentClick);
         document.addEventListener('keydown', handleKeydown);
+    }
+
+    function initImportStarter() {
+        const btn = document.querySelector(SELECTORS.importStarterBtn);
+        if (!btn) return;
+
+        btn.addEventListener('click', handleImportStarterClick);
+    }
+
+    function handleImportStarterClick() {
+        TmpltrPopup.confirmation({
+            title: 'Import Starter Template?',
+            subtext: 'This will create a "Location Page Starter Template" and a linked draft WordPress page.',
+            level: 'low',
+            confirmText: 'Import',
+            cancelText: 'Cancel',
+            onConfirm: importStarterTemplate
+        });
+    }
+
+    function importStarterTemplate() {
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_import_starter_template',
+                nonce: tmpltrData.nonce
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TmpltrToast.success({
+                    title: 'Starter template imported',
+                    subtext: 'Redirecting to editor...'
+                });
+                setTimeout(() => {
+                    window.location.href = data.data.edit_url;
+                }, 1200);
+            } else {
+                TmpltrToast.error({
+                    title: 'Import failed',
+                    subtext: data.data?.message || 'Unknown error occurred',
+                    seconds: 7
+                });
+            }
+        })
+        .catch(() => {
+            TmpltrToast.error({
+                title: 'Network error',
+                subtext: 'Failed to import starter template. Please check your connection.',
+                seconds: 8
+            });
+        });
     }
 
     function handleTableClick(e) {
@@ -450,5 +507,8 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', initTemplateList);
+    document.addEventListener('DOMContentLoaded', function() {
+        initTemplateList();
+        initImportStarter();
+    });
 })();

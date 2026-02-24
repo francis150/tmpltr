@@ -21,6 +21,7 @@ $templates = TmpltrTemplate::get_all();
                 <h1>Templates</h1>
             </div>
             <div class="tmpltr-page-header__right">
+                <button type="button" class="button button-secondary button-hero import-starter-btn">Import Starter</button>
                 <a href="#" class="button button-secondary button-hero">✨ Community Templates</a>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
             </div>
