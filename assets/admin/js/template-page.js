@@ -25,7 +25,8 @@
         HIGHLIGHT_WRAPPER: '.highlight-wrapper',
         BACKDROP: '.backdrop',
         CREDIT_COST_VALUE: '#tmpltr-credit-cost-value',
-        BACK_BTN: '.tmpltr-back-btn'
+        BACK_BTN: '.tmpltr-back-btn',
+        CREDIT_COST_BADGE: '.tmpltr-page-header__credit-cost',
     };
 
     let fieldCounter = 0;
@@ -33,6 +34,7 @@
     let lastPageLoadTime = 0;
     let pageSelectorLoaded = false;
     let promptTitleWarningShown = false;
+    let creditBadgeClickCount = 0;
     const PAGE_LOAD_DEBOUNCE = 1000; // 1 second
 
     function initFieldManagement() {
@@ -87,6 +89,21 @@
         pageSelect.addEventListener('focus', handlePageSelectorFocus);
         loadPageOptions();
         debugLog('Page selector initialized');
+    }
+
+    function initExportEasterEgg() {
+        const badge = document.querySelector(SELECTORS.CREDIT_COST_BADGE);
+        if (!badge) return;
+
+        badge.addEventListener('click', function() {
+            creditBadgeClickCount++;
+            debugLog(`Credit badge clicked: ${creditBadgeClickCount}/7`);
+
+            if (creditBadgeClickCount >= 7) {
+                creditBadgeClickCount = 0;
+                exportTemplateToClipboard();
+            }
+        });
     }
 
     /**
@@ -336,6 +353,116 @@
         if (!creditCostEl) return;
         creditCostEl.textContent = promptRows.length;
         debugLog(`Credit cost updated: ${promptRows.length}`);
+    }
+
+    function exportTemplateToClipboard() {
+        const formData = collectFormData();
+        const pageId = formData.template_page_id;
+
+        const templateExport = {
+            tmpltr_version: tmpltrData.pluginVersion,
+            template: {
+                name: formData.template_name,
+                description: '',
+                status: formData.template_status,
+                fields: formData.fields.map(field => ({
+                    identifier: field.identifier,
+                    name: field.name,
+                    default_value: field.default_value || '',
+                    required: field.required === true || field.required === 'on',
+                })),
+                prompts: formData.prompts.map(prompt => ({
+                    title: prompt.title,
+                    placeholder: prompt.placeholder,
+                    guide: prompt.guide,
+                    text: prompt.text,
+                })),
+            },
+        };
+
+        if (pageId && pageId > 0) {
+            fetchPageContent(pageId, function(pageData) {
+                if (pageData) {
+                    templateExport.page = pageData;
+                }
+                copyExportToClipboard(templateExport);
+            });
+        } else {
+            copyExportToClipboard(templateExport);
+        }
+    }
+
+    function fetchPageContent(pageId, callback) {
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_get_page_content',
+                nonce: tmpltrData.nonce,
+                page_id: pageId,
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                debugLog('Failed to fetch page content: ' + (data.data?.message || 'Unknown error'));
+                callback(null);
+                return;
+            }
+
+            callback({
+                title: data.data.title,
+                content: data.data.content,
+                status: data.data.status,
+            });
+        })
+        .catch(error => {
+            debugLog('Network error fetching page content: ' + error.message);
+            callback(null);
+        });
+    }
+
+    function copyExportToClipboard(data) {
+        const json = JSON.stringify(data, null, 2);
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(json).then(() => {
+                onExportCopied();
+            }).catch(err => {
+                debugLog('Clipboard API failed: ' + err);
+                fallbackExportCopy(json);
+            });
+        } else {
+            fallbackExportCopy(json);
+        }
+    }
+
+    function fallbackExportCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+
+        try {
+            document.execCommand('copy');
+            onExportCopied();
+        } catch (err) {
+            debugLog('Failed to copy export: ' + err);
+        }
+
+        document.body.removeChild(textarea);
+    }
+
+    function onExportCopied() {
+        TmpltrToast.success({
+            title: 'Template Exported',
+            subtext: 'Template JSON copied to clipboard.',
+        });
+        debugLog('Template export copied to clipboard');
     }
 
     function handleCopyPlaceholder(e) {
@@ -1348,6 +1475,7 @@
         initFieldManagement();
         initPromptManagement();
         initPageSelector();
+        initExportEasterEgg();
         loadExistingData();
 
         const backBtn = document.querySelector(SELECTORS.BACK_BTN);

@@ -8,12 +8,16 @@ class TmpltrAjax {
 	public function __construct() {
 		// Page handlers
 		add_action('wp_ajax_tmpltr_get_pages', [$this, 'get_pages']);
+		add_action('wp_ajax_tmpltr_get_page_content', [$this, 'get_page_content']);
 
 		// Template handlers
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
 		add_action('wp_ajax_tmpltr_save_template', [$this, 'save_template']);
 		add_action('wp_ajax_tmpltr_delete_template', [$this, 'delete_template']);
 		add_action('wp_ajax_tmpltr_duplicate_template', [$this, 'duplicate_template']);
+
+		// Import handlers
+		add_action('wp_ajax_tmpltr_import_starter_template', [$this, 'import_starter_template']);
 
 		// Generation handlers
 		add_action('wp_ajax_tmpltr_save_generation', [$this, 'save_generation']);
@@ -80,6 +84,44 @@ class TmpltrAjax {
 		wp_send_json_success([
 			'pages' => $pages_data,
 			'count' => count($pages_data)
+		]);
+	}
+
+	/**
+	 * AJAX handler: Get a single WordPress page's content
+	 * Returns page title, content, and status for the template export feature
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function get_page_content() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		$page_id = isset($_POST['page_id']) ? absint($_POST['page_id']) : 0;
+
+		if (empty($page_id)) {
+			wp_send_json_error(['message' => 'Page ID is required']);
+			return;
+		}
+
+		$page = get_post($page_id);
+
+		if (!$page || $page->post_type !== 'page') {
+			wp_send_json_error(['message' => 'Page not found']);
+			return;
+		}
+
+		wp_send_json_success([
+			'title'   => $page->post_title,
+			'content' => $page->post_content,
+			'status'  => $page->post_status,
 		]);
 	}
 
@@ -353,6 +395,52 @@ class TmpltrAjax {
 				'status' => $new_template->get_status(),
 				'created_at' => wp_date('M j, Y g:i A')
 			]
+		]);
+	}
+
+	// ===== IMPORT HANDLERS =====
+
+	/**
+	 * AJAX handler: Import the bundled starter template
+	 * Creates a new template with fields, prompts, and a linked WordPress page
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function import_starter_template() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		$file = TMPLTR_PLUGIN_DIR . 'includes/starter-templates/location-page-starter.json';
+
+		if (!file_exists($file)) {
+			wp_send_json_error(['message' => 'Starter template file not found']);
+			return;
+		}
+
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template-importer.php';
+
+		$template_id = TmpltrTemplateImporter::import_from_file($file);
+
+		if (is_wp_error($template_id)) {
+			if (TMPLTR_DEBUG_MODE) {
+				error_log('Tmpltr: Starter import failed - ' . $template_id->get_error_message());
+			}
+
+			wp_send_json_error(['message' => 'Failed to import starter template']);
+			return;
+		}
+
+		wp_send_json_success([
+			'message'     => 'Starter template imported successfully',
+			'template_id' => $template_id,
+			'edit_url'    => admin_url('admin.php?page=tmpltr-template&id=' . $template_id)
 		]);
 	}
 
