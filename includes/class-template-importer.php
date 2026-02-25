@@ -31,6 +31,19 @@ class TmpltrTemplateImporter {
 
         $template_data = $data['template'];
         $page_data     = $data['page'] ?? null;
+        $import_id     = isset($template_data['id']) ? sanitize_text_field($template_data['id']) : '';
+
+        if ($import_id !== '') {
+            require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+            $existing = TmpltrTemplate::find_by_import_id($import_id);
+
+            if ($existing !== null) {
+                return new WP_Error(
+                    'already_imported',
+                    'This template has already been imported. You can find it in your template list.'
+                );
+            }
+        }
 
         global $wpdb;
         $wpdb->query('START TRANSACTION');
@@ -56,6 +69,10 @@ class TmpltrTemplateImporter {
             $template = new TmpltrTemplate();
             $template->set_name($template_data['name']);
             $template->set_status(sanitize_text_field($template_data['status'] ?? 'draft'));
+
+            if ($import_id !== '') {
+                $template->set_import_id($import_id);
+            }
 
             if ($page_id > 0) {
                 $template->set_template_page_id($page_id);

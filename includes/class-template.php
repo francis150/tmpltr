@@ -57,13 +57,14 @@ class TmpltrTemplate {
         $result = $wpdb->insert(
             $this->table_name,
             [
+                'import_id' => $this->data['import_id'] ?? null,
                 'name' => $this->data['name'] ?? 'Untitled Template',
                 'description' => $this->data['description'] ?? null,
                 'template_page_id' => $this->data['template_page_id'] ?? null,
                 'status' => $this->data['status'] ?? 'draft',
                 'created_by' => get_current_user_id(),
             ],
-            ['%s', '%s', '%d', '%s', '%d']
+            ['%s', '%s', '%s', '%d', '%s', '%d']
         );
 
         if ($result === false) {
@@ -245,6 +246,46 @@ class TmpltrTemplate {
      */
     public function get_id() {
         return $this->id;
+    }
+
+    /**
+     * Get import ID
+     *
+     * @return string
+     */
+    public function get_import_id() {
+        return $this->data['import_id'] ?? '';
+    }
+
+    /**
+     * Set import ID
+     *
+     * @param string $import_id
+     */
+    public function set_import_id($import_id) {
+        $this->data['import_id'] = sanitize_text_field($import_id);
+    }
+
+    /**
+     * Find a template by its import ID
+     *
+     * @param string $import_id
+     * @return TmpltrTemplate|null
+     */
+    public static function find_by_import_id($import_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'tmpltr_templates';
+
+        $id = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $table_name WHERE import_id = %s AND deleted_at IS NULL LIMIT 1",
+            sanitize_text_field($import_id)
+        ));
+
+        if (!$id) {
+            return null;
+        }
+
+        return new self((int) $id);
     }
 
     /**

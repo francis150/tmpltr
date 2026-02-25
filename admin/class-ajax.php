@@ -433,7 +433,10 @@ class TmpltrAjax {
 				error_log('Tmpltr: Starter import failed - ' . $template_id->get_error_message());
 			}
 
-			wp_send_json_error(['message' => 'Failed to import starter template']);
+			wp_send_json_error([
+				'message'    => $template_id->get_error_message(),
+				'error_code' => $template_id->get_error_code(),
+			]);
 			return;
 		}
 

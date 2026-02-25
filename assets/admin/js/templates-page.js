@@ -75,6 +75,12 @@
                 setTimeout(() => {
                     window.location.href = data.data.edit_url;
                 }, 1200);
+            } else if (data.data?.error_code === 'already_imported') {
+                TmpltrToast.warning({
+                    title: 'Already imported',
+                    subtext: data.data?.message || 'This template has already been imported.',
+                    seconds: 7
+                });
             } else {
                 TmpltrToast.error({
                     title: 'Import failed',
