@@ -21,10 +21,15 @@ $templates = TmpltrTemplate::get_all();
                 <h1>Templates</h1>
             </div>
             <div class="tmpltr-page-header__right">
+                <?php // Starter template banner — remove this block when no longer needed ?>
+                <?php $starter_imported = TmpltrTemplate::find_by_import_id('ST-001') !== null; ?>
+                <?php if (!$starter_imported) : ?>
                 <div class="template-starter-notice">
                     <p>Don't know where to start? Try importing our SEO-Focused Location Page (Starter Template)✨</p>
                     <button type="button" class="template-starter-notice__btn import-starter-btn">Import</button>
                 </div>
+                <?php endif; ?>
+                <?php // Starter template banner END — remove this block when no longer needed ?>
                 <span class="community-templates-btn">
                     <a href="#" class="button button-secondary button-hero community-templates-btn__trigger" aria-disabled="true" tabindex="-1">✨ Community Templates</a>
                     <span class="community-templates-btn__badge">Coming Soon</span>
