@@ -46,6 +46,13 @@ class TmpltrTemplateImporter {
         }
 
         global $wpdb;
+
+        if ($import_id !== '') {
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->prefix}tmpltr_templates SET import_id = NULL WHERE import_id = %s AND deleted_at IS NOT NULL",
+                $import_id
+            ));
+        }
         $wpdb->query('START TRANSACTION');
 
         try {

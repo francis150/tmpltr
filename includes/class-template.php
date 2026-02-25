@@ -143,13 +143,11 @@ class TmpltrTemplate {
             return false;
         }
 
-        $result = $wpdb->update(
-            $this->table_name,
-            ['deleted_at' => current_time('mysql')],
-            ['id' => $this->id],
-            ['%s'],
-            ['%d']
-        );
+        $result = $wpdb->query($wpdb->prepare(
+            "UPDATE $this->table_name SET deleted_at = %s, import_id = NULL WHERE id = %d",
+            current_time('mysql'),
+            $this->id
+        ));
 
         if ($result === false) {
             if (TMPLTR_DEBUG_MODE) {
