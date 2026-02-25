@@ -388,10 +388,10 @@
             if (data.success) {
                 TmpltrToast.success({
                     title: 'Template updated',
-                    subtext: data.data.message || 'Template has been updated successfully'
+                    subtext: 'Template updated successfully. Redirecting to template page...'
                 });
                 setTimeout(() => {
-                    window.location.reload();
+                    window.location.href = tmpltrData.siteUrl + 'wp-admin/admin.php?page=tmpltr-template&id=' + templateId;
                 }, 1200);
             } else {
                 TmpltrToast.error({
