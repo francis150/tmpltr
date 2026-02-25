@@ -25,7 +25,10 @@ $templates = TmpltrTemplate::get_all();
                     <p>Don't know where to start? Try importing our SEO-Focused Location Page (Starter Template)✨</p>
                     <button type="button" class="template-starter-notice__btn import-starter-btn">Import</button>
                 </div>
-                <a href="#" class="button button-secondary button-hero">✨ Community Templates</a>
+                <span class="community-templates-btn">
+                    <a href="#" class="button button-secondary button-hero community-templates-btn__trigger" aria-disabled="true" tabindex="-1">✨ Community Templates</a>
+                    <span class="community-templates-btn__badge">Coming Soon</span>
+                </span>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
             </div>
         </div>

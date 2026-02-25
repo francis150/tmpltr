@@ -191,6 +191,34 @@
     color: #fff;
 }
 
+.community-templates-btn {
+    position: relative;
+    display: inline-flex;
+}
+
+.community-templates-btn__trigger[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.community-templates-btn__badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 2px 7px;
+    background-color: #646970;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 @media screen and (max-width: 782px) {
     .wp-list-table td {
         padding: 10px;
