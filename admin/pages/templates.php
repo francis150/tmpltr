@@ -6,8 +6,19 @@
  */
 
 require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+require_once TMPLTR_PLUGIN_DIR . 'includes/class-template-importer.php';
 
 $templates = TmpltrTemplate::get_all();
+
+$import_updates = [];
+foreach ($templates as $template) {
+    if (!empty($template['import_id'])) {
+        $update = TmpltrTemplateImporter::get_available_update($template['import_id']);
+        if ($update) {
+            $import_updates[$template['id']] = $update;
+        }
+    }
+}
 ?>
 
 <div class="tmpltr-admin-page">
@@ -63,6 +74,13 @@ $templates = TmpltrTemplate::get_all();
                         </td>
                         <td><?php echo esc_html(wp_date('M j, Y g:i A', strtotime($template['created_at']))); ?></td>
                         <td class="template-actions">
+                            <?php if (isset($import_updates[$template['id']])) : ?>
+                                <button class="button update-import-btn"
+                                        data-template-id="<?php echo esc_attr($template['id']); ?>"
+                                        data-version="<?php echo esc_attr($import_updates[$template['id']]['new_version']); ?>">
+                                    Update to v<?php echo esc_html($import_updates[$template['id']]['new_version']); ?>
+                                </button>
+                            <?php endif; ?>
                             <button class="button button-primary generate-template-btn"<?php echo $template['status'] === 'draft' ? ' disabled' : ''; ?>>Generate</button>
                             <div class="template-options">
                                 <button type="button" class="template-options__trigger" aria-label="More options" aria-expanded="false">

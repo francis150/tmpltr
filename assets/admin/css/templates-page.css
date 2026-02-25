@@ -219,6 +219,25 @@
     white-space: nowrap;
 }
 
+.update-import-btn {
+    background-color: #ff9b00 !important;
+    border-color: #ff9b00 !important;
+    color: #fff !important;
+    font-weight: 500;
+    transition: background-color 0.15s ease;
+}
+
+.update-import-btn:hover {
+    background-color: #e68a00 !important;
+    border-color: #e68a00 !important;
+    color: #fff !important;
+}
+
+.update-import-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 @media screen and (max-width: 782px) {
     .wp-list-table td {
         padding: 10px;

@@ -13,6 +13,7 @@
         deleteBtn: '.delete-template-btn',
         duplicateBtn: '.template-options__item--duplicate',
         generateBtn: '.generate-template-btn',
+        updateImportBtn: '.update-import-btn',
         statusBadge: '.template-status-badge',
         optionsTrigger: '.template-options__trigger',
         optionsDropdown: '.template-options__dropdown',
@@ -99,6 +100,14 @@
     }
 
     function handleTableClick(e) {
+        const updateImportBtn = e.target.closest(SELECTORS.updateImportBtn);
+        if (updateImportBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleUpdateImportClick(updateImportBtn);
+            return;
+        }
+
         const generateBtn = e.target.closest(SELECTORS.generateBtn);
         if (generateBtn) {
             e.preventDefault();
@@ -341,6 +350,67 @@
                 }
             },
             cancelText: 'Cancel'
+        });
+    }
+
+    function handleUpdateImportClick(btn) {
+        const templateId = btn.dataset.templateId;
+        const version = btn.dataset.version;
+
+        TmpltrPopup.confirmation({
+            title: 'Update Template?',
+            subtext: `This will update the template's prompts and fields to v${version}. Your generated pages will not be affected.`,
+            level: 'low',
+            confirmText: 'Update',
+            cancelText: 'Cancel',
+            onConfirm: () => updateImportedTemplate(templateId, btn)
+        });
+    }
+
+    function updateImportedTemplate(templateId, btn) {
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Updating...';
+
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_update_imported_template',
+                nonce: tmpltrData.nonce,
+                template_id: templateId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TmpltrToast.success({
+                    title: 'Template updated',
+                    subtext: data.data.message || 'Template has been updated successfully'
+                });
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1200);
+            } else {
+                TmpltrToast.error({
+                    title: 'Update failed',
+                    subtext: data.data?.message || 'Unknown error occurred',
+                    seconds: 7
+                });
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        })
+        .catch(() => {
+            TmpltrToast.error({
+                title: 'Network error',
+                subtext: 'Failed to update template. Please check your connection.',
+                seconds: 8
+            });
+            btn.disabled = false;
+            btn.textContent = originalText;
         });
     }
 
