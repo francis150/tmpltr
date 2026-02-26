@@ -368,9 +368,10 @@
     }
 
     function updateImportedTemplate(templateId, btn) {
-        const originalText = btn.textContent;
+        const textEl = btn.querySelector('span');
+        const originalText = textEl.textContent;
         btn.disabled = true;
-        btn.textContent = 'Updating...';
+        textEl.textContent = 'Updating...';
 
         fetch(tmpltrData.ajaxUrl, {
             method: 'POST',
@@ -400,7 +401,7 @@
                     seconds: 7
                 });
                 btn.disabled = false;
-                btn.textContent = originalText;
+                textEl.textContent = originalText;
             }
         })
         .catch(() => {
@@ -410,7 +411,7 @@
                 seconds: 8
             });
             btn.disabled = false;
-            btn.textContent = originalText;
+            textEl.textContent = originalText;
         });
     }
 

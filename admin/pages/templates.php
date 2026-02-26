@@ -75,10 +75,14 @@ foreach ($templates as $template) {
                         <td><?php echo esc_html(wp_date('M j, Y g:i A', strtotime($template['created_at']))); ?></td>
                         <td class="template-actions">
                             <?php if (isset($import_updates[$template['id']])) : ?>
-                                <button class="button update-import-btn"
+                                <button class="update-import-btn"
                                         data-template-id="<?php echo esc_attr($template['id']); ?>"
                                         data-version="<?php echo esc_attr($import_updates[$template['id']]['new_version']); ?>">
-                                    Update to v<?php echo esc_html($import_updates[$template['id']]['new_version']); ?>
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="1 4 1 10 7 10"></polyline>
+                                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                    </svg>
+                                    <span>Update to v<?php echo esc_html($import_updates[$template['id']]['new_version']); ?></span>
                                 </button>
                             <?php endif; ?>
                             <button class="button button-primary generate-template-btn"<?php echo $template['status'] === 'draft' ? ' disabled' : ''; ?>>Generate</button>

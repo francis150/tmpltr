@@ -220,22 +220,39 @@
 }
 
 .update-import-btn {
-    background-color: #ff9b00 !important;
-    border-color: #ff9b00 !important;
-    color: #fff !important;
-    font-weight: 500;
-    transition: background-color 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background-color: #fff7ed;
+    color: #b45309;
+    border: 1px solid #fed7aa;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    line-height: 1.6;
 }
 
 .update-import-btn:hover {
-    background-color: #e68a00 !important;
-    border-color: #e68a00 !important;
-    color: #fff !important;
+    background-color: #ff9b00;
+    border-color: #ff9b00;
+    color: #fff;
 }
 
 .update-import-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+}
+
+.update-import-btn svg {
+    flex-shrink: 0;
+}
+
+.update-import-btn:hover svg {
+    color: #fff;
 }
 
 @media screen and (max-width: 782px) {
