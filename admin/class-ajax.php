@@ -441,10 +441,18 @@ class TmpltrAjax {
 			return;
 		}
 
+		$template = new TmpltrTemplate($template_id);
+
 		wp_send_json_success([
 			'message'     => 'Starter template imported successfully',
 			'template_id' => $template_id,
-			'edit_url'    => admin_url('admin.php?page=tmpltr-template&id=' . $template_id)
+			'edit_url'    => admin_url('admin.php?page=tmpltr-template&id=' . $template_id),
+			'template'    => [
+				'id'         => $template->get_id(),
+				'name'       => $template->get_name(),
+				'status'     => $template->get_status(),
+				'created_at' => wp_date('M j, Y g:i A')
+			]
 		]);
 	}
 

@@ -18,7 +18,8 @@
         optionsTrigger: '.template-options__trigger',
         optionsDropdown: '.template-options__dropdown',
         optionsContainer: '.template-options',
-        importStarterBtn: '.import-starter-btn'
+        importStarterBtn: '.import-starter-btn',
+        starterNotice: '.template-starter-notice'
     };
 
     const CLASSES = {
@@ -69,13 +70,19 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                addTemplateRow(data.data.template);
+
+                const notice = document.querySelector(SELECTORS.starterNotice);
+                if (notice) {
+                    notice.style.transition = 'opacity 0.3s';
+                    notice.style.opacity = '0';
+                    setTimeout(() => notice.remove(), 300);
+                }
+
                 TmpltrToast.success({
                     title: 'Starter template imported',
-                    subtext: 'Redirecting to editor...'
+                    subtext: data.data.message
                 });
-                setTimeout(() => {
-                    window.location.href = data.data.edit_url;
-                }, 1200);
             } else if (data.data?.error_code === 'already_imported') {
                 TmpltrToast.warning({
                     title: 'Already imported',
@@ -496,8 +503,38 @@
         });
     }
 
+    function ensureTableExists() {
+        var tbody = document.querySelector(SELECTORS.tableBody);
+        if (tbody) return tbody;
+
+        var emptyState = document.querySelector('.template-empty-state');
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+
+        var table = document.createElement('table');
+        table.className = 'wp-list-table widefat striped';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+
+        document.querySelector('.tmpltr-protected-content').appendChild(table);
+
+        initTemplateList();
+
+        return table.querySelector('tbody');
+    }
+
     function addTemplateRow(template) {
-        const tbody = document.querySelector(SELECTORS.tableBody);
+        const tbody = ensureTableExists();
         if (!tbody) return;
 
         const editUrl = tmpltrData.siteUrl + 'wp-admin/admin.php?page=tmpltr-template&id=' + template.id;
@@ -513,7 +550,7 @@
             </td>
             <td>${template.created_at}</td>
             <td class="template-actions">
-                <button class="button button-primary generate-template-btn" disabled>Generate</button>
+                <button class="button button-primary generate-template-btn"${template.status === 'draft' ? ' disabled' : ''}>Generate</button>
                 <div class="template-options">
                     <button type="button" class="template-options__trigger" aria-label="More options" aria-expanded="false">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
