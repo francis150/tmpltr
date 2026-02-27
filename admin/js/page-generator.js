@@ -143,10 +143,17 @@
                 const saveResponse = await this.saveResults(data);
 
                 if (progressToast) {
+                    const viewUrl = saveResponse.view_url;
                     const editUrl = saveResponse.edit_url;
-                    const subtext = editUrl
-                        ? `<a href="${editUrl}" target="_blank">Edit page</a>`
-                        : 'Page created successfully';
+
+                    let subtext = 'Page created successfully';
+                    if (viewUrl && editUrl) {
+                        subtext = `<a href="${viewUrl}" target="_blank">View</a> your new page or <a href="${editUrl}" target="_blank">edit</a> it`;
+                    } else if (viewUrl) {
+                        subtext = `<a href="${viewUrl}" target="_blank">View</a> your new page`;
+                    } else if (editUrl) {
+                        subtext = `<a href="${editUrl}" target="_blank">Edit</a> your new page`;
+                    }
 
                     progressToast.complete('success', 'Page Created', subtext);
                 }

@@ -20,6 +20,8 @@ class TmpltrDatabase {
         // Table 1: Templates
         $sql_templates = "CREATE TABLE {$wpdb->prefix}tmpltr_templates (
           id bigint(20) NOT NULL AUTO_INCREMENT,
+          import_id varchar(100) DEFAULT NULL,
+          import_version varchar(20) DEFAULT NULL,
           name varchar(255) NOT NULL,
           description longtext,
           template_page_id bigint(20),
@@ -29,6 +31,7 @@ class TmpltrDatabase {
           created_at datetime DEFAULT CURRENT_TIMESTAMP,
           updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           PRIMARY KEY  (id),
+          UNIQUE KEY import_id (import_id),
           KEY status (status),
           KEY created_by (created_by),
           KEY deleted_at (deleted_at)

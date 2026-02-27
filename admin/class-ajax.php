@@ -18,6 +18,7 @@ class TmpltrAjax {
 
 		// Import handlers
 		add_action('wp_ajax_tmpltr_import_starter_template', [$this, 'import_starter_template']);
+		add_action('wp_ajax_tmpltr_update_imported_template', [$this, 'update_imported_template']);
 
 		// Generation handlers
 		add_action('wp_ajax_tmpltr_save_generation', [$this, 'save_generation']);
@@ -433,14 +434,69 @@ class TmpltrAjax {
 				error_log('Tmpltr: Starter import failed - ' . $template_id->get_error_message());
 			}
 
-			wp_send_json_error(['message' => 'Failed to import starter template']);
+			wp_send_json_error([
+				'message'    => $template_id->get_error_message(),
+				'error_code' => $template_id->get_error_code(),
+			]);
 			return;
 		}
+
+		$template = new TmpltrTemplate($template_id);
 
 		wp_send_json_success([
 			'message'     => 'Starter template imported successfully',
 			'template_id' => $template_id,
-			'edit_url'    => admin_url('admin.php?page=tmpltr-template&id=' . $template_id)
+			'edit_url'    => admin_url('admin.php?page=tmpltr-template&id=' . $template_id),
+			'template'    => [
+				'id'         => $template->get_id(),
+				'name'       => $template->get_name(),
+				'status'     => $template->get_status(),
+				'created_at' => wp_date('M j, Y g:i A')
+			]
+		]);
+	}
+
+	/**
+	 * AJAX handler: Update an imported template's prompts and fields
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function update_imported_template() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		$template_id = isset($_POST['template_id']) ? absint($_POST['template_id']) : 0;
+
+		if (!$template_id) {
+			wp_send_json_error(['message' => 'Invalid template ID']);
+			return;
+		}
+
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template-importer.php';
+
+		$result = TmpltrTemplateImporter::update_imported_template($template_id);
+
+		if (is_wp_error($result)) {
+			if (TMPLTR_DEBUG_MODE) {
+				error_log('Tmpltr: Template update failed - ' . $result->get_error_message());
+			}
+
+			wp_send_json_error([
+				'message'    => $result->get_error_message(),
+				'error_code' => $result->get_error_code(),
+			]);
+			return;
+		}
+
+		wp_send_json_success([
+			'message' => 'Template updated successfully',
 		]);
 	}
 

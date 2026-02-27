@@ -50,9 +50,15 @@
     vertical-align: middle;
 }
 
+.wp-list-table th:last-child {
+    text-align: right;
+    padding-right: 24px;
+}
+
 .template-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 8px;
 }
 
@@ -188,6 +194,70 @@
 
 .template-starter-notice__btn:hover {
     background-color: #e68a00;
+    color: #fff;
+}
+
+.community-templates-btn {
+    position: relative;
+    display: inline-flex;
+}
+
+.community-templates-btn__trigger[aria-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.community-templates-btn__badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 2px 7px;
+    background-color: #646970;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.update-import-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background-color: #fff7ed;
+    color: #b45309;
+    border: 1px solid #fed7aa;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    line-height: 1.6;
+}
+
+.update-import-btn:hover {
+    background-color: #ff9b00;
+    border-color: #ff9b00;
+    color: #fff;
+}
+
+.update-import-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.update-import-btn svg {
+    flex-shrink: 0;
+}
+
+.update-import-btn:hover svg {
     color: #fff;
 }
 

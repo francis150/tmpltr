@@ -13,11 +13,14 @@
         deleteBtn: '.delete-template-btn',
         duplicateBtn: '.template-options__item--duplicate',
         generateBtn: '.generate-template-btn',
+        updateImportBtn: '.update-import-btn',
         statusBadge: '.template-status-badge',
         optionsTrigger: '.template-options__trigger',
         optionsDropdown: '.template-options__dropdown',
         optionsContainer: '.template-options',
-        importStarterBtn: '.import-starter-btn'
+        importStarterBtn: '.import-starter-btn',
+        starterNotice: '.template-starter-notice',
+        emptyState: '.template-empty-state'
     };
 
     const CLASSES = {
@@ -68,13 +71,25 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                addTemplateRow(data.data.template);
+
+                const notice = document.querySelector(SELECTORS.starterNotice);
+                if (notice) {
+                    notice.style.transition = 'opacity 0.3s';
+                    notice.style.opacity = '0';
+                    setTimeout(() => notice.remove(), 300);
+                }
+
                 TmpltrToast.success({
                     title: 'Starter template imported',
-                    subtext: 'Redirecting to editor...'
+                    subtext: data.data.message
                 });
-                setTimeout(() => {
-                    window.location.href = data.data.edit_url;
-                }, 1200);
+            } else if (data.data?.error_code === 'already_imported') {
+                TmpltrToast.warning({
+                    title: 'Already imported',
+                    subtext: data.data?.message || 'This template has already been imported.',
+                    seconds: 7
+                });
             } else {
                 TmpltrToast.error({
                     title: 'Import failed',
@@ -93,6 +108,14 @@
     }
 
     function handleTableClick(e) {
+        const updateImportBtn = e.target.closest(SELECTORS.updateImportBtn);
+        if (updateImportBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            handleUpdateImportClick(updateImportBtn);
+            return;
+        }
+
         const generateBtn = e.target.closest(SELECTORS.generateBtn);
         if (generateBtn) {
             e.preventDefault();
@@ -338,6 +361,68 @@
         });
     }
 
+    function handleUpdateImportClick(btn) {
+        const templateId = btn.dataset.templateId;
+        const version = btn.dataset.version;
+
+        TmpltrPopup.confirmation({
+            title: 'Update Template?',
+            subtext: `This will update the template's prompts and fields to v${version}. Your generated pages will not be affected.`,
+            level: 'low',
+            confirmText: 'Update',
+            cancelText: 'Cancel',
+            onConfirm: () => updateImportedTemplate(templateId, btn)
+        });
+    }
+
+    function updateImportedTemplate(templateId, btn) {
+        const textEl = btn.querySelector('span');
+        const originalText = textEl.textContent;
+        btn.disabled = true;
+        textEl.textContent = 'Updating...';
+
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_update_imported_template',
+                nonce: tmpltrData.nonce,
+                template_id: templateId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                TmpltrToast.success({
+                    title: 'Template updated',
+                    subtext: 'Template updated successfully. Redirecting to template page...'
+                });
+                setTimeout(() => {
+                    window.location.href = tmpltrData.siteUrl + 'wp-admin/admin.php?page=tmpltr-template&id=' + templateId;
+                }, 1200);
+            } else {
+                TmpltrToast.error({
+                    title: 'Update failed',
+                    subtext: data.data?.message || 'Unknown error occurred',
+                    seconds: 7
+                });
+                btn.disabled = false;
+                textEl.textContent = originalText;
+            }
+        })
+        .catch(() => {
+            TmpltrToast.error({
+                title: 'Network error',
+                subtext: 'Failed to update template. Please check your connection.',
+                seconds: 8
+            });
+            btn.disabled = false;
+            textEl.textContent = originalText;
+        });
+    }
+
     function deleteTemplate(templateId, rowElement) {
         fetch(tmpltrData.ajaxUrl, {
             method: 'POST',
@@ -359,6 +444,7 @@
                 setTimeout(() => {
                     rowElement.remove();
                     checkEmptyState();
+                    checkStarterNotice();
 
                     TmpltrToast.success({
                         title: 'Template deleted',
@@ -419,14 +505,54 @@
         });
     }
 
+    function ensureTableExists() {
+        var table = document.querySelector('.wp-list-table');
+        if (table) {
+            table.style.display = '';
+            var emptyState = document.querySelector(SELECTORS.emptyState);
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            return table.querySelector('tbody');
+        }
+
+        var emptyState = document.querySelector(SELECTORS.emptyState);
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+
+        var table = document.createElement('table');
+        table.className = 'wp-list-table widefat striped';
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        `;
+
+        document.querySelector('.tmpltr-protected-content').appendChild(table);
+
+        initTemplateList();
+
+        return table.querySelector('tbody');
+    }
+
     function addTemplateRow(template) {
-        const tbody = document.querySelector(SELECTORS.tableBody);
+        const tbody = ensureTableExists();
         if (!tbody) return;
 
         const editUrl = tmpltrData.siteUrl + 'wp-admin/admin.php?page=tmpltr-template&id=' + template.id;
 
         const newRow = document.createElement('tr');
         newRow.dataset.templateId = template.id;
+        if (template.import_id) {
+            newRow.dataset.importId = template.import_id;
+        }
         newRow.innerHTML = `
             <td>${escapeHtml(template.name)}</td>
             <td>
@@ -436,7 +562,7 @@
             </td>
             <td>${template.created_at}</td>
             <td class="template-actions">
-                <button class="button button-primary generate-template-btn" disabled>Generate</button>
+                <button class="button button-primary generate-template-btn"${template.status === 'draft' ? ' disabled' : ''}>Generate</button>
                 <div class="template-options">
                     <button type="button" class="template-options__trigger" aria-label="More options" aria-expanded="false">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -492,20 +618,52 @@
         if (!tableBody) return;
 
         const remainingRows = tableBody.querySelectorAll(SELECTORS.templateRow);
-
         if (remainingRows.length === 0) {
             const table = document.querySelector('.wp-list-table');
-            const emptyState = document.querySelector('.template-empty-state');
-
             if (table) {
                 table.style.display = 'none';
             }
 
-            if (emptyState) {
-                emptyState.style.display = 'block';
+            let emptyState = document.querySelector(SELECTORS.emptyState);
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'template-empty-state';
+                emptyState.innerHTML = '<p>No templates found. Create your first template to get started.</p>';
+                document.querySelector('.tmpltr-protected-content').appendChild(emptyState);
             }
+            emptyState.style.display = 'block';
         }
     }
+
+    // Starter template banner — remove this block when no longer needed
+    function checkStarterNotice() {
+        const starterRow = document.querySelector('[data-import-id="ST-001"]');
+        if (starterRow) return;
+
+        if (document.querySelector(SELECTORS.starterNotice)) return;
+
+        showStarterNotice();
+    }
+
+    function showStarterNotice() {
+        const notice = document.createElement('div');
+        notice.className = 'template-starter-notice';
+        notice.innerHTML =
+            '<p>Don\'t know where to start? Try importing our SEO-Focused Location Page (Starter Template)✨</p>' +
+            '<button type="button" class="template-starter-notice__btn import-starter-btn">Import</button>';
+
+        notice.style.opacity = '0';
+        const headerRight = document.querySelector('.tmpltr-page-header__right');
+        headerRight.insertBefore(notice, headerRight.firstChild);
+
+        notice.querySelector(SELECTORS.importStarterBtn).addEventListener('click', handleImportStarterClick);
+
+        requestAnimationFrame(() => {
+            notice.style.transition = 'opacity 0.3s';
+            notice.style.opacity = '1';
+        });
+    }
+    // Starter template banner END — remove this block when no longer needed
 
     document.addEventListener('DOMContentLoaded', function() {
         initTemplateList();

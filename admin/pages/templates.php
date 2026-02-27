@@ -6,8 +6,19 @@
  */
 
 require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+require_once TMPLTR_PLUGIN_DIR . 'includes/class-template-importer.php';
 
 $templates = TmpltrTemplate::get_all();
+
+$import_updates = [];
+foreach ($templates as $template) {
+    if (!empty($template['import_id'])) {
+        $update = TmpltrTemplateImporter::get_available_update($template['import_id']);
+        if ($update) {
+            $import_updates[$template['id']] = $update;
+        }
+    }
+}
 ?>
 
 <div class="tmpltr-admin-page">
@@ -21,11 +32,19 @@ $templates = TmpltrTemplate::get_all();
                 <h1>Templates</h1>
             </div>
             <div class="tmpltr-page-header__right">
+                <?php // Starter template banner — remove this block when no longer needed ?>
+                <?php $starter_imported = TmpltrTemplate::find_by_import_id('ST-001') !== null; ?>
+                <?php if (!$starter_imported) : ?>
                 <div class="template-starter-notice">
                     <p>Don't know where to start? Try importing our SEO-Focused Location Page (Starter Template)✨</p>
                     <button type="button" class="template-starter-notice__btn import-starter-btn">Import</button>
                 </div>
-                <a href="#" class="button button-secondary button-hero">✨ Community Templates</a>
+                <?php endif; ?>
+                <?php // Starter template banner END — remove this block when no longer needed ?>
+                <span class="community-templates-btn">
+                    <a href="#" class="button button-secondary button-hero community-templates-btn__trigger" aria-disabled="true" tabindex="-1">✨ Community Templates</a>
+                    <span class="community-templates-btn__badge">Coming Soon</span>
+                </span>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
             </div>
         </div>
@@ -46,7 +65,7 @@ $templates = TmpltrTemplate::get_all();
             </thead>
             <tbody>
                 <?php foreach ($templates as $template) : ?>
-                    <tr data-template-id="<?php echo esc_attr($template['id']); ?>">
+                    <tr data-template-id="<?php echo esc_attr($template['id']); ?>"<?php if (!empty($template['import_id'])) : ?> data-import-id="<?php echo esc_attr($template['import_id']); ?>"<?php endif; ?>>
                         <td><?php echo esc_html($template['name']); ?></td>
                         <td>
                             <span class="template-status-badge status-<?php echo esc_attr($template['status']); ?>">
@@ -55,6 +74,17 @@ $templates = TmpltrTemplate::get_all();
                         </td>
                         <td><?php echo esc_html(wp_date('M j, Y g:i A', strtotime($template['created_at']))); ?></td>
                         <td class="template-actions">
+                            <?php if (isset($import_updates[$template['id']])) : ?>
+                                <button class="update-import-btn"
+                                        data-template-id="<?php echo esc_attr($template['id']); ?>"
+                                        data-version="<?php echo esc_attr($import_updates[$template['id']]['new_version']); ?>">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="1 4 1 10 7 10"></polyline>
+                                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                                    </svg>
+                                    <span>Update to v<?php echo esc_html($import_updates[$template['id']]['new_version']); ?></span>
+                                </button>
+                            <?php endif; ?>
                             <button class="button button-primary generate-template-btn"<?php echo $template['status'] === 'draft' ? ' disabled' : ''; ?>>Generate</button>
                             <div class="template-options">
                                 <button type="button" class="template-options__trigger" aria-label="More options" aria-expanded="false">

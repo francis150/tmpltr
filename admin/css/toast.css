@@ -119,6 +119,15 @@
     word-wrap: break-word;
 }
 
+.tmpltr-toast__subtext a {
+    color: #0073aa;
+    text-decoration: none;
+}
+
+.tmpltr-toast__subtext a:hover {
+    text-decoration: underline;
+}
+
 .tmpltr-toast__progress-bar {
     width: 100%;
     height: 4px;

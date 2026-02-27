@@ -57,13 +57,15 @@ class TmpltrTemplate {
         $result = $wpdb->insert(
             $this->table_name,
             [
+                'import_id' => $this->data['import_id'] ?? null,
+                'import_version' => $this->data['import_version'] ?? null,
                 'name' => $this->data['name'] ?? 'Untitled Template',
                 'description' => $this->data['description'] ?? null,
                 'template_page_id' => $this->data['template_page_id'] ?? null,
                 'status' => $this->data['status'] ?? 'draft',
                 'created_by' => get_current_user_id(),
             ],
-            ['%s', '%s', '%d', '%s', '%d']
+            ['%s', '%s', '%s', '%s', '%d', '%s', '%d']
         );
 
         if ($result === false) {
@@ -100,9 +102,10 @@ class TmpltrTemplate {
                 'description' => $this->data['description'] ?? null,
                 'template_page_id' => $this->data['template_page_id'] ?? null,
                 'status' => $this->data['status'] ?? 'draft',
+                'import_version' => $this->data['import_version'] ?? null,
             ],
             ['id' => $this->id],
-            ['%s', '%s', '%d', '%s'],
+            ['%s', '%s', '%d', '%s', '%s'],
             ['%d']
         );
 
@@ -142,13 +145,11 @@ class TmpltrTemplate {
             return false;
         }
 
-        $result = $wpdb->update(
-            $this->table_name,
-            ['deleted_at' => current_time('mysql')],
-            ['id' => $this->id],
-            ['%s'],
-            ['%d']
-        );
+        $result = $wpdb->query($wpdb->prepare(
+            "UPDATE $this->table_name SET deleted_at = %s, import_id = NULL WHERE id = %d",
+            current_time('mysql'),
+            $this->id
+        ));
 
         if ($result === false) {
             if (TMPLTR_DEBUG_MODE) {
@@ -245,6 +246,64 @@ class TmpltrTemplate {
      */
     public function get_id() {
         return $this->id;
+    }
+
+    /**
+     * Get import ID
+     *
+     * @return string
+     */
+    public function get_import_id() {
+        return $this->data['import_id'] ?? '';
+    }
+
+    /**
+     * Set import ID
+     *
+     * @param string $import_id
+     */
+    public function set_import_id($import_id) {
+        $this->data['import_id'] = sanitize_text_field($import_id);
+    }
+
+    /**
+     * Get import version
+     *
+     * @return string
+     */
+    public function get_import_version() {
+        return $this->data['import_version'] ?? '';
+    }
+
+    /**
+     * Set import version
+     *
+     * @param string $version
+     */
+    public function set_import_version($version) {
+        $this->data['import_version'] = sanitize_text_field($version);
+    }
+
+    /**
+     * Find a template by its import ID
+     *
+     * @param string $import_id
+     * @return TmpltrTemplate|null
+     */
+    public static function find_by_import_id($import_id) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'tmpltr_templates';
+
+        $id = $wpdb->get_var($wpdb->prepare(
+            "SELECT id FROM $table_name WHERE import_id = %s AND deleted_at IS NULL LIMIT 1",
+            sanitize_text_field($import_id)
+        ));
+
+        if (!$id) {
+            return null;
+        }
+
+        return new self((int) $id);
     }
 
     /**

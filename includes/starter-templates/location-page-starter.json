@@ -1,8 +1,10 @@
 {
   "tmpltr_version": "1.0.4",
   "template": {
+    "id": "ST-001",
+    "version": "2.4",
     "name": "SEO-Focused Location Page (Starter Template)",
-    "description": "",
+    "description": "A clean, content-focused location page template with structured sections, image placeholders, and call-to-action. Built with native WordPress blocks — works with any theme.",
     "status": "published",
     "fields": [
       {
@@ -26,88 +28,94 @@
     ],
     "prompts": [
       {
+        "title": "Hero Label",
+        "placeholder": "{hero_label}",
+        "guide": "Small uppercase text displayed above the H1 heading. Sets context for the page.",
+        "text": "Write a short 3-5 word label for the top of a location page about @target_keyword in @city, @state. Format: combine the city and service with a separator like a dot or dash. Examples of the style: \"Tucson · HVAC Experts\" or \"Dallas — Roof Repair\". Keep it punchy and local. Do not use quotes in your response."
+      },
+      {
         "title": "H1 Heading",
         "placeholder": "{h1_heading}",
-        "guide": "Use as the main page headline. There should only be one H1 per page. Place it at the very top of your page content.",
+        "guide": "Used as the main page headline in the hero section. There should only be one H1 per page.",
         "text": "Write a single H1 heading for a location page about @target_keyword in @city, @state. Include the keyword and city naturally. Keep it under 70 characters."
       },
       {
         "title": "Hero Paragraph",
         "placeholder": "{hero_paragraph}",
-        "guide": "Place directly below the H1 heading as the opening text visitors see first.",
+        "guide": "Displayed in the hero section directly below the H1 heading.",
         "text": "Write a short 2-3 sentence opening paragraph for a location page about @target_keyword in @city, @state. Immediately establish what the business does and where it operates. Weave in the keyword naturally within the first two sentences. Keep the tone professional and confident."
       },
       {
         "title": "Local Area Section Heading",
         "placeholder": "{local_area_section_heading}",
-        "guide": "Use as an H2 heading to introduce the local area section.",
+        "guide": "Used as the H2 heading for the local area section.",
         "text": "Write a short H2 heading for a section about the @city, @state area and how it relates to @target_keyword. Make it natural and locally relevant, not generic."
       },
       {
         "title": "Local Area Content",
         "placeholder": "{local_area_content}",
-        "guide": "Place directly below the Local Area heading. This section builds local relevance for SEO.",
+        "guide": "Displayed next to the local area image. Builds local relevance for SEO.",
         "text": "Write a 150-200 word paragraph about @city, @state that establishes local relevance for a @target_keyword business. Reference well-known neighborhoods, landmarks, or characteristics of the area. Explain why residents in @city need or benefit from this service. Include @target_keyword once naturally. Do not make up specific statistics. Write naturally — this should read like it was written by someone who knows the area."
       },
       {
         "title": "Services Section Heading",
         "placeholder": "{services_section_heading}",
-        "guide": "Use as an H2 heading to introduce the services section.",
+        "guide": "Used as the H2 heading for the services section.",
         "text": "Write a short H2 heading for a section describing @target_keyword offerings in @city, @state. Keep it keyword-rich but not stuffed."
       },
       {
         "title": "Services Content",
         "placeholder": "{services_content}",
-        "guide": "Place directly below the Services heading. Describes what the business offers.",
+        "guide": "Displayed in the services section.",
         "text": "Write a 150-200 word paragraph describing the services related to @target_keyword available in @city, @state. Cover 3-4 specific sub-services or specializations that would be relevant. Tailor the sub-services to what makes sense for @target_keyword. Include the keyword once naturally. Write with authority."
       },
       {
         "title": "Why Choose Us Heading",
         "placeholder": "{why_choose_us_heading}",
-        "guide": "Use as an H2 heading to introduce the trust/credibility section.",
+        "guide": "Used as the H2 heading next to the trust-building image.",
         "text": "Write a short H2 heading for a trust-building section about choosing a @target_keyword provider in @city, @state. Avoid the generic phrase \"Why Choose Us\" — make it more compelling."
       },
       {
         "title": "Why Choose Us Content",
         "placeholder": "{why_choose_us_content}",
-        "guide": "Place directly below the Why Choose Us heading. Builds trust and credibility.",
+        "guide": "Displayed next to the team/trust image. Builds credibility.",
         "text": "Write a 120-150 word paragraph explaining why someone in @city, @state should choose a trusted local provider for @target_keyword. Focus on trust signals: experience, local knowledge, customer commitment, and reliability. Include the keyword once naturally. Do not fabricate specific numbers, awards, or certifications."
       },
       {
         "title": "FAQ Heading",
         "placeholder": "{faq_heading}",
-        "guide": "Use as an H2 heading to introduce the FAQ section.",
+        "guide": "Used as the H2 heading for the FAQ section.",
         "text": "Write a short H2 heading for a FAQ section about @target_keyword in @city, @state. Keep it simple and SEO-friendly."
       },
       {
         "title": "FAQ Content",
         "placeholder": "{faq_content}",
-        "guide": "Place directly below the FAQ heading. These target featured snippets in Google search results.",
+        "guide": "Displayed in the FAQ section. Targets featured snippets in Google.",
         "text": "Write 4 frequently asked questions with answers about @target_keyword in @city, @state. Format each as: the question in bold followed by a 2-3 sentence answer. Questions should reflect what real customers would search for on Google. Include @target_keyword naturally in at least one question. Include the city name naturally in at least 2 of the answers. Do not use numbered lists. Make sure to use new line after every question and every answer."
       },
       {
         "title": "CTA",
         "placeholder": "{cta}",
-        "guide": "Place near the bottom of the page. Add a contact button or phone number next to this text.",
-        "text": "Write 7 to 10 word short phrase/sentence call-to-action paragraph encouraging the reader to get in touch for @target_keyword in @city, @state. Create urgency without being pushy. End with a clear next step."
+        "guide": "Displayed as the call-to-action text above the contact button.",
+        "text": "Write a 7 to 10 word call-to-action phrase encouraging the reader to get in touch for @target_keyword in @city, @state. Create urgency without being pushy. End with a clear next step."
       },
       {
         "title": "Service Areas Heading",
         "placeholder": "{service_areas_heading}",
-        "guide": "Place this as the H2 heading for the service areas section, typically near the bottom of the page above the footer.",
-        "text": "Write a short H2 heading for a section about the areas near @city, @state where the business provides @service. Keep it locally relevant and natural."
+        "guide": "Used as the H2 heading for the service areas section near the bottom.",
+        "text": "Write a short H2 heading for a section about the areas near @city, @state where the business provides @target_keyword. Keep it locally relevant and natural."
       },
       {
         "title": "Service Areas Content",
         "placeholder": "{service_areas_content}",
-        "guide": "Place this below the Service Areas heading. This paragraph mentions nearby cities to show coverage area and boost local SEO relevance.",
+        "guide": "Mentions nearby cities for local SEO coverage.",
         "text": "Write a brief 2-3 sentence paragraph mentioning 4-6 nearby cities or communities surrounding @city, @state where the business also provides services. Also for each of the nearby location, make sure to link it to a wikipedia link. Write it naturally, not as a list. Make it read like a helpful note about coverage area."
       }
     ]
   },
   "page": {
     "title": "Location Page Template (Starter)",
-    "content": "<!-- wp:heading {\"level\":1} -->\n<h1 class=\"wp-block-heading\">{h1_heading}</h1>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{hero_paragraph}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{local_area_section_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{local_area_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{services_section_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{services_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{why_choose_us_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{why_choose_us_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{faq_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{faq_content}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{cta}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:heading -->\n<h2 class=\"wp-block-heading\">{service_areas_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph -->\n<p>{service_areas_content}</p>\n<!-- /wp:paragraph -->",
+    "content": "<!-- wp:group {\"style\":{\"spacing\":{\"padding\":{\"top\":\"80px\",\"bottom\":\"60px\",\"left\":\"40px\",\"right\":\"40px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"820px\"}} -->\n<div class=\"wp-block-group\" style=\"padding-top:80px;padding-right:40px;padding-bottom:60px;padding-left:40px\">\n\n<!-- wp:paragraph {\"align\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"12px\",\"fontStyle\":\"normal\",\"fontWeight\":\"600\",\"letterSpacing\":\"1.5px\",\"textTransform\":\"uppercase\"},\"color\":{\"text\":\"#2563eb\"},\"spacing\":{\"margin\":{\"bottom\":\"20px\"}}}} -->\n<p class=\"has-text-align-center has-text-color\" style=\"color:#2563eb;font-size:12px;font-style:normal;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px\">{hero_label}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:heading {\"level\":1,\"textAlign\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"40px\",\"fontWeight\":\"700\",\"lineHeight\":\"1.2\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"24px\"}}}} -->\n<h1 class=\"wp-block-heading has-text-align-center has-text-color\" style=\"color:#111827;font-size:40px;font-weight:700;line-height:1.2;margin-bottom:24px\">{h1_heading}</h1>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"align\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"18px\",\"lineHeight\":\"1.7\"},\"color\":{\"text\":\"#4b5563\"}}} -->\n<p class=\"has-text-align-center has-text-color\" style=\"color:#4b5563;font-size:18px;line-height:1.7\">{hero_paragraph}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons {\"layout\":{\"type\":\"flex\",\"justifyContent\":\"center\"},\"style\":{\"spacing\":{\"margin\":{\"top\":\"32px\"}}}} -->\n<div class=\"wp-block-buttons\" style=\"margin-top:32px\">\n<!-- wp:button {\"style\":{\"color\":{\"background\":\"#2563eb\",\"text\":\"#ffffff\"},\"border\":{\"radius\":\"8px\"},\"typography\":{\"fontSize\":\"15px\",\"fontStyle\":\"normal\",\"fontWeight\":\"600\"},\"spacing\":{\"padding\":{\"top\":\"14px\",\"bottom\":\"14px\",\"left\":\"36px\",\"right\":\"36px\"}}}} -->\n<div class=\"wp-block-button\" style=\"font-size:15px;font-style:normal;font-weight:600\"><a class=\"wp-block-button__link has-text-color has-background wp-element-button\" style=\"border-radius:8px;color:#ffffff;background-color:#2563eb;padding-top:14px;padding-right:36px;padding-bottom:14px;padding-left:36px\">Get a Free Quote →</a></div>\n<!-- /wp:button -->\n</div>\n<!-- /wp:buttons -->\n\n</div>\n<!-- /wp:group -->\n\n<!-- wp:separator {\"style\":{\"color\":{\"background\":\"#e5e7eb\"},\"spacing\":{\"margin\":{\"top\":\"0px\",\"bottom\":\"0px\"}}},\"className\":\"is-style-wide\"} -->\n<hr class=\"wp-block-separator has-text-color has-alpha-channel-opacity has-background is-style-wide\" style=\"background-color:#e5e7eb;color:#e5e7eb;margin-top:0px;margin-bottom:0px\"/>\n<!-- /wp:separator -->\n\n<!-- wp:group {\"style\":{\"spacing\":{\"padding\":{\"top\":\"70px\",\"bottom\":\"70px\",\"left\":\"40px\",\"right\":\"40px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"960px\"}} -->\n<div class=\"wp-block-group\" style=\"padding-top:70px;padding-right:40px;padding-bottom:70px;padding-left:40px\">\n\n<!-- wp:columns {\"verticalAlignment\":\"center\",\"style\":{\"spacing\":{\"blockGap\":{\"left\":\"48px\"}}}} -->\n<div class=\"wp-block-columns are-vertically-aligned-center\">\n\n<!-- wp:column {\"verticalAlignment\":\"center\",\"width\":\"55%\"} -->\n<div class=\"wp-block-column is-vertically-aligned-center\" style=\"flex-basis:55%\">\n<!-- wp:heading {\"style\":{\"typography\":{\"fontSize\":\"26px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.3\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"20px\"}}}} -->\n<h2 class=\"wp-block-heading has-text-color\" style=\"color:#111827;font-size:26px;font-weight:600;line-height:1.3;margin-bottom:20px\">{local_area_section_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"16px\",\"lineHeight\":\"1.85\"},\"color\":{\"text\":\"#374151\"}}} -->\n<p style=\"color:#374151;font-size:16px;line-height:1.85\">{local_area_content}</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n\n<!-- wp:column {\"verticalAlignment\":\"center\",\"width\":\"45%\"} -->\n<div class=\"wp-block-column is-vertically-aligned-center\" style=\"flex-basis:45%\">\n<!-- wp:image {\"style\":{\"border\":{\"radius\":\"10px\"}}} -->\n<figure class=\"wp-block-image\" style=\"border-radius:10px\"><img src=\"https://placehold.co/600x400/f3f4f6/9ca3af?font=raleway&amp;text=Local+Area+Image%0ACity+Photo+or+Landmark\" alt=\"Add a local area image here\"/></figure>\n<!-- /wp:image -->\n</div>\n<!-- /wp:column -->\n\n</div>\n<!-- /wp:columns -->\n\n</div>\n<!-- /wp:group -->\n\n<!-- wp:group {\"style\":{\"color\":{\"background\":\"#fafbfc\"},\"spacing\":{\"padding\":{\"top\":\"70px\",\"bottom\":\"70px\",\"left\":\"40px\",\"right\":\"40px\"}},\"border\":{\"top\":{\"color\":\"#f3f4f6\",\"width\":\"1px\"},\"bottom\":{\"color\":\"#f3f4f6\",\"width\":\"1px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"960px\"}} -->\n<div class=\"wp-block-group has-background\" style=\"border-top-color:#f3f4f6;border-top-width:1px;border-bottom-color:#f3f4f6;border-bottom-width:1px;background-color:#fafbfc;padding-top:70px;padding-right:40px;padding-bottom:70px;padding-left:40px\">\n\n<!-- wp:heading {\"textAlign\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"26px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.3\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"32px\"}}}} -->\n<h2 class=\"wp-block-heading has-text-align-center has-text-color\" style=\"color:#111827;font-size:26px;font-weight:600;line-height:1.3;margin-bottom:32px\">{services_section_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"16px\",\"lineHeight\":\"1.85\"},\"color\":{\"text\":\"#374151\"}}} -->\n<p style=\"color:#374151;font-size:16px;line-height:1.85\">{services_content}</p>\n<!-- /wp:paragraph -->\n\n</div>\n<!-- /wp:group -->\n\n<!-- wp:group {\"style\":{\"spacing\":{\"padding\":{\"top\":\"70px\",\"bottom\":\"70px\",\"left\":\"40px\",\"right\":\"40px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"960px\"}} -->\n<div class=\"wp-block-group\" style=\"padding-top:70px;padding-right:40px;padding-bottom:70px;padding-left:40px\">\n\n<!-- wp:columns {\"verticalAlignment\":\"center\",\"style\":{\"spacing\":{\"blockGap\":{\"left\":\"48px\"}}}} -->\n<div class=\"wp-block-columns are-vertically-aligned-center\">\n\n<!-- wp:column {\"verticalAlignment\":\"center\",\"width\":\"42%\"} -->\n<div class=\"wp-block-column is-vertically-aligned-center\" style=\"flex-basis:42%\">\n<!-- wp:image {\"style\":{\"border\":{\"radius\":\"10px\"}}} -->\n<figure class=\"wp-block-image\" style=\"border-radius:10px\"><img src=\"https://placehold.co/600x400/f3f4f6/9ca3af?font=raleway&amp;text=Team+or+Business+Photo%0AYour+Crew+in+Action\" alt=\"Add a team photo or trust-building image here\"/></figure>\n<!-- /wp:image -->\n</div>\n<!-- /wp:column -->\n\n<!-- wp:column {\"verticalAlignment\":\"center\",\"width\":\"58%\"} -->\n<div class=\"wp-block-column is-vertically-aligned-center\" style=\"flex-basis:58%\">\n<!-- wp:heading {\"style\":{\"typography\":{\"fontSize\":\"26px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.3\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"20px\"}}}} -->\n<h2 class=\"wp-block-heading has-text-color\" style=\"color:#111827;font-size:26px;font-weight:600;line-height:1.3;margin-bottom:20px\">{why_choose_us_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"16px\",\"lineHeight\":\"1.85\"},\"color\":{\"text\":\"#374151\"}}} -->\n<p style=\"color:#374151;font-size:16px;line-height:1.85\">{why_choose_us_content}</p>\n<!-- /wp:paragraph -->\n</div>\n<!-- /wp:column -->\n\n</div>\n<!-- /wp:columns -->\n\n</div>\n<!-- /wp:group -->\n\n<!-- wp:group {\"style\":{\"color\":{\"background\":\"#fafbfc\"},\"spacing\":{\"padding\":{\"top\":\"70px\",\"bottom\":\"70px\",\"left\":\"40px\",\"right\":\"40px\"}},\"border\":{\"top\":{\"color\":\"#f3f4f6\",\"width\":\"1px\"},\"bottom\":{\"color\":\"#f3f4f6\",\"width\":\"1px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"960px\"}} -->\n<div class=\"wp-block-group has-background\" style=\"border-top-color:#f3f4f6;border-top-width:1px;border-bottom-color:#f3f4f6;border-bottom-width:1px;background-color:#fafbfc;padding-top:70px;padding-right:40px;padding-bottom:70px;padding-left:40px\">\n\n<!-- wp:heading {\"textAlign\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"26px\",\"fontWeight\":\"600\",\"lineHeight\":\"1.3\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"32px\"}}}} -->\n<h2 class=\"wp-block-heading has-text-align-center has-text-color\" style=\"color:#111827;font-size:26px;font-weight:600;line-height:1.3;margin-bottom:32px\">{faq_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"style\":{\"typography\":{\"fontSize\":\"16px\",\"lineHeight\":\"1.9\"},\"color\":{\"text\":\"#374151\"}}} -->\n<p style=\"color:#374151;font-size:16px;line-height:1.9\">{faq_content}</p>\n<!-- /wp:paragraph -->\n\n</div>\n<!-- /wp:group -->\n\n<!-- wp:group {\"style\":{\"spacing\":{\"padding\":{\"top\":\"60px\",\"bottom\":\"60px\",\"left\":\"40px\",\"right\":\"40px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"700px\"}} -->\n<div class=\"wp-block-group\" style=\"padding-top:60px;padding-right:40px;padding-bottom:60px;padding-left:40px\">\n\n<!-- wp:separator {\"style\":{\"color\":{\"background\":\"#e5e7eb\"},\"spacing\":{\"margin\":{\"bottom\":\"48px\"}}},\"className\":\"is-style-wide\"} -->\n<hr class=\"wp-block-separator has-text-color has-alpha-channel-opacity has-background is-style-wide\" style=\"background-color:#e5e7eb;color:#e5e7eb;margin-bottom:48px\"/>\n<!-- /wp:separator -->\n\n<!-- wp:paragraph {\"align\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"24px\",\"fontStyle\":\"normal\",\"fontWeight\":\"600\",\"lineHeight\":\"1.35\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"28px\"}}}} -->\n<p class=\"has-text-align-center has-text-color\" style=\"color:#111827;font-size:24px;font-style:normal;font-weight:600;line-height:1.35;margin-bottom:28px\">{cta}</p>\n<!-- /wp:paragraph -->\n\n<!-- wp:buttons {\"layout\":{\"type\":\"flex\",\"justifyContent\":\"center\"}} -->\n<div class=\"wp-block-buttons\">\n<!-- wp:button {\"style\":{\"color\":{\"background\":\"#2563eb\",\"text\":\"#ffffff\"},\"border\":{\"radius\":\"8px\"},\"typography\":{\"fontSize\":\"15px\",\"fontStyle\":\"normal\",\"fontWeight\":\"600\"},\"spacing\":{\"padding\":{\"top\":\"14px\",\"bottom\":\"14px\",\"left\":\"36px\",\"right\":\"36px\"}}}} -->\n<div class=\"wp-block-button\" style=\"font-size:15px;font-style:normal;font-weight:600\"><a class=\"wp-block-button__link has-text-color has-background wp-element-button\" style=\"border-radius:8px;color:#ffffff;background-color:#2563eb;padding-top:14px;padding-right:36px;padding-bottom:14px;padding-left:36px\">Contact Us Today →</a></div>\n<!-- /wp:button -->\n</div>\n<!-- /wp:buttons -->\n\n</div>\n<!-- /wp:group -->\n\n<!-- wp:group {\"style\":{\"spacing\":{\"padding\":{\"top\":\"50px\",\"bottom\":\"50px\",\"left\":\"40px\",\"right\":\"40px\"}},\"border\":{\"top\":{\"color\":\"#f3f4f6\",\"width\":\"1px\"}}},\"layout\":{\"type\":\"constrained\",\"contentSize\":\"960px\"}} -->\n<div class=\"wp-block-group\" style=\"border-top-color:#f3f4f6;border-top-width:1px;padding-top:50px;padding-right:40px;padding-bottom:50px;padding-left:40px\">\n\n<!-- wp:heading {\"textAlign\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"22px\",\"fontWeight\":\"600\"},\"color\":{\"text\":\"#111827\"},\"spacing\":{\"margin\":{\"bottom\":\"16px\"}}}} -->\n<h2 class=\"wp-block-heading has-text-align-center has-text-color\" style=\"color:#111827;font-size:22px;font-weight:600;margin-bottom:16px\">{service_areas_heading}</h2>\n<!-- /wp:heading -->\n\n<!-- wp:paragraph {\"align\":\"center\",\"style\":{\"typography\":{\"fontSize\":\"15px\",\"lineHeight\":\"1.8\"},\"color\":{\"text\":\"#6b7280\"}}} -->\n<p class=\"has-text-align-center\" style=\"color:#6b7280;font-size:15px;line-height:1.8\">{service_areas_content}</p>\n<!-- /wp:paragraph -->\n\n</div>\n<!-- /wp:group -->",
     "status": "draft"
   }
 }
