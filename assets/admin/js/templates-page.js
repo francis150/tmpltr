@@ -19,7 +19,8 @@
         optionsDropdown: '.template-options__dropdown',
         optionsContainer: '.template-options',
         importStarterBtn: '.import-starter-btn',
-        starterNotice: '.template-starter-notice'
+        starterNotice: '.template-starter-notice',
+        emptyState: '.template-empty-state'
     };
 
     const CLASSES = {
@@ -443,6 +444,7 @@
                 setTimeout(() => {
                     rowElement.remove();
                     checkEmptyState();
+                    checkStarterNotice();
 
                     TmpltrToast.success({
                         title: 'Template deleted',
@@ -504,10 +506,17 @@
     }
 
     function ensureTableExists() {
-        var tbody = document.querySelector(SELECTORS.tableBody);
-        if (tbody) return tbody;
+        var table = document.querySelector('.wp-list-table');
+        if (table) {
+            table.style.display = '';
+            var emptyState = document.querySelector(SELECTORS.emptyState);
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            return table.querySelector('tbody');
+        }
 
-        var emptyState = document.querySelector('.template-empty-state');
+        var emptyState = document.querySelector(SELECTORS.emptyState);
         if (emptyState) {
             emptyState.style.display = 'none';
         }
@@ -541,6 +550,9 @@
 
         const newRow = document.createElement('tr');
         newRow.dataset.templateId = template.id;
+        if (template.import_id) {
+            newRow.dataset.importId = template.import_id;
+        }
         newRow.innerHTML = `
             <td>${escapeHtml(template.name)}</td>
             <td>
@@ -606,20 +618,52 @@
         if (!tableBody) return;
 
         const remainingRows = tableBody.querySelectorAll(SELECTORS.templateRow);
-
         if (remainingRows.length === 0) {
             const table = document.querySelector('.wp-list-table');
-            const emptyState = document.querySelector('.template-empty-state');
-
             if (table) {
                 table.style.display = 'none';
             }
 
-            if (emptyState) {
-                emptyState.style.display = 'block';
+            let emptyState = document.querySelector(SELECTORS.emptyState);
+            if (!emptyState) {
+                emptyState = document.createElement('div');
+                emptyState.className = 'template-empty-state';
+                emptyState.innerHTML = '<p>No templates found. Create your first template to get started.</p>';
+                document.querySelector('.tmpltr-protected-content').appendChild(emptyState);
             }
+            emptyState.style.display = 'block';
         }
     }
+
+    // Starter template banner — remove this block when no longer needed
+    function checkStarterNotice() {
+        const starterRow = document.querySelector('[data-import-id="ST-001"]');
+        if (starterRow) return;
+
+        if (document.querySelector(SELECTORS.starterNotice)) return;
+
+        showStarterNotice();
+    }
+
+    function showStarterNotice() {
+        const notice = document.createElement('div');
+        notice.className = 'template-starter-notice';
+        notice.innerHTML =
+            '<p>Don\'t know where to start? Try importing our SEO-Focused Location Page (Starter Template)✨</p>' +
+            '<button type="button" class="template-starter-notice__btn import-starter-btn">Import</button>';
+
+        notice.style.opacity = '0';
+        const headerRight = document.querySelector('.tmpltr-page-header__right');
+        headerRight.insertBefore(notice, headerRight.firstChild);
+
+        notice.querySelector(SELECTORS.importStarterBtn).addEventListener('click', handleImportStarterClick);
+
+        requestAnimationFrame(() => {
+            notice.style.transition = 'opacity 0.3s';
+            notice.style.opacity = '1';
+        });
+    }
+    // Starter template banner END — remove this block when no longer needed
 
     document.addEventListener('DOMContentLoaded', function() {
         initTemplateList();

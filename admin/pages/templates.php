@@ -65,7 +65,7 @@ foreach ($templates as $template) {
             </thead>
             <tbody>
                 <?php foreach ($templates as $template) : ?>
-                    <tr data-template-id="<?php echo esc_attr($template['id']); ?>">
+                    <tr data-template-id="<?php echo esc_attr($template['id']); ?>"<?php if (!empty($template['import_id'])) : ?> data-import-id="<?php echo esc_attr($template['import_id']); ?>"<?php endif; ?>>
                         <td><?php echo esc_html($template['name']); ?></td>
                         <td>
                             <span class="template-status-badge status-<?php echo esc_attr($template['status']); ?>">
