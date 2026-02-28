@@ -17,7 +17,8 @@
         confirmText: 'Confirm',
         onConfirm: null,
         cancelText: 'Cancel',
-        onCancel: null
+        onCancel: null,
+        checkboxes: []
     };
 
     const FORM_DEFAULTS = {
@@ -28,7 +29,8 @@
         submitText: 'Submit',
         onSubmit: null,
         cancelText: 'Cancel',
-        onCancel: null
+        onCancel: null,
+        checkboxes: []
     };
 
     const LEVELS = {
@@ -190,7 +192,10 @@
             closeBtn.setAttribute('aria-label', 'Close popup');
             closeBtn.innerHTML = '<span class="dashicons dashicons-no-alt"></span>';
             closeBtn.addEventListener('click', () => {
-                this.dismiss(opts.onCancel);
+                const checked = this.collectCheckboxData(popup);
+                this.dismiss(() => {
+                    if (opts.onCancel) opts.onCancel(checked);
+                });
             });
 
             header.appendChild(headerContent);
@@ -206,6 +211,11 @@
                 body.appendChild(subtext);
             }
 
+            const checkboxGroup = this.createCheckboxes(opts);
+            if (checkboxGroup) {
+                body.appendChild(checkboxGroup);
+            }
+
             const footer = document.createElement('div');
             footer.className = 'tmpltr-popup__footer';
 
@@ -214,7 +224,10 @@
             cancelBtn.type = 'button';
             cancelBtn.textContent = opts.cancelText;
             cancelBtn.addEventListener('click', () => {
-                this.dismiss(opts.onCancel);
+                const checked = this.collectCheckboxData(popup);
+                this.dismiss(() => {
+                    if (opts.onCancel) opts.onCancel(checked);
+                });
             });
 
             const confirmBtn = document.createElement('button');
@@ -222,8 +235,9 @@
             confirmBtn.type = 'button';
             confirmBtn.textContent = opts.confirmText;
             confirmBtn.addEventListener('click', () => {
+                const checked = this.collectCheckboxData(popup);
                 if (opts.onConfirm) {
-                    opts.onConfirm();
+                    opts.onConfirm(checked);
                 }
                 this.dismiss();
             });
@@ -269,7 +283,10 @@
             closeBtn.setAttribute('aria-label', 'Close popup');
             closeBtn.innerHTML = '<span class="dashicons dashicons-no-alt"></span>';
             closeBtn.addEventListener('click', () => {
-                this.dismiss(opts.onCancel);
+                const checked = this.collectCheckboxData(popup);
+                this.dismiss(() => {
+                    if (opts.onCancel) opts.onCancel(checked);
+                });
             });
 
             header.appendChild(headerContent);
@@ -322,6 +339,11 @@
             form.appendChild(formGrid);
             body.appendChild(form);
 
+            const checkboxGroup = this.createCheckboxes(opts);
+            if (checkboxGroup) {
+                body.appendChild(checkboxGroup);
+            }
+
             const footer = document.createElement('div');
             footer.className = 'tmpltr-popup__footer';
 
@@ -330,7 +352,10 @@
             cancelBtn.type = 'button';
             cancelBtn.textContent = opts.cancelText;
             cancelBtn.addEventListener('click', () => {
-                this.dismiss(opts.onCancel);
+                const checked = this.collectCheckboxData(popup);
+                this.dismiss(() => {
+                    if (opts.onCancel) opts.onCancel(checked);
+                });
             });
 
             const submitBtn = document.createElement('button');
@@ -340,8 +365,9 @@
             submitBtn.addEventListener('click', () => {
                 if (this.validateForm(popup)) {
                     const formData = this.collectFormData(popup);
+                    const checked = this.collectCheckboxData(popup);
                     if (opts.onSubmit) {
-                        opts.onSubmit(formData);
+                        opts.onSubmit(formData, checked);
                     }
                     this.dismiss();
                 }
@@ -361,6 +387,44 @@
             if (width === '33%') return 'tmpltr-popup__field--w-33';
             if (width === '50%') return 'tmpltr-popup__field--w-50';
             return 'tmpltr-popup__field--w-100';
+        },
+
+        createCheckboxes(opts) {
+            if (!opts.checkboxes || opts.checkboxes.length === 0) return null;
+
+            const container = document.createElement('div');
+            container.className = 'tmpltr-popup__checkboxes';
+
+            opts.checkboxes.forEach(checkbox => {
+                const wrapper = document.createElement('label');
+                wrapper.className = 'tmpltr-popup__checkbox';
+
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = checkbox.name;
+                input.className = 'tmpltr-popup__checkbox-input';
+
+                const text = document.createElement('span');
+                text.className = 'tmpltr-popup__checkbox-label';
+                text.textContent = checkbox.label;
+
+                wrapper.appendChild(input);
+                wrapper.appendChild(text);
+                container.appendChild(wrapper);
+            });
+
+            return container;
+        },
+
+        collectCheckboxData(popup) {
+            const data = {};
+            const checkboxes = popup.querySelectorAll('.tmpltr-popup__checkbox-input');
+
+            checkboxes.forEach(checkbox => {
+                data[checkbox.name] = checkbox.checked;
+            });
+
+            return data;
         },
 
         collectFormData(popup) {
