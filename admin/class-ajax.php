@@ -457,7 +457,7 @@ class TmpltrAjax {
 	}
 
 	/**
-	 * AJAX handler: Update an imported template's prompts and fields
+	 * AJAX handler: Update an imported template's prompts, fields, and optionally the layout page content
 	 *
 	 * @return void Outputs JSON response
 	 */
@@ -479,9 +479,11 @@ class TmpltrAjax {
 			return;
 		}
 
+		$update_layout_page = isset($_POST['update_layout_page']) && sanitize_text_field($_POST['update_layout_page']) === '1';
+
 		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template-importer.php';
 
-		$result = TmpltrTemplateImporter::update_imported_template($template_id);
+		$result = TmpltrTemplateImporter::update_imported_template($template_id, $update_layout_page);
 
 		if (is_wp_error($result)) {
 			if (TMPLTR_DEBUG_MODE) {

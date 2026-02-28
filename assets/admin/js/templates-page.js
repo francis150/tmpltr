@@ -371,11 +371,14 @@
             level: 'low',
             confirmText: 'Update',
             cancelText: 'Cancel',
-            onConfirm: () => updateImportedTemplate(templateId, btn)
+            checkboxes: [
+                { name: 'update_layout_page', label: `Also update the layout page to v${version} (replaces current layout)` }
+            ],
+            onConfirm: (checked) => updateImportedTemplate(templateId, btn, checked)
         });
     }
 
-    function updateImportedTemplate(templateId, btn) {
+    function updateImportedTemplate(templateId, btn, checked) {
         const textEl = btn.querySelector('span');
         const originalText = textEl.textContent;
         btn.disabled = true;
@@ -389,7 +392,8 @@
             body: new URLSearchParams({
                 action: 'tmpltr_update_imported_template',
                 nonce: tmpltrData.nonce,
-                template_id: templateId
+                template_id: templateId,
+                update_layout_page: checked.update_layout_page ? '1' : '0'
             })
         })
         .then(response => response.json())
