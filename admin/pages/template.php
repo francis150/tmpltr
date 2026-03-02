@@ -110,7 +110,7 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         <button type="button" class="button add-prompt-btn">Add Prompt</button>
 
         <hr>
-        <h2>Template Page</h2>
+        <h2>Layout Page</h2>
         <p>
             <label for="template-page-select">Select Page:</label><br>
             <select name="template_page_id" id="template-page-select" class="regular-text" data-selected-page="<?php echo esc_attr($template->get_template_page_id()); ?>">

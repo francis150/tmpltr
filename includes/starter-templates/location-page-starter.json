@@ -2,7 +2,7 @@
   "tmpltr_version": "1.0.4",
   "template": {
     "id": "ST-001",
-    "version": "2.12",
+    "version": "2.13",
     "name": "SEO-Focused Location Page (Starter Template)",
     "description": "A clean, content-focused location page template with structured sections, image placeholders, and call-to-action. Built with native WordPress blocks — works with any theme.",
     "status": "published",
@@ -139,7 +139,7 @@
         "title": "Service Areas Content",
         "placeholder": "{service_areas_content}",
         "guide": "Mentions nearby cities for local SEO coverage.",
-        "text": "Write a brief 2-3 sentence paragraph mentioning 4-6 nearby cities or communities surrounding @city, @state where the business also provides services. Also for each of the nearby location, make sure to link it to a wikipedia link. Write it naturally, not as a list. Make it read like a helpful note about coverage area."
+        "text": "Write a brief 2-3 sentence paragraph mentioning 4-6 nearby cities or communities surrounding @city, @state where the business also provides services. Also for each of the nearby location, make sure to link it to Google Maps link. Write it naturally, not as a list. Make it read like a helpful note about coverage area."
       }
     ]
   },
