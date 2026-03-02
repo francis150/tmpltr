@@ -327,6 +327,7 @@
                 inputElement.id = input.id || input.name || '';
                 inputElement.placeholder = input.placeholder || '';
                 inputElement.className = input.class || '';
+                inputElement.value = input.value || '';
 
                 if (input.required) {
                     inputElement.required = true;
