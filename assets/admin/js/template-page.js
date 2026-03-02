@@ -27,6 +27,9 @@
         CREDIT_COST_VALUE: '#tmpltr-credit-cost-value',
         BACK_BTN: '.tmpltr-back-btn',
         CREDIT_COST_BADGE: '.tmpltr-page-header__credit-cost',
+        TEMPLATE_PAGE_LINKS: '#template-page-links',
+        TEMPLATE_PAGE_VIEW_LINK: '#template-page-view-link',
+        TEMPLATE_PAGE_EDIT_LINK: '#template-page-edit-link',
     };
 
     let fieldCounter = 0;
@@ -87,8 +90,32 @@
 
         // Load pages when user focuses on the dropdown
         pageSelect.addEventListener('focus', handlePageSelectorFocus);
+        pageSelect.addEventListener('change', function() {
+            updatePageLinks(this);
+        });
         loadPageOptions();
         debugLog('Page selector initialized');
+    }
+
+    function updatePageLinks(pageSelect) {
+        const linksWrapper = document.querySelector(SELECTORS.TEMPLATE_PAGE_LINKS);
+        const viewLink = document.querySelector(SELECTORS.TEMPLATE_PAGE_VIEW_LINK);
+        const editLink = document.querySelector(SELECTORS.TEMPLATE_PAGE_EDIT_LINK);
+
+        if (!linksWrapper || !viewLink || !editLink) return;
+
+        const selectedOption = pageSelect.options[pageSelect.selectedIndex];
+        const viewUrl = selectedOption?.dataset.viewUrl;
+        const editUrl = selectedOption?.dataset.editUrl;
+
+        if (!pageSelect.value || pageSelect.value === '0' || !viewUrl) {
+            linksWrapper.style.display = 'none';
+            return;
+        }
+
+        viewLink.href = viewUrl;
+        editLink.href = editUrl;
+        linksWrapper.style.display = '';
     }
 
     function initExportEasterEgg() {
@@ -197,6 +224,9 @@
             // Show status for draft/private pages
             option.textContent = page.title + (page.status !== 'publish' ? ` (${page.status})` : '');
 
+            option.dataset.viewUrl = page.view_url || '';
+            option.dataset.editUrl = page.edit_url || '';
+
             // Preserve current selection
             if (page.id == currentValue) {
                 option.selected = true;
@@ -205,6 +235,7 @@
             select.appendChild(option);
         });
 
+        updatePageLinks(select);
         debugLog(`Populated ${pages.length} page options`);
     }
 

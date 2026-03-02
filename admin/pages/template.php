@@ -118,6 +118,12 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
             </select>
         </p>
 
+        <p id="template-page-links">
+            <a id="template-page-view-link" href="#" target="_blank">View Page</a>
+            &nbsp;|&nbsp;
+            <a id="template-page-edit-link" href="#" target="_blank">Edit Page</a>
+        </p>
+
         <button type="submit" class="button button-primary">Save Template</button>
     </form>
     </div>

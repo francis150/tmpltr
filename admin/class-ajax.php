@@ -75,9 +75,11 @@ class TmpltrAjax {
 		$pages_data = [];
 		foreach ($pages as $page) {
 			$pages_data[] = [
-				'id' => $page->ID,
-				'title' => $page->post_title,
-				'status' => $page->post_status
+				'id'       => $page->ID,
+				'title'    => $page->post_title,
+				'status'   => $page->post_status,
+				'view_url' => get_permalink($page->ID),
+				'edit_url' => get_edit_post_link($page->ID, 'raw'),
 			];
 		}
 
