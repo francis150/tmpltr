@@ -9,6 +9,7 @@ class TmpltrAjax {
 		// Page handlers
 		add_action('wp_ajax_tmpltr_get_pages', [$this, 'get_pages']);
 		add_action('wp_ajax_tmpltr_get_page_content', [$this, 'get_page_content']);
+		add_action('wp_ajax_tmpltr_get_menus', [$this, 'get_menus']);
 
 		// Template handlers
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
@@ -126,6 +127,68 @@ class TmpltrAjax {
 			'content' => $page->post_content,
 			'status'  => $page->post_status,
 		]);
+	}
+
+	/**
+	 * AJAX handler: Get all WordPress nav menus with nested items
+	 * Returns menus with hierarchical item structure
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function get_menus() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		$nav_menus = wp_get_nav_menus();
+		$menus_data = [];
+
+		foreach ($nav_menus as $menu) {
+			$items = wp_get_nav_menu_items($menu->term_id);
+			$menus_data[] = [
+				'name'  => $menu->name,
+				'items' => $items ? $this->build_menu_tree($items) : [],
+			];
+		}
+
+		wp_send_json_success(['menus' => $menus_data]);
+	}
+
+	/**
+	 * Build a nested menu tree from flat menu items
+	 *
+	 * @param array $items Flat array of WP_Post menu item objects
+	 * @param int   $parent_id Parent menu item ID
+	 * @return array Nested menu structure
+	 */
+	private function build_menu_tree($items, $parent_id = 0) {
+		$tree = [];
+
+		foreach ($items as $item) {
+			if ((int) $item->menu_item_parent !== $parent_id) {
+				continue;
+			}
+
+			$node = [
+				'title' => $item->title,
+				'url'   => $item->url,
+			];
+
+			$children = $this->build_menu_tree($items, $item->ID);
+			if (!empty($children)) {
+				$node['items'] = $children;
+			}
+
+			$tree[] = $node;
+		}
+
+		return $tree;
 	}
 
 	// ===== TEMPLATE HANDLERS =====

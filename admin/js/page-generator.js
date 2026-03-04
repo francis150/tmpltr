@@ -68,10 +68,16 @@
 
             progressToast = TmpltrToast.progress({
                 title: 'Generating Page',
-                subtext: 'Connecting to server...',
+                subtext: 'Fetching site data...',
                 progress: 0,
                 seconds: 0
             });
+
+            activeJob.menus = await this.fetchMenus();
+
+            if (progressToast) {
+                progressToast.update(0.02, 'Generating Page', 'Connecting to server...');
+            }
 
             return new Promise((resolve, reject) => {
                 activeJob.resolve = resolve;
@@ -225,7 +231,7 @@
 
             activeJob.processedPrompts = processedPrompts;
 
-            return {
+            const payload = {
                 job_id: activeJob.id,
                 engine: CONFIG.engine,
                 token: activeJob.token,
@@ -242,6 +248,12 @@
                     requesting_domain: tmpltrData.siteUrl
                 }
             };
+
+            if (activeJob.menus && activeJob.menus.length > 0) {
+                payload.menus = activeJob.menus;
+            }
+
+            return payload;
         },
 
         substituteFieldValues(promptText, formData) {
@@ -301,6 +313,26 @@
             }
 
             return responseData.data;
+        },
+
+        async fetchMenus() {
+            try {
+                const response = await fetch(tmpltrData.ajaxUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        action: 'tmpltr_get_menus',
+                        nonce: tmpltrData.nonce
+                    })
+                });
+
+                const data = await response.json();
+                return data.success ? data.data.menus : null;
+            } catch {
+                return null;
+            }
         }
     };
 

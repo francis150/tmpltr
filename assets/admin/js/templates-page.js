@@ -296,7 +296,7 @@
                 generateBtn.textContent = 'Generate';
             }
         })
-        .catch(error => {
+        .catch(() => {
             TmpltrToast.error({
                 title: 'Network error',
                 subtext: 'Failed to load template fields. Please check your connection.',
