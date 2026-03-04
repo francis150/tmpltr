@@ -9,6 +9,7 @@ class TmpltrAjax {
 		// Page handlers
 		add_action('wp_ajax_tmpltr_get_pages', [$this, 'get_pages']);
 		add_action('wp_ajax_tmpltr_get_page_content', [$this, 'get_page_content']);
+		add_action('wp_ajax_tmpltr_get_menus', [$this, 'get_menus']);
 
 		// Template handlers
 		add_action('wp_ajax_tmpltr_get_template_data', [$this, 'get_template_data']);
@@ -75,9 +76,11 @@ class TmpltrAjax {
 		$pages_data = [];
 		foreach ($pages as $page) {
 			$pages_data[] = [
-				'id' => $page->ID,
-				'title' => $page->post_title,
-				'status' => $page->post_status
+				'id'       => $page->ID,
+				'title'    => $page->post_title,
+				'status'   => $page->post_status,
+				'view_url' => get_permalink($page->ID),
+				'edit_url' => get_edit_post_link($page->ID, 'raw'),
 			];
 		}
 
@@ -124,6 +127,68 @@ class TmpltrAjax {
 			'content' => $page->post_content,
 			'status'  => $page->post_status,
 		]);
+	}
+
+	/**
+	 * AJAX handler: Get all WordPress nav menus with nested items
+	 * Returns menus with hierarchical item structure
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function get_menus() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		$nav_menus = wp_get_nav_menus();
+		$menus_data = [];
+
+		foreach ($nav_menus as $menu) {
+			$items = wp_get_nav_menu_items($menu->term_id);
+			$menus_data[] = [
+				'name'  => $menu->name,
+				'items' => $items ? $this->build_menu_tree($items) : [],
+			];
+		}
+
+		wp_send_json_success(['menus' => $menus_data]);
+	}
+
+	/**
+	 * Build a nested menu tree from flat menu items
+	 *
+	 * @param array $items Flat array of WP_Post menu item objects
+	 * @param int   $parent_id Parent menu item ID
+	 * @return array Nested menu structure
+	 */
+	private function build_menu_tree($items, $parent_id = 0) {
+		$tree = [];
+
+		foreach ($items as $item) {
+			if ((int) $item->menu_item_parent !== $parent_id) {
+				continue;
+			}
+
+			$node = [
+				'title' => $item->title,
+				'url'   => $item->url,
+			];
+
+			$children = $this->build_menu_tree($items, $item->ID);
+			if (!empty($children)) {
+				$node['items'] = $children;
+			}
+
+			$tree[] = $node;
+		}
+
+		return $tree;
 	}
 
 	// ===== TEMPLATE HANDLERS =====
@@ -457,7 +522,7 @@ class TmpltrAjax {
 	}
 
 	/**
-	 * AJAX handler: Update an imported template's prompts and fields
+	 * AJAX handler: Update an imported template's prompts, fields, and optionally the layout page content
 	 *
 	 * @return void Outputs JSON response
 	 */
@@ -479,9 +544,11 @@ class TmpltrAjax {
 			return;
 		}
 
+		$update_layout_page = isset($_POST['update_layout_page']) && sanitize_text_field($_POST['update_layout_page']) === '1';
+
 		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template-importer.php';
 
-		$result = TmpltrTemplateImporter::update_imported_template($template_id);
+		$result = TmpltrTemplateImporter::update_imported_template($template_id, $update_layout_page);
 
 		if (is_wp_error($result)) {
 			if (TMPLTR_DEBUG_MODE) {

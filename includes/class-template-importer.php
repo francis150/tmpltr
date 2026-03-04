@@ -193,10 +193,11 @@ class TmpltrTemplateImporter {
     /**
      * Update an imported template's prompts and fields from its source JSON
      *
-     * @param int $template_id
+     * @param int  $template_id
+     * @param bool $update_layout_page Whether to also update the linked WordPress page content
      * @return true|WP_Error True on success, WP_Error on failure
      */
-    public static function update_imported_template($template_id) {
+    public static function update_imported_template($template_id, $update_layout_page = false) {
         require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
 
         $template = new TmpltrTemplate(absint($template_id));
@@ -261,6 +262,25 @@ class TmpltrTemplateImporter {
             if (!empty($template_data['version'])) {
                 $template->set_import_version($template_data['version']);
                 $template->save();
+            }
+
+            if ($update_layout_page) {
+                $page_data = $data['page'] ?? null;
+
+                if (!empty($page_data['content'])) {
+                    $page_id = $template->get_template_page_id();
+
+                    if ($page_id > 0 && get_post($page_id)) {
+                        $update_result = wp_update_post([
+                            'ID'           => $page_id,
+                            'post_content' => wp_kses_post($page_data['content']),
+                        ], true);
+
+                        if (is_wp_error($update_result)) {
+                            throw new Exception('Failed to update layout page: ' . $update_result->get_error_message());
+                        }
+                    }
+                }
             }
 
             $wpdb->query('COMMIT');
