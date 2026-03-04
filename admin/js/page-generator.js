@@ -219,11 +219,7 @@
                     id: prompt.id,
                     placeholder: prompt.placeholder,
                     text: substitutedText,
-                    originalText: prompt.prompt_text,
-                    settings: {
-                        max_tokens: parseInt(prompt.max_tokens, 10) || 1000,
-                        temperature: parseFloat(prompt.temperature) || 0.7
-                    }
+                    originalText: prompt.prompt_text
                 };
             });
 

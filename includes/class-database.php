@@ -62,8 +62,6 @@ class TmpltrDatabase {
           placeholder varchar(100) NOT NULL,
           prompt_text longtext NOT NULL,
           prompt_order int(11) DEFAULT 0,
-          max_tokens int(11) DEFAULT 1000,
-          temperature decimal(3,2) DEFAULT 0.70,
           created_at datetime DEFAULT CURRENT_TIMESTAMP,
           updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           PRIMARY KEY  (id),
