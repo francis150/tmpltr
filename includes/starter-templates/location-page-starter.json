@@ -121,7 +121,7 @@
         "title": "Neighborhoods Content",
         "placeholder": "{neighborhoods_content}",
         "guide": "A comma-separated list of neighborhood names, each linked to their Google Maps link. Displayed in paragraph style.",
-        "text": "List 15-25 real neighborhoods, subdivisions, and communities within @city, @state.\nFormat them as a comma-separated inline list (not a bulleted or numbered list).\nEach neighborhood name must be wrapped in an HTML anchor tag linking to Google Maps.\n\nInclude a wide range: historic neighborhoods, newer subdivisions, well-known communities, and surrounding unincorporated areas that locals would recognize.\nOnly include real, verifiable names. Do not invent any.\n\nIf you cannot confidently name at least 15, list as many as you can verify.\nWrite nothing else besides the linked neighborhood names separated by commas."
+        "text": "List 15-25 real neighborhoods, subdivisions, and communities within @city, @state.\nFormat them as a comma-separated inline list (not a bulleted or numbered list).\nEach neighborhood name must be linked to Google Maps.\n\nInclude a wide range: historic neighborhoods, newer subdivisions, well-known communities, and surrounding unincorporated areas that locals would recognize.\nOnly include real, verifiable names. Do not invent any.\n\nIf you cannot confidently name at least 15, list as many as you can verify.\nWrite nothing else besides the linked neighborhood names separated by commas."
       },
       {
         "title": "CTA",
