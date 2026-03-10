@@ -28,9 +28,7 @@
         ERROR: 'prompt-processing-error'
     };
 
-    let socket = null;
-    let activeJob = null;
-    let progressToast = null;
+    const jobs = new Map();
 
     const GeneratorManager = {
         async generate(options) {
@@ -56,99 +54,115 @@
             const jobId = Date.now();
             const pageTitle = formData.page_title || 'Untitled Page';
 
-            activeJob = {
-                id: jobId,
-                templateId,
-                templateName,
-                pageTitle,
-                prompts,
-                formData,
-                token: session.access_token
-            };
-
-            progressToast = TmpltrToast.progress({
+            const toast = TmpltrToast.progress({
                 title: 'Generating Page',
                 subtext: 'Fetching site data...',
                 progress: 0,
                 seconds: 0
             });
 
-            activeJob.menus = await this.fetchMenus();
+            const job = {
+                id: jobId,
+                templateId,
+                templateName,
+                pageTitle,
+                prompts,
+                formData,
+                token: session.access_token,
+                socket: null,
+                toast
+            };
 
-            if (progressToast) {
-                progressToast.update(0.02, 'Generating Page', 'Connecting to server...');
+            jobs.set(jobId, job);
+
+            job.menus = await this.fetchMenus();
+
+            if (job.toast) {
+                job.toast.update(0.02, 'Generating Page', 'Connecting to server...');
             }
 
             return new Promise((resolve, reject) => {
-                activeJob.resolve = resolve;
-                activeJob.reject = reject;
+                job.resolve = resolve;
+                job.reject = reject;
 
-                this.connect();
+                this.connect(jobId);
             });
         },
 
-        connect() {
+        connect(jobId) {
+            const job = jobs.get(jobId);
+            if (!job) return;
+
             if (!window.io) {
-                this.handleError({ message: 'Socket.IO library not loaded' });
+                this.handleError(jobId, { message: 'Socket.IO library not loaded' });
                 return;
             }
 
-            socket = io(getServerUrl(), {
+            const sock = io(getServerUrl(), {
                 transports: ['websocket'],
                 reconnection: false
             });
 
-            socket.on('connect', () => this.onConnected());
-            socket.on('disconnect', () => this.onDisconnected());
-            socket.on('connect_error', (error) => this.handleError({ message: 'Connection failed: ' + error.message }));
-            socket.on(EVENTS.PROGRESS, (data) => this.onProgress(data));
-            socket.on(EVENTS.SUCCESS, (data) => this.onSuccess(data));
-            socket.on(EVENTS.ERROR, (data) => this.onError(data));
+            job.socket = sock;
+
+            sock.on('connect', () => this.onConnected(jobId));
+            sock.on('disconnect', () => this.onDisconnected(jobId));
+            sock.on('connect_error', (error) => this.handleError(jobId, { message: 'Connection failed: ' + error.message }));
+            sock.on(EVENTS.PROGRESS, (data) => this.onProgress(jobId, data));
+            sock.on(EVENTS.SUCCESS, (data) => this.onSuccess(jobId, data));
+            sock.on(EVENTS.ERROR, (data) => this.onError(jobId, data));
         },
 
-        disconnect() {
-            if (socket) {
-                socket.disconnect();
-                socket = null;
+        disconnect(jobId) {
+            const job = jobs.get(jobId);
+            if (job && job.socket) {
+                job.socket.disconnect();
+                job.socket = null;
             }
         },
 
-        onConnected() {
-            if (!activeJob) return;
+        onConnected(jobId) {
+            const job = jobs.get(jobId);
+            if (!job) return;
 
-            if (progressToast) {
-                progressToast.update(0.05, 'Generating Page', 'Processing prompts...');
+            if (job.toast) {
+                job.toast.update(0.05, 'Generating Page', 'Processing prompts...');
             }
 
-            const payload = this.buildPayload();
-            socket.emit(EVENTS.REQUEST, payload);
+            const payload = this.buildPayload(jobId);
+            job.socket.emit(EVENTS.REQUEST, payload);
         },
 
-        onDisconnected() {
-            socket = null;
+        onDisconnected(jobId) {
+            const job = jobs.get(jobId);
+            if (job) {
+                job.socket = null;
+            }
         },
 
-        onProgress(data) {
-            if (!activeJob || data.job_id !== activeJob.id) return;
+        onProgress(jobId, data) {
+            const job = jobs.get(jobId);
+            if (!job) return;
 
             const progress = Math.min(0.9, 0.1 + (data.progress * 0.8));
 
-            if (progressToast) {
-                progressToast.update(progress, 'Generating Page', data.message || 'Processing...');
+            if (job.toast) {
+                job.toast.update(progress, 'Generating Page', data.message || 'Processing...');
             }
         },
 
-        async onSuccess(data) {
-            if (!activeJob || data.job_id !== activeJob.id) return;
+        async onSuccess(jobId, data) {
+            const job = jobs.get(jobId);
+            if (!job) return;
 
-            if (progressToast) {
-                progressToast.update(0.95, 'Generating Page', 'Creating page...');
+            if (job.toast) {
+                job.toast.update(0.95, 'Generating Page', 'Creating page...');
             }
 
             try {
-                const saveResponse = await this.saveResults(data);
+                const saveResponse = await this.saveResults(jobId, data);
 
-                if (progressToast) {
+                if (job.toast) {
                     const viewUrl = saveResponse.view_url;
                     const editUrl = saveResponse.edit_url;
 
@@ -161,66 +175,68 @@
                         subtext = `<a href="${editUrl}" target="_blank">Edit</a> your new page`;
                     }
 
-                    progressToast.complete('success', 'Page Created', subtext);
+                    job.toast.complete('success', 'Page Created', subtext);
                 }
 
-                if (activeJob.resolve) {
-                    activeJob.resolve({ ...data, saveResponse });
+                if (job.resolve) {
+                    job.resolve({ ...data, saveResponse });
                 }
             } catch (saveError) {
-                if (progressToast) {
-                    progressToast.complete('error', 'Save Failed', 'Generated content could not be saved');
+                if (job.toast) {
+                    job.toast.complete('error', 'Save Failed', 'Generated content could not be saved');
                 }
 
-                if (activeJob.reject) {
-                    activeJob.reject(saveError);
+                if (job.reject) {
+                    job.reject(saveError);
                 }
             }
 
-            this.cleanup();
+            this.cleanup(jobId);
         },
 
-        onError(data) {
-            if (!activeJob || data.job_id !== activeJob.id) return;
+        onError(jobId, data) {
+            const job = jobs.get(jobId);
+            if (!job) return;
 
             const errorMessage = data.error?.message || 'An unknown error occurred';
 
-            if (progressToast) {
-                progressToast.complete('error', 'Generation Failed', errorMessage);
+            if (job.toast) {
+                job.toast.complete('error', 'Generation Failed', errorMessage);
             }
 
-            if (activeJob.reject) {
-                activeJob.reject(new Error(errorMessage));
+            if (job.reject) {
+                job.reject(new Error(errorMessage));
             }
 
-            this.cleanup();
+            this.cleanup(jobId);
         },
 
-        handleError(error) {
+        handleError(jobId, error) {
+            const job = jobs.get(jobId);
             const errorMessage = error.message || 'An unknown error occurred';
 
-            if (progressToast) {
-                progressToast.complete('error', 'Generation Failed', errorMessage);
+            if (job && job.toast) {
+                job.toast.complete('error', 'Generation Failed', errorMessage);
             }
 
-            if (activeJob && activeJob.reject) {
-                activeJob.reject(new Error(errorMessage));
+            if (job && job.reject) {
+                job.reject(new Error(errorMessage));
             }
 
-            this.cleanup();
+            this.cleanup(jobId);
         },
 
-        cleanup() {
-            this.disconnect();
-            activeJob = null;
-            progressToast = null;
+        cleanup(jobId) {
+            this.disconnect(jobId);
+            jobs.delete(jobId);
         },
 
-        buildPayload() {
-            if (!activeJob) return null;
+        buildPayload(jobId) {
+            const job = jobs.get(jobId);
+            if (!job) return null;
 
-            const processedPrompts = activeJob.prompts.map(prompt => {
-                const substitutedText = this.substituteFieldValues(prompt.prompt_text, activeJob.formData);
+            const processedPrompts = job.prompts.map(prompt => {
+                const substitutedText = this.substituteFieldValues(prompt.prompt_text, job.formData);
                 return {
                     id: prompt.id,
                     placeholder: prompt.placeholder,
@@ -229,17 +245,17 @@
                 };
             });
 
-            activeJob.processedPrompts = processedPrompts;
+            job.processedPrompts = processedPrompts;
 
             const payload = {
-                job_id: activeJob.id,
+                job_id: job.id,
                 engine: CONFIG.engine,
-                token: activeJob.token,
+                token: job.token,
                 template: {
-                    id: activeJob.templateId,
-                    name: activeJob.templateName
+                    id: job.templateId,
+                    name: job.templateName
                 },
-                page_title: activeJob.pageTitle,
+                page_title: job.pageTitle,
                 prompts: processedPrompts,
                 metadata: {
                     user_id: tmpltrData.userId,
@@ -249,8 +265,8 @@
                 }
             };
 
-            if (activeJob.menus && activeJob.menus.length > 0) {
-                payload.menus = activeJob.menus;
+            if (job.menus && job.menus.length > 0) {
+                payload.menus = job.menus;
             }
 
             return payload;
@@ -276,8 +292,9 @@
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         },
 
-        async saveResults(data) {
-            if (!activeJob) {
+        async saveResults(jobId, data) {
+            const job = jobs.get(jobId);
+            if (!job) {
                 throw new Error('No active job to save');
             }
 
@@ -287,7 +304,7 @@
                 content: result.content,
                 tokens_used: result.tokens_used,
                 processing_time_ms: result.processing_time_ms,
-                prompt_text_used: activeJob.processedPrompts.find(p => p.id === result.prompt_id)?.text || ''
+                prompt_text_used: job.processedPrompts.find(p => p.id === result.prompt_id)?.text || ''
             }));
 
             const response = await fetch(tmpltrData.ajaxUrl, {
@@ -298,9 +315,9 @@
                 body: new URLSearchParams({
                     action: 'tmpltr_save_generation',
                     nonce: tmpltrData.nonce,
-                    template_id: activeJob.templateId,
-                    page_title: activeJob.pageTitle,
-                    field_values: JSON.stringify(activeJob.formData),
+                    template_id: job.templateId,
+                    page_title: job.pageTitle,
+                    field_values: JSON.stringify(job.formData),
                     results: JSON.stringify(resultsForSave),
                     summary: JSON.stringify(data.summary || {})
                 })
