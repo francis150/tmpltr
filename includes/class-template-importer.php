@@ -85,6 +85,14 @@ class TmpltrTemplateImporter {
                 $template->set_import_version($template_data['version']);
             }
 
+            if (!empty($template_data['meta_title_template'])) {
+                $template->set_meta_title_template($template_data['meta_title_template']);
+            }
+
+            if (!empty($template_data['meta_description_template'])) {
+                $template->set_meta_description_template($template_data['meta_description_template']);
+            }
+
             if ($page_id > 0) {
                 $template->set_template_page_id($page_id);
             }
@@ -261,8 +269,17 @@ class TmpltrTemplateImporter {
 
             if (!empty($template_data['version'])) {
                 $template->set_import_version($template_data['version']);
-                $template->save();
             }
+
+            if (isset($template_data['meta_title_template'])) {
+                $template->set_meta_title_template($template_data['meta_title_template']);
+            }
+
+            if (isset($template_data['meta_description_template'])) {
+                $template->set_meta_description_template($template_data['meta_description_template']);
+            }
+
+            $template->save();
 
             if ($update_layout_page) {
                 $page_data = $data['page'] ?? null;

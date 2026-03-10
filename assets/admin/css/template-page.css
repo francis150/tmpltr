@@ -196,13 +196,22 @@ select.validation-error:focus {
     box-sizing: border-box;
 }
 
-.highlight-wrapper textarea {
+.highlight-wrapper--single-line .backdrop {
+    white-space: nowrap;
+    word-wrap: normal;
+}
+
+.highlight-wrapper textarea,
+.highlight-wrapper input[type="text"] {
     position: relative;
     z-index: 2;
     background: transparent;
     color: #1d2327;
-    resize: vertical;
     box-sizing: border-box;
+}
+
+.highlight-wrapper textarea {
+    resize: vertical;
 }
 
 .identifier-highlight {
@@ -286,6 +295,44 @@ select.validation-error:focus {
     font-weight: 600;
     color: #1d2327;
     min-width: 1ch;
+}
+
+.seo-meta-description {
+    color: #646970;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+.seo-meta-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.seo-meta-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.seo-meta-field input[type="text"],
+.seo-meta-field textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.seo-meta-char-count {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #646970;
+}
+
+.seo-meta-char-count.over-limit {
+    color: #d63638;
+    font-weight: 600;
 }
 
 /* Responsive Design */
@@ -380,7 +427,8 @@ select.validation-error:focus {
         padding: 12px 8px;
     }
 
-    .prompt-group textarea {
+    .prompt-group textarea,
+    .seo-meta-field textarea {
         font-size: 16px; /* Prevents zoom on iOS */
     }
 

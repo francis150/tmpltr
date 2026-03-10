@@ -110,6 +110,33 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
         <button type="button" class="button add-prompt-btn">Add Prompt</button>
 
         <hr>
+        <h2>SEO Meta</h2>
+        <p class="seo-meta-description">Use @field placeholders for dynamic values. These are substituted directly — no AI credits used.</p>
+        <div class="seo-meta-fields">
+            <div class="seo-meta-field">
+                <label for="meta-title-template">Meta Title</label>
+                <div class="highlight-wrapper highlight-wrapper--single-line">
+                    <div class="backdrop" id="meta-title-backdrop"></div>
+                    <input type="text" id="meta-title-template" name="meta_title_template"
+                           value="<?php echo esc_attr($template->get_meta_title_template()); ?>"
+                           class="regular-text" placeholder="e.g., Best @target_keyword in @city, @state">
+                </div>
+                <span class="seo-meta-char-count" id="meta-title-char-count">0 / 60</span>
+            </div>
+            <div class="seo-meta-field">
+                <label for="meta-desc-template">Meta Description</label>
+                <div class="highlight-wrapper">
+                    <div class="backdrop" id="meta-desc-backdrop"></div>
+                    <textarea id="meta-desc-template" name="meta_description_template"
+                              rows="2" class="large-text"
+                              placeholder="e.g., Looking for @target_keyword in @city? ..."
+                    ><?php echo esc_textarea($template->get_meta_description_template()); ?></textarea>
+                </div>
+                <span class="seo-meta-char-count" id="meta-desc-char-count">0 / 160</span>
+            </div>
+        </div>
+
+        <hr>
         <h2>Layout Page</h2>
         <p>
             <label for="template-page-select">Select Page:</label><br>
