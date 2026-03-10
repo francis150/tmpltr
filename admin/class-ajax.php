@@ -235,7 +235,9 @@ class TmpltrAjax {
 
 		wp_send_json_success([
 			'fields' => $template->get_fields(),
-			'prompts' => $template->get_prompts()
+			'prompts' => $template->get_prompts(),
+			'meta_title_template' => $template->get_meta_title_template(),
+			'meta_description_template' => $template->get_meta_description_template()
 		]);
 	}
 
@@ -264,6 +266,8 @@ class TmpltrAjax {
 		$template_name = isset($_POST['template_name']) ? sanitize_text_field($_POST['template_name']) : '';
 		$template_status = isset($_POST['template_status']) ? sanitize_text_field($_POST['template_status']) : 'draft';
 		$template_page_id = isset($_POST['template_page_id']) ? absint($_POST['template_page_id']) : 0;
+		$meta_title_template = isset($_POST['meta_title_template']) ? sanitize_text_field($_POST['meta_title_template']) : '';
+		$meta_description_template = isset($_POST['meta_description_template']) ? sanitize_text_field($_POST['meta_description_template']) : '';
 		$fields_data = isset($_POST['fields']) ? json_decode(stripslashes($_POST['fields']), true) : [];
 		$prompts_data = isset($_POST['prompts']) ? json_decode(stripslashes($_POST['prompts']), true) : [];
 
@@ -313,6 +317,8 @@ class TmpltrAjax {
 			$template->set_name($template_name);
 			$template->set_status($template_status);
 			$template->set_template_page_id($template_page_id);
+			$template->set_meta_title_template($meta_title_template);
+			$template->set_meta_description_template($meta_description_template);
 
 			if (!$template->save()) {
 				throw new Exception('Failed to save template metadata');
@@ -684,6 +690,14 @@ class TmpltrAjax {
 
 			if (is_wp_error($new_page_id)) {
 				throw new Exception($new_page_id->get_error_message());
+			}
+
+			require_once TMPLTR_PLUGIN_DIR . 'includes/class-seo-meta.php';
+			$meta_title = TmpltrSeoMeta::substitute_fields($template->get_meta_title_template(), $field_values);
+			$meta_description = TmpltrSeoMeta::substitute_fields($template->get_meta_description_template(), $field_values);
+
+			if ($meta_title || $meta_description) {
+				TmpltrSeoMeta::apply_to_page($new_page_id, $meta_title, $meta_description);
 			}
 
 			$wpdb->update(

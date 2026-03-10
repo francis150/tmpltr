@@ -30,6 +30,10 @@
         TEMPLATE_PAGE_LINKS: '#template-page-links',
         TEMPLATE_PAGE_VIEW_LINK: '#template-page-view-link',
         TEMPLATE_PAGE_EDIT_LINK: '#template-page-edit-link',
+        META_TITLE_INPUT: '#meta-title-template',
+        META_DESC_TEXTAREA: '#meta-desc-template',
+        META_TITLE_CHAR_COUNT: '#meta-title-char-count',
+        META_DESC_CHAR_COUNT: '#meta-desc-char-count',
     };
 
     let fieldCounter = 0;
@@ -408,6 +412,8 @@
                     guide: prompt.guide,
                     text: prompt.text,
                 })),
+                meta_title_template: formData.meta_title_template || '',
+                meta_description_template: formData.meta_description_template || '',
             },
         };
 
@@ -800,9 +806,9 @@
             dropdown.appendChild(item);
         });
 
-        const promptGroup = textarea.closest('.prompt-group');
-        promptGroup.style.position = 'relative';
-        promptGroup.appendChild(dropdown);
+        const parentGroup = textarea.closest('.prompt-group') || textarea.closest('.seo-meta-field');
+        parentGroup.style.position = 'relative';
+        parentGroup.appendChild(dropdown);
 
         const cursorPos = textarea.selectionStart;
         const textBefore = textarea.value.substring(0, cursorPos);
@@ -810,10 +816,10 @@
 
         const coords = getCaretCoordinates(textarea, atIndex);
         const textareaRect = textarea.getBoundingClientRect();
-        const promptGroupRect = promptGroup.getBoundingClientRect();
+        const parentGroupRect = parentGroup.getBoundingClientRect();
 
-        const topPosition = (textareaRect.top - promptGroupRect.top) + coords.top + coords.height + 2;
-        const leftPosition = (textareaRect.left - promptGroupRect.left) + coords.left;
+        const topPosition = (textareaRect.top - parentGroupRect.top) + coords.top + coords.height + 2;
+        const leftPosition = (textareaRect.left - parentGroupRect.left) + coords.left;
 
         dropdown.style.top = topPosition + 'px';
         dropdown.style.left = leftPosition + 'px';
@@ -876,6 +882,12 @@
         }
     }
 
+    function isAutocompleteTarget(element) {
+        return element.matches(SELECTORS.PROMPT_TEXTAREA) ||
+               element.matches(SELECTORS.META_TITLE_INPUT) ||
+               element.matches(SELECTORS.META_DESC_TEXTAREA);
+    }
+
     function initAutocomplete() {
         const promptRowsContainer = document.querySelector(SELECTORS.PROMPT_ROWS_CONTAINER);
         if (!promptRowsContainer) return;
@@ -892,8 +904,21 @@
             }
         });
 
+        const metaTitleInput = document.querySelector(SELECTORS.META_TITLE_INPUT);
+        const metaDescTextarea = document.querySelector(SELECTORS.META_DESC_TEXTAREA);
+
+        if (metaTitleInput) {
+            metaTitleInput.addEventListener('input', handleAutocompleteInput);
+            metaTitleInput.addEventListener('keydown', handleAutocompleteKeydown);
+        }
+
+        if (metaDescTextarea) {
+            metaDescTextarea.addEventListener('input', handleAutocompleteInput);
+            metaDescTextarea.addEventListener('keydown', handleAutocompleteKeydown);
+        }
+
         document.addEventListener('click', function(e) {
-            if (currentAutocomplete && !e.target.closest(SELECTORS.AUTOCOMPLETE_DROPDOWN) && !e.target.matches(SELECTORS.PROMPT_TEXTAREA)) {
+            if (currentAutocomplete && !e.target.closest(SELECTORS.AUTOCOMPLETE_DROPDOWN) && !isAutocompleteTarget(e.target)) {
                 hideAutocomplete();
             }
         });
@@ -995,6 +1020,8 @@
             template_name: formData.template_name,
             template_status: formData.template_status,
             template_page_id: formData.template_page_id,
+            meta_title_template: formData.meta_title_template,
+            meta_description_template: formData.meta_description_template,
             fields: JSON.stringify(formData.fields),
             prompts: JSON.stringify(formData.prompts)
         });
@@ -1060,7 +1087,9 @@
             template_status: 'draft',
             fields: [],
             prompts: [],
-            template_page_id: 0
+            template_page_id: 0,
+            meta_title_template: '',
+            meta_description_template: ''
         };
 
         const fieldGroups = {};
@@ -1122,6 +1151,9 @@
         if (pageSelector) {
             data.template_page_id = parseInt(pageSelector.value, 10) || 0;
         }
+
+        data.meta_title_template = document.querySelector(SELECTORS.META_TITLE_INPUT)?.value || '';
+        data.meta_description_template = document.querySelector(SELECTORS.META_DESC_TEXTAREA)?.value || '';
 
         return data;
     }
@@ -1505,6 +1537,7 @@
     function init() {
         initFieldManagement();
         initPromptManagement();
+        initSeoMeta();
         initPageSelector();
         initExportEasterEgg();
         loadExistingData();
@@ -1555,6 +1588,7 @@
 
             populateExistingFields(data.data.fields || []);
             populateExistingPrompts(data.data.prompts || []);
+            populateExistingSeoMeta(data.data);
             debugLog(`Loaded ${data.data.fields.length} fields and ${data.data.prompts.length} prompts`);
         })
         .catch(error => {
@@ -1576,6 +1610,67 @@
         });
 
         validateFieldNames();
+    }
+
+    function populateExistingSeoMeta(data) {
+        const metaTitleInput = document.querySelector(SELECTORS.META_TITLE_INPUT);
+        const metaDescTextarea = document.querySelector(SELECTORS.META_DESC_TEXTAREA);
+
+        if (metaTitleInput) {
+            metaTitleInput.value = data.meta_title_template || '';
+            updateBackdrop(metaTitleInput);
+        }
+
+        if (metaDescTextarea) {
+            metaDescTextarea.value = data.meta_description_template || '';
+            updateBackdrop(metaDescTextarea);
+        }
+
+        updateSeoCharCounts();
+    }
+
+    function initSeoMeta() {
+        const metaTitleInput = document.querySelector(SELECTORS.META_TITLE_INPUT);
+        const metaDescTextarea = document.querySelector(SELECTORS.META_DESC_TEXTAREA);
+
+        if (metaTitleInput) {
+            metaTitleInput.addEventListener('input', function() {
+                updateSeoCharCounts();
+                updateBackdrop(this);
+            });
+            updateBackdrop(metaTitleInput);
+        }
+
+        if (metaDescTextarea) {
+            metaDescTextarea.addEventListener('input', function() {
+                updateSeoCharCounts();
+                updateBackdrop(this);
+            });
+            metaDescTextarea.addEventListener('scroll', function() {
+                const wrapper = this.closest(SELECTORS.HIGHLIGHT_WRAPPER);
+                if (!wrapper) return;
+                const backdrop = wrapper.querySelector(SELECTORS.BACKDROP);
+                if (backdrop) syncScroll(this, backdrop);
+            });
+            updateBackdrop(metaDescTextarea);
+        }
+
+        updateSeoCharCounts();
+    }
+
+    function updateSeoCharCounts() {
+        updateCharCount(SELECTORS.META_TITLE_INPUT, SELECTORS.META_TITLE_CHAR_COUNT, 60);
+        updateCharCount(SELECTORS.META_DESC_TEXTAREA, SELECTORS.META_DESC_CHAR_COUNT, 160);
+    }
+
+    function updateCharCount(inputSelector, countSelector, limit) {
+        const input = document.querySelector(inputSelector);
+        const counter = document.querySelector(countSelector);
+        if (!input || !counter) return;
+
+        const len = input.value.length;
+        counter.textContent = `${len} / ${limit}`;
+        counter.classList.toggle('over-limit', len > limit);
     }
 
     function populateExistingPrompts(prompts) {

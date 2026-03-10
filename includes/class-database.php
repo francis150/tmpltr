@@ -25,6 +25,8 @@ class TmpltrDatabase {
           name varchar(255) NOT NULL,
           description longtext,
           template_page_id bigint(20),
+          meta_title_template text DEFAULT NULL,
+          meta_description_template text DEFAULT NULL,
           status varchar(20) DEFAULT 'draft',
           deleted_at datetime DEFAULT NULL,
           created_by bigint(20),

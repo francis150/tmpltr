@@ -7,6 +7,7 @@ class TmpltrCore {
     public function __construct() {
         add_action('init', [$this, 'init_updater']);
         $this->init_shortcodes();
+        $this->init_seo_meta();
         $this->init_admin();
 
         add_action('admin_init', [$this, 'check_db_version']);
@@ -20,6 +21,11 @@ class TmpltrCore {
     private function init_shortcodes() {
         require_once TMPLTR_PLUGIN_DIR . 'includes/class-shortcode.php';
         new TmpltrShortcode();
+    }
+
+    private function init_seo_meta() {
+        require_once TMPLTR_PLUGIN_DIR . 'includes/class-seo-meta.php';
+        new TmpltrSeoMeta();
     }
 
     private function init_admin() {

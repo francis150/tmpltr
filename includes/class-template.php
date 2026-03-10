@@ -62,10 +62,12 @@ class TmpltrTemplate {
                 'name' => $this->data['name'] ?? 'Untitled Template',
                 'description' => $this->data['description'] ?? null,
                 'template_page_id' => $this->data['template_page_id'] ?? null,
+                'meta_title_template' => $this->data['meta_title_template'] ?? null,
+                'meta_description_template' => $this->data['meta_description_template'] ?? null,
                 'status' => $this->data['status'] ?? 'draft',
                 'created_by' => get_current_user_id(),
             ],
-            ['%s', '%s', '%s', '%s', '%d', '%s', '%d']
+            ['%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d']
         );
 
         if ($result === false) {
@@ -101,11 +103,13 @@ class TmpltrTemplate {
                 'name' => $this->data['name'] ?? 'Untitled Template',
                 'description' => $this->data['description'] ?? null,
                 'template_page_id' => $this->data['template_page_id'] ?? null,
+                'meta_title_template' => $this->data['meta_title_template'] ?? null,
+                'meta_description_template' => $this->data['meta_description_template'] ?? null,
                 'status' => $this->data['status'] ?? 'draft',
                 'import_version' => $this->data['import_version'] ?? null,
             ],
             ['id' => $this->id],
-            ['%s', '%s', '%d', '%s', '%s'],
+            ['%s', '%s', '%d', '%s', '%s', '%s', '%s'],
             ['%d']
         );
 
@@ -187,6 +191,8 @@ class TmpltrTemplate {
             $new_template = new TmpltrTemplate();
             $new_template->set_name($this->get_name() . ' (Copy)');
             $new_template->set_description($this->get_description());
+            $new_template->set_meta_title_template($this->get_meta_title_template());
+            $new_template->set_meta_description_template($this->get_meta_description_template());
             $new_template->set_status('draft');
 
             if (!$new_template->save()) {
@@ -358,6 +364,42 @@ class TmpltrTemplate {
      */
     public function set_template_page_id($page_id) {
         $this->data['template_page_id'] = absint($page_id);
+    }
+
+    /**
+     * Get meta title template
+     *
+     * @return string
+     */
+    public function get_meta_title_template() {
+        return $this->data['meta_title_template'] ?? '';
+    }
+
+    /**
+     * Set meta title template
+     *
+     * @param string $value
+     */
+    public function set_meta_title_template($value) {
+        $this->data['meta_title_template'] = sanitize_text_field($value);
+    }
+
+    /**
+     * Get meta description template
+     *
+     * @return string
+     */
+    public function get_meta_description_template() {
+        return $this->data['meta_description_template'] ?? '';
+    }
+
+    /**
+     * Set meta description template
+     *
+     * @param string $value
+     */
+    public function set_meta_description_template($value) {
+        $this->data['meta_description_template'] = sanitize_text_field($value);
     }
 
     /**
