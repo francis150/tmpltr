@@ -56,6 +56,10 @@
     color: #1d2327;
 }
 
+.tmpltr-wizard__welcome {
+    text-align: center;
+}
+
 .tmpltr-wizard__subtitle {
     color: #646970;
     font-size: 14px;
@@ -294,7 +298,7 @@
     padding: 20px 24px;
     margin-bottom: 24px;
     text-align: left;
-    display: inline-block;
+    display: block;
     min-width: 320px;
 }
 

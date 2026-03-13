@@ -70,7 +70,7 @@ defined('ABSPATH') or die();
                 <p class="tmpltr-wizard__account-note">A free Tmpltr account is required to use AI generation credits.</p>
 
                 <div class="tmpltr-wizard__actions">
-                    <button type="button" class="button button-secondary tmpltr-wizard__skip-btn">I'll do this later</button>
+                    <button type="button" class="button button-secondary button-hero tmpltr-wizard__skip-btn">I'll do this later</button>
                     <button type="button" class="button button-primary button-hero tmpltr-wizard__start-btn">Get Started</button>
                 </div>
             </div>
@@ -120,7 +120,7 @@ defined('ABSPATH') or die();
                                 <h2>Check Your Email</h2>
                                 <p>We've sent a confirmation link to your email. Please confirm your account to continue.</p>
                                 <button type="button" class="button button-primary button-hero tmpltr-wizard__confirmed-btn">I've Confirmed My Email</button>
-                                <button type="button" class="button button-secondary tmpltr-wizard__resend-btn">Resend Email</button>
+                                <button type="button" class="button button-secondary button-hero tmpltr-wizard__resend-btn">Resend Email</button>
                             </div>
                         </div>
 
@@ -145,19 +145,19 @@ defined('ABSPATH') or die();
                         <ul class="tmpltr-wizard__info-list">
                             <li>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a32a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Free starter plan
+                                Generate full WordPress pages in minutes
                             </li>
                             <li>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a32a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                AI generation credits included
+                                100 free AI credits (~5-6 pages)
                             </li>
                             <li>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a32a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Starter template ready to use
+                                Ready-to-use Location Page Starter Template
                             </li>
                             <li>
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00a32a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                Create unlimited custom templates
+                                Build unlimited custom templates
                             </li>
                         </ul>
                     </div>
@@ -178,8 +178,8 @@ defined('ABSPATH') or die();
                     <h2>Something Went Wrong</h2>
                     <p class="tmpltr-wizard__setup-error-message"></p>
                     <div class="tmpltr-wizard__actions">
-                        <button type="button" class="button button-secondary tmpltr-wizard__setup-skip">Skip to Dashboard</button>
-                        <button type="button" class="button button-primary tmpltr-wizard__setup-retry">Try Again</button>
+                        <button type="button" class="button button-secondary button-hero tmpltr-wizard__setup-skip">Skip to Dashboard</button>
+                        <button type="button" class="button button-primary button-hero tmpltr-wizard__setup-retry">Try Again</button>
                     </div>
                 </div>
             </div>
