@@ -24,6 +24,7 @@ class TmpltrAdmin {
     ];
 
     public function __construct() {
+        add_action('admin_init', [$this, 'maybe_redirect_to_wizard'], 1);
         add_action('admin_init', [$this, 'init']);
         add_action('admin_menu', [$this, 'add_admin_menu']);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_assets']);
@@ -82,6 +83,39 @@ class TmpltrAdmin {
 
     public function render_pages_page() {
         require_once plugin_dir_path( __FILE__ ) . 'pages/pages.php';
+    }
+
+    public function maybe_redirect_to_wizard() {
+        if (wp_doing_ajax()) {
+            return;
+        }
+
+        if (get_option('tmpltr_activation_redirect')) {
+            delete_option('tmpltr_activation_redirect');
+            wp_safe_redirect(admin_url('admin.php?page=tmpltr-wizard'));
+            exit;
+        }
+
+        if (!get_option('tmpltr_wizard_pending')) {
+            return;
+        }
+
+        if (get_option('tmpltr_wizard_dismissed') || get_option('tmpltr_wizard_completed')) {
+            return;
+        }
+
+        $page_slug = isset($_GET['page']) ? sanitize_text_field($_GET['page']) : '';
+
+        if (strpos($page_slug, 'tmpltr') !== 0) {
+            return;
+        }
+
+        if (in_array($page_slug, ['tmpltr-wizard', 'tmpltr-login', 'tmpltr-register'])) {
+            return;
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=tmpltr-wizard'));
+        exit;
     }
 
     public function enqueue_admin_assets($hook) {

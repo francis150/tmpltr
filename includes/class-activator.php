@@ -20,6 +20,11 @@ class TmpltrActivator {
 
         $plugin_data = self::get_plugin_data();
         add_option('tmpltr_db_version', $plugin_data['Version']);
+
+        if (!get_option('tmpltr_wizard_completed')) {
+            update_option('tmpltr_wizard_pending', true);
+            update_option('tmpltr_activation_redirect', true);
+        }
     }
 
     public static function deactivate() {

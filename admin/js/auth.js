@@ -153,6 +153,8 @@
     }
 
     async function handleAuthPage() {
+        if (tmpltrAuth.isWizardPage) return;
+
         const session = await getSession();
 
         if (session) {

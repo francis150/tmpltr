@@ -24,6 +24,11 @@ class TmpltrAjax {
 		// Generation handlers
 		add_action('wp_ajax_tmpltr_save_generation', [$this, 'save_generation']);
 		add_action('wp_ajax_tmpltr_delete_generated_page', [$this, 'delete_generated_page']);
+
+		// Wizard handlers
+		add_action('wp_ajax_tmpltr_dismiss_wizard', [$this, 'dismiss_wizard']);
+		add_action('wp_ajax_tmpltr_complete_wizard', [$this, 'complete_wizard']);
+		add_action('wp_ajax_tmpltr_check_starter_template', [$this, 'check_starter_template']);
 	}
 
 	// ===== PAGE HANDLERS =====
@@ -816,6 +821,89 @@ class TmpltrAjax {
 
 			wp_send_json_error([
 				'message' => 'Failed to delete page. Please try again.'
+			]);
+		}
+	}
+
+	// ===== WIZARD HANDLERS =====
+
+	/**
+	 * AJAX handler: Dismiss the setup wizard
+	 * Marks the wizard as dismissed so it won't auto-redirect
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function dismiss_wizard() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		update_option('tmpltr_wizard_dismissed', true);
+		delete_option('tmpltr_wizard_pending');
+
+		wp_send_json_success(['message' => 'Wizard dismissed']);
+	}
+
+	/**
+	 * AJAX handler: Mark the setup wizard as completed
+	 * Clears all wizard state options
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function complete_wizard() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		update_option('tmpltr_wizard_completed', true);
+		delete_option('tmpltr_wizard_pending');
+		delete_option('tmpltr_wizard_dismissed');
+
+		wp_send_json_success(['message' => 'Wizard completed']);
+	}
+
+	/**
+	 * AJAX handler: Check if the starter template has been imported
+	 * Returns whether ST-001 exists and its template ID
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function check_starter_template() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
+
+		$template = TmpltrTemplate::find_by_import_id('ST-001');
+
+		if ($template) {
+			wp_send_json_success([
+				'exists' => true,
+				'template_id' => $template->get_id(),
+			]);
+		} else {
+			wp_send_json_success([
+				'exists' => false,
+				'template_id' => null,
 			]);
 		}
 	}
