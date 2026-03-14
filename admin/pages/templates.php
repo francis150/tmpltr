@@ -65,7 +65,7 @@ if ($show_onboarding) {
 
     $completed_count = count(array_filter($onboarding_items, fn($item) => $item['done']));
     $total_count = count($onboarding_items);
-    $progress = round(($completed_count / $total_count) * 100);
+    $progress = (int) round(($completed_count / $total_count) * 100);
 }
 ?>
 
@@ -103,20 +103,31 @@ if ($show_onboarding) {
                 <div class="template-onboarding__header-left">
                     <h2 class="template-onboarding__title">Getting Started</h2>
                     <span class="template-onboarding__count"><?php echo $completed_count; ?>/<?php echo $total_count; ?> completed</span>
+                    <div class="template-onboarding__mini-progress">
+                        <div class="template-onboarding__mini-progress-fill" style="width: <?php echo esc_attr($progress); ?>%"></div>
+                    </div>
                 </div>
-                <button type="button" class="template-onboarding__dismiss" aria-label="Dismiss checklist">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
+                <div class="template-onboarding__header-right">
+                    <button type="button" class="template-onboarding__toggle" aria-label="Toggle checklist">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <button type="button" class="template-onboarding__dismiss" aria-label="Dismiss checklist">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
-            <div class="template-onboarding__progress">
-                <div class="template-onboarding__progress-fill" style="width: <?php echo esc_attr($progress); ?>%"></div>
-            </div>
+            <div class="template-onboarding__body">
+                <div class="template-onboarding__progress">
+                    <div class="template-onboarding__progress-fill" style="width: <?php echo esc_attr($progress); ?>%"></div>
+                </div>
 
-            <ul class="template-onboarding__list">
+                <ul class="template-onboarding__list">
                 <li class="template-onboarding__item<?php echo $onboarding_items['import_starter']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="import-starter">
                     <span class="template-onboarding__check">
                         <?php if ($onboarding_items['import_starter']['done']) : ?>
@@ -125,12 +136,10 @@ if ($show_onboarding) {
                             <span class="template-onboarding__circle"></span>
                         <?php endif; ?>
                     </span>
-                    <span class="template-onboarding__label">
-                        Import Starter Template
-                        <?php if ($onboarding_items['import_starter']['done'] && $onboarding_items['import_starter']['wizard']) : ?>
-                            <span class="template-onboarding__badge">Checked from Setup Wizard</span>
-                        <?php endif; ?>
-                    </span>
+                    <span class="template-onboarding__label">Import Starter Template</span>
+                    <?php if (!$onboarding_items['import_starter']['done']) : ?>
+                    <svg class="template-onboarding__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <?php endif; ?>
                 </li>
 
                 <li class="template-onboarding__item<?php echo $onboarding_items['first_page']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="first-page">
@@ -141,12 +150,10 @@ if ($show_onboarding) {
                             <span class="template-onboarding__circle"></span>
                         <?php endif; ?>
                     </span>
-                    <span class="template-onboarding__label">
-                        Generate your first Page
-                        <?php if ($onboarding_items['first_page']['done'] && $onboarding_items['first_page']['wizard']) : ?>
-                            <span class="template-onboarding__badge">Checked from Setup Wizard</span>
-                        <?php endif; ?>
-                    </span>
+                    <span class="template-onboarding__label">Generate your first Page</span>
+                    <?php if (!$onboarding_items['first_page']['done']) : ?>
+                    <svg class="template-onboarding__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <?php endif; ?>
                 </li>
 
                 <li class="template-onboarding__item<?php echo $onboarding_items['customize_layout']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="customize-layout"<?php if ($starter_page_id) : ?> data-page-id="<?php echo esc_attr($starter_page_id); ?>"<?php endif; ?>>
@@ -158,6 +165,9 @@ if ($show_onboarding) {
                         <?php endif; ?>
                     </span>
                     <span class="template-onboarding__label">Customize Template Layout Page</span>
+                    <?php if (!$onboarding_items['customize_layout']['done']) : ?>
+                    <svg class="template-onboarding__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <?php endif; ?>
                 </li>
 
                 <li class="template-onboarding__item<?php echo $onboarding_items['generate_more']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="generate-more">
@@ -169,8 +179,19 @@ if ($show_onboarding) {
                         <?php endif; ?>
                     </span>
                     <span class="template-onboarding__label">Generate 3 more pages</span>
+                    <?php if (!$onboarding_items['generate_more']['done']) : ?>
+                    <svg class="template-onboarding__arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    <?php endif; ?>
                 </li>
             </ul>
+
+                <?php if ($progress === 100) : ?>
+                <div class="template-onboarding__complete">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    <span>You're all set!</span>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
         <?php endif; ?>
 
