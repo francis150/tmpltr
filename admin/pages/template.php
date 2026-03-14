@@ -138,18 +138,19 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
 
         <hr>
         <h2>Layout Page</h2>
-        <p>
-            <label for="template-page-select">Select Page:</label><br>
+        <div class="tmpltr-layout-page-row">
             <select name="template_page_id" id="template-page-select" class="regular-text" data-selected-page="<?php echo esc_attr($template->get_template_page_id()); ?>">
                 <option value="0">Select a page...</option>
             </select>
-        </p>
-
-        <p id="template-page-links">
-            <a id="template-page-view-link" href="#" target="_blank">View Page</a>
-            &nbsp;|&nbsp;
-            <a id="template-page-edit-link" href="#" target="_blank">Edit Page</a>
-        </p>
+            <span id="template-page-links">
+                <a id="template-page-view-link" href="#" target="_blank">View Page</a>
+                &nbsp;|&nbsp;
+                <a id="template-page-edit-link" href="#" target="_blank">Edit Page</a>
+            </span>
+            <span id="template-page-create-link-wrapper">
+                <a id="template-page-create-link" href="<?php echo esc_url(admin_url('post-new.php?post_type=page')); ?>" target="_blank">Create Page</a>
+            </span>
+        </div>
 
         <button type="submit" class="button button-primary">Save Template</button>
     </form>
