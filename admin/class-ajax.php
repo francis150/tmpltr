@@ -29,6 +29,9 @@ class TmpltrAjax {
 		add_action('wp_ajax_tmpltr_dismiss_wizard', [$this, 'dismiss_wizard']);
 		add_action('wp_ajax_tmpltr_complete_wizard', [$this, 'complete_wizard']);
 		add_action('wp_ajax_tmpltr_check_starter_template', [$this, 'check_starter_template']);
+
+		// Onboarding handlers
+		add_action('wp_ajax_tmpltr_dismiss_onboarding', [$this, 'dismiss_onboarding']);
 	}
 
 	// ===== PAGE HANDLERS =====
@@ -872,6 +875,30 @@ class TmpltrAjax {
 		delete_option('tmpltr_wizard_dismissed');
 
 		wp_send_json_success(['message' => 'Wizard completed']);
+	}
+
+	// ===== ONBOARDING HANDLERS =====
+
+	/**
+	 * AJAX handler: Dismiss the onboarding checklist
+	 * Marks the onboarding as dismissed so it won't show again
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function dismiss_onboarding() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		update_option('tmpltr_onboarding_dismissed', true);
+
+		wp_send_json_success(['message' => 'Onboarding dismissed']);
 	}
 
 	/**

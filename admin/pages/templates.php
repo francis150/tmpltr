@@ -19,6 +19,54 @@ foreach ($templates as $template) {
         }
     }
 }
+
+$wizard_completed = get_option('tmpltr_wizard_completed', false);
+$onboarding_dismissed = get_option('tmpltr_onboarding_dismissed', false);
+$show_onboarding = $wizard_completed && !$onboarding_dismissed;
+
+if ($show_onboarding) {
+    $starter_template_obj = TmpltrTemplate::find_by_import_id('ST-001');
+
+    global $wpdb;
+    $generated_count = (int) $wpdb->get_var(
+        "SELECT COUNT(*) FROM {$wpdb->prefix}tmpltr_generated_pages gp
+         INNER JOIN {$wpdb->prefix}tmpltr_templates t ON gp.template_id = t.id
+         INNER JOIN {$wpdb->posts} p ON gp.page_id = p.ID
+         WHERE gp.generation_status = 'completed'
+         AND t.deleted_at IS NULL
+         AND p.post_status IN ('publish', 'draft', 'private')"
+    );
+
+    $layout_customized = false;
+    $starter_page_id = 0;
+    if ($starter_template_obj) {
+        $starter_page_id = $starter_template_obj->get_template_page_id();
+        if ($starter_page_id) {
+            $page = get_post($starter_page_id);
+            if ($page) {
+                $original_hash = get_post_meta($starter_page_id, '_tmpltr_original_content_hash', true);
+
+                if (!$original_hash) {
+                    $original_hash = md5($page->post_content);
+                    update_post_meta($starter_page_id, '_tmpltr_original_content_hash', $original_hash);
+                }
+
+                $layout_customized = md5($page->post_content) !== $original_hash;
+            }
+        }
+    }
+
+    $onboarding_items = [
+        'import_starter'   => ['done' => $starter_template_obj !== null, 'wizard' => true],
+        'first_page'       => ['done' => $generated_count >= 1,          'wizard' => true],
+        'customize_layout' => ['done' => $layout_customized,             'wizard' => false],
+        'generate_more'    => ['done' => $generated_count >= 4,          'wizard' => false],
+    ];
+
+    $completed_count = count(array_filter($onboarding_items, fn($item) => $item['done']));
+    $total_count = count($onboarding_items);
+    $progress = round(($completed_count / $total_count) * 100);
+}
 ?>
 
 <div class="tmpltr-admin-page">
@@ -48,6 +96,83 @@ foreach ($templates as $template) {
                 <a href="<?php echo esc_url(admin_url('admin.php?page=tmpltr-template')); ?>" class="button button-primary button-hero">Create Template</a>
             </div>
         </div>
+
+        <?php if ($show_onboarding) : ?>
+        <div class="template-onboarding" data-progress="<?php echo esc_attr($progress); ?>">
+            <div class="template-onboarding__header">
+                <div class="template-onboarding__header-left">
+                    <h2 class="template-onboarding__title">Getting Started</h2>
+                    <span class="template-onboarding__count"><?php echo $completed_count; ?>/<?php echo $total_count; ?> completed</span>
+                </div>
+                <button type="button" class="template-onboarding__dismiss" aria-label="Dismiss checklist">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="template-onboarding__progress">
+                <div class="template-onboarding__progress-fill" style="width: <?php echo esc_attr($progress); ?>%"></div>
+            </div>
+
+            <ul class="template-onboarding__list">
+                <li class="template-onboarding__item<?php echo $onboarding_items['import_starter']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="import-starter">
+                    <span class="template-onboarding__check">
+                        <?php if ($onboarding_items['import_starter']['done']) : ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <?php else : ?>
+                            <span class="template-onboarding__circle"></span>
+                        <?php endif; ?>
+                    </span>
+                    <span class="template-onboarding__label">
+                        Import Starter Template
+                        <?php if ($onboarding_items['import_starter']['done'] && $onboarding_items['import_starter']['wizard']) : ?>
+                            <span class="template-onboarding__badge">Checked from Setup Wizard</span>
+                        <?php endif; ?>
+                    </span>
+                </li>
+
+                <li class="template-onboarding__item<?php echo $onboarding_items['first_page']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="first-page">
+                    <span class="template-onboarding__check">
+                        <?php if ($onboarding_items['first_page']['done']) : ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <?php else : ?>
+                            <span class="template-onboarding__circle"></span>
+                        <?php endif; ?>
+                    </span>
+                    <span class="template-onboarding__label">
+                        Generate your first Page
+                        <?php if ($onboarding_items['first_page']['done'] && $onboarding_items['first_page']['wizard']) : ?>
+                            <span class="template-onboarding__badge">Checked from Setup Wizard</span>
+                        <?php endif; ?>
+                    </span>
+                </li>
+
+                <li class="template-onboarding__item<?php echo $onboarding_items['customize_layout']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="customize-layout"<?php if ($starter_page_id) : ?> data-page-id="<?php echo esc_attr($starter_page_id); ?>"<?php endif; ?>>
+                    <span class="template-onboarding__check">
+                        <?php if ($onboarding_items['customize_layout']['done']) : ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <?php else : ?>
+                            <span class="template-onboarding__circle"></span>
+                        <?php endif; ?>
+                    </span>
+                    <span class="template-onboarding__label">Customize Template Layout Page</span>
+                </li>
+
+                <li class="template-onboarding__item<?php echo $onboarding_items['generate_more']['done'] ? ' template-onboarding__item--done' : ''; ?>" data-action="generate-more">
+                    <span class="template-onboarding__check">
+                        <?php if ($onboarding_items['generate_more']['done']) : ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <?php else : ?>
+                            <span class="template-onboarding__circle"></span>
+                        <?php endif; ?>
+                    </span>
+                    <span class="template-onboarding__label">Generate 3 more pages</span>
+                </li>
+            </ul>
+        </div>
+        <?php endif; ?>
 
     <?php if (empty($templates)) : ?>
         <div class="template-empty-state">

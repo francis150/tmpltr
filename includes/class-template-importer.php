@@ -69,6 +69,9 @@ class TmpltrTemplateImporter {
                 if (is_wp_error($page_id)) {
                     throw new Exception($page_id->get_error_message());
                 }
+
+                $stored_content = get_post_field('post_content', $page_id);
+                update_post_meta($page_id, '_tmpltr_original_content_hash', md5($stored_content));
             }
 
             require_once TMPLTR_PLUGIN_DIR . 'includes/class-template.php';
@@ -296,6 +299,9 @@ class TmpltrTemplateImporter {
                         if (is_wp_error($update_result)) {
                             throw new Exception('Failed to update layout page: ' . $update_result->get_error_message());
                         }
+
+                        $stored_content = get_post_field('post_content', $page_id);
+                        update_post_meta($page_id, '_tmpltr_original_content_hash', md5($stored_content));
                     }
                 }
             }

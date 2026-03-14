@@ -20,7 +20,10 @@
         optionsContainer: '.template-options',
         importStarterBtn: '.import-starter-btn',
         starterNotice: '.template-starter-notice',
-        emptyState: '.template-empty-state'
+        emptyState: '.template-empty-state',
+        onboarding: '.template-onboarding',
+        onboardingDismiss: '.template-onboarding__dismiss',
+        onboardingItem: '.template-onboarding__item:not(.template-onboarding__item--done)'
     };
 
     const CLASSES = {
@@ -669,8 +672,84 @@
     }
     // Starter template banner END — remove this block when no longer needed
 
+    function initOnboarding() {
+        const onboarding = document.querySelector(SELECTORS.onboarding);
+        if (!onboarding) return;
+
+        onboarding.querySelector(SELECTORS.onboardingDismiss).addEventListener('click', handleOnboardingDismiss);
+
+        onboarding.querySelectorAll(SELECTORS.onboardingItem).forEach(function(item) {
+            item.addEventListener('click', handleOnboardingItemClick);
+        });
+    }
+
+    function handleOnboardingDismiss() {
+        const onboarding = document.querySelector(SELECTORS.onboarding);
+        if (!onboarding) return;
+
+        fetch(tmpltrData.ajaxUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                action: 'tmpltr_dismiss_onboarding',
+                nonce: tmpltrData.nonce
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                onboarding.style.transition = 'opacity 0.3s';
+                onboarding.style.opacity = '0';
+                setTimeout(() => onboarding.remove(), 300);
+            }
+        })
+        .catch(() => {
+            onboarding.style.transition = 'opacity 0.3s';
+            onboarding.style.opacity = '0';
+            setTimeout(() => onboarding.remove(), 300);
+        });
+    }
+
+    function handleOnboardingItemClick(e) {
+        var item = e.currentTarget;
+        var action = item.dataset.action;
+
+        switch (action) {
+            case 'import-starter': {
+                var btn = document.querySelector(SELECTORS.importStarterBtn);
+                if (btn) {
+                    btn.click();
+                } else {
+                    handleImportStarterClick();
+                }
+                break;
+            }
+            case 'first-page':
+            case 'generate-more': {
+                var starterRow = document.querySelector('[data-import-id="ST-001"]');
+                if (starterRow) {
+                    var genBtn = starterRow.querySelector(SELECTORS.generateBtn);
+                    if (genBtn && !genBtn.disabled) {
+                        genBtn.click();
+                    }
+                }
+                break;
+            }
+            case 'customize-layout': {
+                var pageId = item.dataset.pageId;
+                if (pageId) {
+                    window.open(tmpltrData.siteUrl + 'wp-admin/post.php?post=' + pageId + '&action=edit', '_blank');
+                }
+                break;
+            }
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         initTemplateList();
         initImportStarter();
+        initOnboarding();
     });
 })();
