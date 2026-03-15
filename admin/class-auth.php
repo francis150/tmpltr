@@ -22,6 +22,11 @@ class TmpltrAuth {
             'js' => 'register-page.js',
             'handle' => 'tmpltr-register-page',
         ],
+        'tmpltr-wizard' => [
+            'css' => 'wizard-page.css',
+            'js' => 'wizard-page.js',
+            'handle' => 'tmpltr-wizard-page',
+        ],
     ];
 
     private $protected_pages = ['tmpltr', 'tmpltr-template', 'tmpltr-pages'];
@@ -54,6 +59,15 @@ class TmpltrAuth {
             'tmpltr-register',
             [$this, 'render_register_page']
         );
+
+        add_submenu_page(
+            null,
+            'Setup Wizard - Tmpltr',
+            'Setup Wizard',
+            'manage_options',
+            'tmpltr-wizard',
+            [$this, 'render_wizard_page']
+        );
     }
 
     public function render_login_page() {
@@ -62,6 +76,10 @@ class TmpltrAuth {
 
     public function render_register_page() {
         require_once TMPLTR_PLUGIN_DIR . 'admin/pages/register.php';
+    }
+
+    public function render_wizard_page() {
+        require_once TMPLTR_PLUGIN_DIR . 'admin/pages/wizard.php';
     }
 
     public function enqueue_auth_assets($hook) {
@@ -125,10 +143,16 @@ class TmpltrAuth {
             'supabaseKey' => self::SUPABASE_ANON_KEY,
             'loginUrl' => admin_url('admin.php?page=tmpltr-login'),
             'registerUrl' => admin_url('admin.php?page=tmpltr-register'),
+            'wizardUrl' => admin_url('admin.php?page=tmpltr-wizard'),
             'dashboardUrl' => admin_url('admin.php?page=tmpltr'),
             'isAuthPage' => isset($this->auth_pages[$page_slug]),
+            'isWizardPage' => ($page_slug === 'tmpltr-wizard'),
             'isProtectedPage' => in_array($page_slug, $this->protected_pages),
         ]);
+
+        if ($page_slug === 'tmpltr-wizard') {
+            $this->enqueue_wizard_assets();
+        }
 
         if (isset($this->auth_pages[$page_slug])) {
             $page_config = $this->auth_pages[$page_slug];
@@ -140,13 +164,75 @@ class TmpltrAuth {
                 $this->plugin_data['Version']
             );
 
+            $js_deps = ['tmpltr-auth'];
+
+            if ($page_slug === 'tmpltr-wizard') {
+                $js_deps = ['tmpltr-auth', 'tmpltr-admin-global', 'tmpltr-toast', 'tmpltr-popup', 'tmpltr-page-generator'];
+            }
+
             wp_enqueue_script(
                 $page_config['handle'],
                 plugin_dir_url(__FILE__) . '../assets/admin/js/' . $page_config['js'],
-                ['tmpltr-auth'],
+                $js_deps,
                 $this->plugin_data['Version'],
                 true
             );
         }
+    }
+
+    private function enqueue_wizard_assets() {
+        wp_enqueue_script(
+            'tmpltr-admin-global',
+            plugin_dir_url(__FILE__) . 'js/admin-global.js',
+            [],
+            $this->plugin_data['Version'],
+            true
+        );
+
+        wp_localize_script(
+            'tmpltr-admin-global',
+            'tmpltrData',
+            [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('tmpltr_nonce'),
+                'pluginUrl' => plugin_dir_url(__FILE__) . '../',
+                'siteUrl' => home_url('/'),
+                'pluginVersion' => $this->plugin_data['Version'],
+                'userId' => get_current_user_id(),
+                'generatorServerUrl' => TmpltrConstants::GENERATOR_SERVER_URL,
+                'creditLogsUrl' => TmpltrConstants::CREDIT_LOGS_URL
+            ]
+        );
+
+        wp_enqueue_style(
+            'tmpltr-popup',
+            plugin_dir_url(__FILE__) . 'css/popup.css',
+            [],
+            $this->plugin_data['Version']
+        );
+
+        wp_enqueue_script(
+            'tmpltr-popup',
+            plugin_dir_url(__FILE__) . 'js/popup.js',
+            ['tmpltr-admin-global', 'tmpltr-toast'],
+            $this->plugin_data['Version'],
+            true
+        );
+
+        wp_enqueue_script(
+            'socket-io',
+            'https://cdn.socket.io/4.7.2/socket.io.min.js',
+            [],
+            '4.7.2',
+            true
+        );
+
+        wp_enqueue_script(
+            'tmpltr-page-generator',
+            plugin_dir_url(__FILE__) . 'js/page-generator.js',
+            ['tmpltr-admin-global', 'tmpltr-toast', 'tmpltr-auth', 'socket-io'],
+            $this->plugin_data['Version'],
+            true
+        );
     }
 }

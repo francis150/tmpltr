@@ -2,7 +2,7 @@
   "tmpltr_version": "1.0.7",
   "template": {
     "id": "ST-001",
-    "version": "2.20",
+    "version": "2.21",
     "name": "SEO-Focused Location Page (Starter Template)",
     "description": "A clean, content-focused location page template with structured sections, image placeholders, and call-to-action. Built with native WordPress blocks — works with any theme.",
     "status": "published",
@@ -75,7 +75,7 @@
         "title": "Services Content",
         "placeholder": "{services_content}",
         "guide": "Displayed in the services section.",
-        "text": "Write a 150-200 word paragraph describing the services related to @target_keyword available in @city, @state. Cover 3-4 specific sub-services or specializations that would be relevant. Tailor the sub-services to what makes sense for @target_keyword. Include the keyword once naturally. Write with authority."
+        "text": "Write a 150-200 word paragraph about the services @target_keyword offers in @city, @state. If a business name is provided (@business_name), make sure the services are attributed to @business_name. Look at the list of site pages and mention any relevant services you can find there and link each service name to its page if one exists. Cover the most relevant specializations for @target_keyword. Include the keyword once naturally. Write with authority."
       },
       {
         "title": "Why Choose Us Heading",

@@ -30,6 +30,7 @@
         TEMPLATE_PAGE_LINKS: '#template-page-links',
         TEMPLATE_PAGE_VIEW_LINK: '#template-page-view-link',
         TEMPLATE_PAGE_EDIT_LINK: '#template-page-edit-link',
+        TEMPLATE_PAGE_CREATE_LINK_WRAPPER: '#template-page-create-link-wrapper',
         META_TITLE_INPUT: '#meta-title-template',
         META_DESC_TEXTAREA: '#meta-desc-template',
         META_TITLE_CHAR_COUNT: '#meta-title-char-count',
@@ -105,6 +106,7 @@
         const linksWrapper = document.querySelector(SELECTORS.TEMPLATE_PAGE_LINKS);
         const viewLink = document.querySelector(SELECTORS.TEMPLATE_PAGE_VIEW_LINK);
         const editLink = document.querySelector(SELECTORS.TEMPLATE_PAGE_EDIT_LINK);
+        const createLinkWrapper = document.querySelector(SELECTORS.TEMPLATE_PAGE_CREATE_LINK_WRAPPER);
 
         if (!linksWrapper || !viewLink || !editLink) return;
 
@@ -114,12 +116,14 @@
 
         if (!pageSelect.value || pageSelect.value === '0' || !viewUrl) {
             linksWrapper.style.display = 'none';
+            if (createLinkWrapper) createLinkWrapper.style.display = '';
             return;
         }
 
         viewLink.href = viewUrl;
         editLink.href = editUrl;
         linksWrapper.style.display = '';
+        if (createLinkWrapper) createLinkWrapper.style.display = 'none';
     }
 
     function initExportEasterEgg() {
