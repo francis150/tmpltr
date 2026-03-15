@@ -33,11 +33,22 @@ class TmpltrFrontendNotice {
 			 FROM {$wpdb->prefix}tmpltr_generated_pages gp
 			 JOIN {$wpdb->prefix}tmpltr_templates t ON t.id = gp.template_id
 			 WHERE gp.page_id = %d
+			 AND t.import_id LIKE 'ST%%'
 			 LIMIT 1",
 			get_the_ID()
 		));
 
 		if (!$generated || !$generated->template_page_id) {
+			return;
+		}
+
+		$layout_page = get_post($generated->template_page_id);
+		if (!$layout_page) {
+			return;
+		}
+
+		$original_hash = get_post_meta($generated->template_page_id, '_tmpltr_original_content_hash', true);
+		if ($original_hash && md5($layout_page->post_content) !== $original_hash) {
 			return;
 		}
 
