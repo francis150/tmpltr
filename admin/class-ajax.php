@@ -32,6 +32,9 @@ class TmpltrAjax {
 
 		// Onboarding handlers
 		add_action('wp_ajax_tmpltr_dismiss_onboarding', [$this, 'dismiss_onboarding']);
+
+		// Frontend notice handlers
+		add_action('wp_ajax_tmpltr_dismiss_page_notice', [$this, 'dismiss_page_notice']);
 	}
 
 	// ===== PAGE HANDLERS =====
@@ -933,5 +936,29 @@ class TmpltrAjax {
 				'template_id' => null,
 			]);
 		}
+	}
+
+	// ===== FRONTEND NOTICE HANDLERS =====
+
+	/**
+	 * AJAX handler: Dismiss the frontend page notice bar
+	 * Stores dismissal in user meta so it persists per user
+	 *
+	 * @return void Outputs JSON response
+	 */
+	public function dismiss_page_notice() {
+		if (!check_ajax_referer('tmpltr_nonce', 'nonce', false)) {
+			wp_send_json_error(['message' => 'Security check failed']);
+			return;
+		}
+
+		if (!current_user_can('manage_options')) {
+			wp_send_json_error(['message' => 'Insufficient permissions']);
+			return;
+		}
+
+		update_user_meta(get_current_user_id(), 'tmpltr_dismiss_page_notice', 1);
+
+		wp_send_json_success(['message' => 'Notice dismissed']);
 	}
 }
